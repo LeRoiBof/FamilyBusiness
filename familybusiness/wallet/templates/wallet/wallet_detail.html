@@ -1,0 +1,383 @@
+{% extends "master.html" %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <!-- En-tête du portefeuille -->
+        <div class="card mb-5">
+            <div class="card-content">
+                <div class="level">
+                    <div class="level-left">
+                        <div class="level-item">
+                            <div>
+                                <h1 class="title is-3 has-text-primary mb-1">{{ wallet.name }}</h1>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="level-right">
+                        <div class="buttons">
+                            <a href="#" class="button is-success">
+                                <span class="icon">
+                                    <i class="mdi mdi-plus"></i>
+                                </span>
+                                <span>Ajouter transaction</span>
+                            </a>
+                            <a href="#" class="button is-info is-light">
+                                <span class="icon">
+                                    <i class="mdi mdi-account-plus"></i>
+                                </span>
+                                <span>Inviter</span>
+                            </a>
+                            <a href="#" class="button is-primary is-light">
+                                <span class="icon">
+                                    <i class="mdi mdi-format-list-bulleted"></i>
+                                </span>
+                                <span>Transactions</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Indicateurs financiers -->
+                <div class="columns is-multiline mt-4">
+                    <div class="column is-half-tablet is-one-quarter-desktop">
+                        <div class="box has-background-success-light">
+                            <div class="level">
+                                <div class="level-left">
+                                    <div>
+                                        <p class="heading">Solde actuel</p>
+                                        <p class="title is-4 has-text-success">{{ wallet.balance|floatformat:2 }} €</p>
+                                    </div>
+                                </div>
+                                <div class="level-right">
+                                    <span class="icon is-large has-text-success">
+                                        <i class="mdi mdi-wallet mdi-36px"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="column is-half-tablet is-one-quarter-desktop">
+                        <div class="box has-background-info-light">
+                            <div class="level">
+                                <div class="level-left">
+                                    <div>
+                                        <p class="heading">
+                                            Objectif
+                                            <a class="icon is-small ml-2" title="Modifier l'objectif">
+                                                <i class="mdi mdi-pencil has-text-grey"></i>
+                                            </a>
+                                        </p>
+                                        <p class="title is-4 has-text-info">{{ wallet.objective|floatformat:2 }} €</p>
+                                    </div>
+                                </div>
+                                <div class="level-right">
+                                    <span class="icon is-large has-text-info">
+                                        <i class="mdi mdi-target mdi-36px"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="column is-half-tablet is-one-quarter-desktop">
+                        <div class="box has-background-warning-light">
+                            <div class="level">
+                                <div class="level-left">
+                                    <div>
+                                        <p class="heading">Revenus du mois</p>
+                                        <p class="title is-4 has-text-success">{{ monthly_income|floatformat:2 }} €</p>
+                                    </div>
+                                </div>
+                                <div class="level-right">
+                                    <span class="icon is-large has-text-success">
+                                        <i class="mdi mdi-trending-up mdi-36px"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="column is-half-tablet is-one-quarter-desktop">
+                        <div class="box has-background-danger-light">
+                            <div class="level">
+                                <div class="level-left">
+                                    <div>
+                                        <p class="heading">Dépenses du mois</p>
+                                        <p class="title is-4 has-text-danger">{{ monthly_expenses|floatformat:2 }} €</p>
+                                    </div>
+                                </div>
+                                <div class="level-right">
+                                    <span class="icon is-large has-text-danger">
+                                        <i class="mdi mdi-trending-down mdi-36px"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barre de progression vers l'objectif -->
+                {% if wallet.objective > 0 %}
+                <div class="field">
+                    <label class="label">Progression vers l'objectif</label>
+                    <progress class="progress is-primary" value="{{ wallet.balance }}" max="{{ wallet.objective }}">
+                        {{ wallet.balance|floatformat:0 }}/{{ wallet.objective|floatformat:0 }}
+                    </progress>
+                    <p class="help">
+                        {% widthratio wallet.balance wallet.objective 100 %}% de votre objectif atteint
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Graphiques -->
+        <div class="columns">
+            <div class="column is-half">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <span class="icon mr-2">
+                                <i class="mdi mdi-chart-line"></i>
+                            </span>
+                            Évolution des finances (mois en cours)
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <canvas id="evolutionChart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column is-half">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <span class="icon mr-2">
+                                <i class="mdi mdi-chart-donut"></i>
+                            </span>
+                            Dépenses par catégorie
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <canvas id="categoryChart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions récentes -->
+        <div class="card mt-5">
+            <div class="card-header">
+                <div class="card-header-title">
+                    <span class="icon mr-2">
+                        <i class="mdi mdi-clock-outline"></i>
+                    </span>
+                    Transactions récentes
+                </div>
+                <div class="card-header-icon">
+                    <a href="#" class="button is-small is-primary is-light">
+                        Voir tout
+                    </a>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="table-container">
+                    <table class="table is-fullwidth is-hoverable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Catégorie</th>
+                                <th class="has-text-right">Montant</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in recent_transactions %}
+                            <tr>
+                                <td>{{ transaction.date|date:"d/m/Y" }}</td>
+                                <td>
+                                    {% if transaction.description %}
+                                    <strong>{{ transaction.description }}</strong>
+                                    {% else %}
+                                    <strong>Sans description</strong>
+                                    {% endif %}
+                                    {% if transaction.user %}
+                                    <br><small class="has-text-grey">par {{ transaction.user.get_full_name }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="tag is-light">{{ transaction.category.name }}</span>
+                                </td>
+                                <td class="has-text-right">
+                                    {% if transaction.is_income %}
+                                    <span class="has-text-success">+{{ transaction.amount|floatformat:2 }} €</span>
+                                    {% else %}
+                                    <span class="has-text-danger">-{{ transaction.amount|floatformat:2 }} €</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="has-text-centered has-text-grey">
+                                    Aucune transaction récente
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+// Configuration globale
+Chart.defaults.font.family = "'Segoe UI', 'Roboto', sans-serif";
+Chart.defaults.color = '#4a4a4a';
+
+const evolutionCtx = document.getElementById('evolutionChart').getContext('2d');
+const evolutionChart = new Chart(evolutionCtx, {
+    type: 'line',
+    data: {
+        labels: {{ chart_dates|safe }},
+        datasets: [{
+            label: 'Revenus',
+            data: {{ chart_incomes|safe }},
+            borderColor: '#48c78e',
+            backgroundColor: 'rgba(72, 199, 142, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+        }, {
+            label: 'Dépenses',
+            data: {{ chart_expenses|safe }},
+            borderColor: '#f14668',
+            backgroundColor: 'rgba(241, 70, 104, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            intersect: false,
+            mode: 'index'
+        },
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    usePointStyle: true,
+                    padding: 20
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                borderColor: '#ddd',
+                borderWidth: 1,
+                callbacks: {
+                    label: function(context) {
+                        return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + ' €';
+                    }
+                }
+            }
+        },
+        scales: {
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    maxTicksLimit: 7
+                }
+            },
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.1)'
+                },
+                ticks: {
+                    callback: function(value) {
+                        return value + ' €';
+                    }
+                }
+            }
+        }
+    }
+});
+
+const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+const categoryChart = new Chart(categoryCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ category_labels|safe }},
+        datasets: [{
+            data: {{ category_values|safe }},
+            backgroundColor: [
+                '#3273dc',
+                '#48c78e',
+                '#f14668',
+                '#ffdd57',
+                '#00d1b2',
+                '#ff6b7a',
+                '#b86bff',
+                '#ffa726'
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    usePointStyle: true,
+                    padding: 15,
+                    generateLabels: function(chart) {
+                        const data = chart.data;
+                        if (data.labels.length && data.datasets.length) {
+                            return data.labels.map((label, i) => {
+                                const value = data.datasets[0].data[i];
+                                return {
+                                    text: label + ' (' + value.toFixed(2) + ' €)',
+                                    fillStyle: data.datasets[0].backgroundColor[i],
+                                    strokeStyle: data.datasets[0].borderColor,
+                                    lineWidth: data.datasets[0].borderWidth,
+                                    pointStyle: 'circle',
+                                    index: i
+                                };
+                            });
+                        }
+                        return [];
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                borderColor: '#ddd',
+                borderWidth: 1,
+                callbacks: {
+                    label: function(context) {
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = ((context.parsed * 100) / total).toFixed(1);
+                        return context.label + ': ' + context.parsed.toFixed(2) + ' € (' + percentage + '%)';
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

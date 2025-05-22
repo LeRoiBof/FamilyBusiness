@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
     <style>
         :root {
@@ -86,6 +87,19 @@
         .info-icon:hover::after {
             opacity: 1;
         }
+
+        .language-switch-btn {
+            transition: all 0.2s ease;
+        }
+
+        .language-switch-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .language-switch-btn:active {
+            transform: scale(0.95);
+        }
+
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.0.1"></script>
@@ -119,46 +133,46 @@
             <div class="navbar-end">
                 <div class="navbar-item">
                     {% if user.is_authenticated %}
-                        <form action="{% url 'set_language' %}" method="post" class="navbar-item p-0 m-0">
+                        <form action="{% url 'set_language' %}" method="post" class="navbar-item p-0 m-0" id="language-form">
                             {% csrf_token %}
                             {% get_current_language as LANGUAGE_CODE %}
                             {% if LANGUAGE_CODE == 'fr' %}
                                 <input type="hidden" name="language" value="en">
-                                <input type="hidden" name="next" value="/en/{{ request.path|cut:'/'|cut:LANGUAGE_CODE }}">
-                                <button type="submit" class="button is-white" title="Switch to English">
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}" id="next-input">
+                                <button type="submit" class="button is-white language-switch-btn" title="Switch to English">
                                     <span class="icon is-small">🇬🇧</span>
                                 </button>
                             {% else %}
                                 <input type="hidden" name="language" value="fr">
-                                <input type="hidden" name="next" value="/fr/{{ request.path|cut:'/'|cut:LANGUAGE_CODE }}">
-                                <button type="submit" class="button is-white" title="Passer en français">
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}" id="next-input">
+                                <button type="submit" class="button is-white language-switch-btn" title="Passer en français">
                                     <span class="icon is-small">🇫🇷</span>
                                 </button>
                             {% endif %}
                         </form>
 
-                    <span class="has-text-black"><strong>{{ user.get_full_name }}</strong></span>
-                    <a href="{% url 'logout' %}?next={{ request.path }}" class="button ml-2">{% trans "Logout" %}</a>
+                        <span class="has-text-black"><strong>{{ user.get_full_name }}</strong></span>
+                        <a href="{% url 'logout' %}?next={{ request.path }}" class="button ml-2">{% trans "Logout" %}</a>
                     {% else %}
-                        <form action="{% url 'set_language' %}" method="post" class="navbar-item p-0 m-0">
+                        <form action="{% url 'set_language' %}" method="post" class="navbar-item p-0 m-0" id="language-form">
                             {% csrf_token %}
                             {% get_current_language as LANGUAGE_CODE %}
                             {% if LANGUAGE_CODE == 'fr' %}
                                 <input type="hidden" name="language" value="en">
-                                <input type="hidden" name="next" value="/en/{{ request.path|cut:'/'|cut:LANGUAGE_CODE }}">
-                                <button type="submit" class="button is-white" title="Switch to English">
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}" id="next-input">
+                                <button type="submit" class="button is-white language-switch-btn" title="Switch to English">
                                     <span class="icon is-small">🇬🇧</span>
                                 </button>
                             {% else %}
                                 <input type="hidden" name="language" value="fr">
-                                <input type="hidden" name="next" value="/fr/{{ request.path|cut:'/'|cut:LANGUAGE_CODE }}">
-                                <button type="submit" class="button is-white" title="Passer en français">
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}" id="next-input">
+                                <button type="submit" class="button is-white language-switch-btn" title="Passer en français">
                                     <span class="icon is-small">🇫🇷</span>
                                 </button>
                             {% endif %}
                         </form>
-                    <a href="{% url 'register' %}?next={{ request.path }}" class="button is-info">{% trans "Create account" %}</a>
-                    <a href="{% url 'login' %}?next={{ request.path }}" class="button ml-2">{% trans "Login" %}</a>
+                        <a href="{% url 'register' %}?next={{ request.path }}" class="button is-info">{% trans "Create account" %}</a>
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="button ml-2">{% trans "Login" %}</a>
                     {% endif %}
                 </div>
             </div>
@@ -178,6 +192,47 @@
                         $target.classList.toggle('is-active');
                     });
                 });
+            }
+
+            // Gestion dynamique du changement de langue
+            const languageForm = document.getElementById('language-form');
+            const nextInput = document.getElementById('next-input');
+
+            if (languageForm && nextInput) {
+                languageForm.addEventListener('submit', function(e) {
+                    // Mettre à jour l'URL de redirection juste avant la soumission
+                    const currentPath = window.location.pathname;
+                    const currentSearch = window.location.search;
+                    const fullPath = currentPath + currentSearch;
+
+                    // Calculer la nouvelle URL avec la langue opposée
+                    const currentLanguage = document.documentElement.lang === 'fr' ? 'fr' : 'en';
+                    const targetLanguage = currentLanguage === 'fr' ? 'en' : 'fr';
+
+                    let newPath;
+                    if (currentPath.startsWith('/fr/')) {
+                        newPath = currentPath.replace('/fr/', '/en/');
+                    } else if (currentPath.startsWith('/en/')) {
+                        newPath = currentPath.replace('/en/', '/fr/');
+                    } else {
+                        // Si pas de préfixe de langue, ajouter le préfixe cible
+                        newPath = '/' + targetLanguage + currentPath;
+                    }
+
+                    nextInput.value = newPath + currentSearch;
+                });
+
+                // Ajouter un effet visuel lors du clic
+                const languageBtn = languageForm.querySelector('.language-switch-btn');
+                if (languageBtn) {
+                    languageBtn.addEventListener('click', function() {
+                        this.classList.add('is-loading');
+                        // Retirer la classe loading après un délai pour éviter qu'elle reste
+                        setTimeout(() => {
+                            this.classList.remove('is-loading');
+                        }, 2000);
+                    });
+                }
             }
         });
     </script>

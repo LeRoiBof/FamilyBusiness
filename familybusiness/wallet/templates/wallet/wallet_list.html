@@ -1,0 +1,255 @@
+{% extends "master.html" %}
+
+{% block head %}
+    <style>
+        .card {
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="level mb-5">
+            <div class="level-left">
+                <div class="level-item">
+                    <h1 class="title is-4">
+                        <span class="icon-text">
+                            <span class="icon has-text-primary">
+                                <i class="mdi mdi-wallet"></i>
+                            </span>
+                            <span>Mes Wallets</span>
+                        </span>
+                    </h1>
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    <a href="{% url 'wallet:wallet_create' %}" class="button is-primary modern-btn">
+                        <span class="icon">
+                            <i class="mdi mdi-plus-thick"></i>
+                        </span>
+                        <span>Nouveau Wallet</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {% if wallets %}
+            <div class="columns is-multiline">
+                {% for wallet in wallets %}
+                    <div class="column is-one-third-desktop is-half-tablet">
+                        <div class="card modern-card" onclick="window.location.href='{% url 'wallet:wallet_detail' wallet.id %}'">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <span class="icon-text">
+                                        <span class="icon has-text-success">
+                                            <i class="mdi mdi-wallet-outline"></i>
+                                        </span>
+                                        <span>{{ wallet.name }}</span>
+                                    </span>
+                                </div>
+                                <div class="card-header-icon">
+                                    <div class="buttons are-small">
+                                        <a href="{% url 'wallet:wallet_update' wallet.id %}" class="button is-warning is-light" title="Modifier">
+                                            <span class="icon">
+                                                <i class="mdi mdi-pencil"></i>
+                                            </span>
+                                        </a>
+                                        <button class="button is-danger is-light js-modal-trigger"
+                                                title="Supprimer"
+                                                data-target="modal-delete-{{ wallet.id }}">
+                                            <span class="icon">
+                                                <i class="mdi mdi-delete"></i>
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <div class="content">
+                                    <div class="level is-mobile mb-4">
+                                        <div class="level-item has-text-centered">
+                                            <div>
+                                                <p class="heading">Solde actuel</p>
+                                                <p class="title is-5 has-text-success">{{ wallet.balance }} €</p>
+                                            </div>
+                                        </div>
+                                        <div class="level-item has-text-centered">
+                                            <div>
+                                                <p class="heading">Objectif</p>
+                                                <p class="title is-5 has-text-info">{{ wallet.objective }} €</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="field mt-3">
+                                        <label class="label is-small">Propriétaire</label>
+                                        <p class="has-text-weight-semibold">
+                                            <span class="icon-text">
+                                                <span class="icon has-text-grey-dark">
+                                                    <i class="mdi mdi-account-circle"></i>
+                                                </span>
+                                                <span>{{ wallet.owner.get_full_name|default:wallet.owner.email }}</span>
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div class="field">
+                                        <label class="label is-small">Progression vers l'objectif</label>
+                                        <progress class="progress is-success" value="{% widthratio wallet.balance wallet.objective 100 %}" max="100">
+                                            {% widthratio wallet.balance wallet.objective 100 %}%
+                                        </progress>
+                                        <p class="help has-text-centered">
+                                            <strong>{% widthratio wallet.balance wallet.objective 100 %}%</strong> de l'objectif atteint
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal de suppression pour chaque wallet -->
+                        <div id="modal-delete-{{ wallet.id }}" class="modal">
+                            <div class="modal-background"></div>
+                            <div class="modal-card">
+                                <header class="modal-card-head">
+                                    <p class="modal-card-title">
+                                        <span class="icon-text">
+                                            <span class="icon has-text-danger">
+                                                <i class="mdi mdi-alert-circle"></i>
+                                            </span>
+                                            <span>Confirmer la suppression</span>
+                                        </span>
+                                    </p>
+                                    <button class="delete" aria-label="close"></button>
+                                </header>
+                                <section class="modal-card-body">
+                                    <div class="has-text-centered mb-4">
+                                        <h3 class="title is-5">Supprimer le wallet "{{ wallet.name }}" ?</h3>
+                                    </div>
+
+                                    <article class="message is-warning">
+                                        <div class="message-body">
+                                            <div class="content">
+                                                <p><strong>⚠️ Cette action est irréversible.</strong></p>
+                                                <p>Toutes les données associées à ce wallet seront définitivement perdues.</p>
+                                            </div>
+                                        </div>
+                                    </article>
+
+                                    <div class="box has-background-light">
+                                        <h4 class="subtitle is-6 mb-3">Informations du wallet :</h4>
+                                        <div class="columns is-mobile">
+                                            <div class="column">
+                                                <div class="field">
+                                                    <label class="label is-small">Nom</label>
+                                                    <div class="control">
+                                                        <input class="input is-static" type="text" value="{{ wallet.name }}" readonly>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="columns is-mobile">
+                                            <div class="column">
+                                                <div class="field">
+                                                    <label class="label is-small">Solde actuel</label>
+                                                    <div class="control">
+                                                        <input class="input is-static has-text-success has-text-weight-semibold"
+                                                               type="text" value="{{ wallet.balance }} €" readonly>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="column">
+                                                <div class="field">
+                                                    <label class="label is-small">Objectif</label>
+                                                    <div class="control">
+                                                        <input class="input is-static has-text-info has-text-weight-semibold"
+                                                               type="text" value="{{ wallet.objective }} €" readonly>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                                <footer class="modal-card-foot is-justify-content-space-between">
+                                    <button class="button is-light">
+                                        <span class="icon">
+                                            <i class="mdi mdi-close"></i>
+                                        </span>
+                                        <span>Annuler</span>
+                                    </button>
+                                    <form method="post" action="{% url 'wallet:wallet_delete' wallet.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="button is-danger">
+                                            <span class="icon">
+                                                <i class="mdi mdi-delete"></i>
+                                            </span>
+                                            <span>Confirmer la suppression</span>
+                                        </button>
+                                    </form>
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="hero">
+                <div class="hero-body has-text-centered">
+                    <div class="container">
+                        <span class="icon is-large has-text-grey-light mb-4">
+                            <i class="mdi mdi-wallet-plus-outline mdi-48px"></i>
+                        </span>
+                        <h3 class="title is-4 has-text-grey">Aucun wallet pour le moment</h3>
+                        <p class="subtitle has-text-grey-light">Créez votre premier wallet pour commencer à gérer vos finances</p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Fonctions pour gérer les modals
+    function openModal($el) {
+        $el.classList.add('is-active');
+    }
+
+    function closeModal($el) {
+        $el.classList.remove('is-active');
+    }
+
+    function closeAllModals() {
+        (document.querySelectorAll('.modal') || []).forEach(($modal) => {
+            closeModal($modal);
+        });
+    }
+
+    // Ajouter les événements pour ouvrir les modals
+    (document.querySelectorAll('.js-modal-trigger') || []).forEach(($trigger) => {
+        const modal = $trigger.dataset.target;
+        const $target = document.getElementById(modal);
+
+        $trigger.addEventListener('click', () => {
+            openModal($target);
+        });
+    });
+
+    // Ajouter les événements pour fermer les modals
+    (document.querySelectorAll('.modal-background, .modal-card-head .delete, .modal-card-foot .button.is-light') || []).forEach(($close) => {
+        const $target = $close.closest('.modal');
+
+        $close.addEventListener('click', () => {
+            closeModal($target);
+        });
+    });
+
+    // Fermer les modals avec la touche Escape
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeAllModals();
+        }
+    });
+});
+</script>
+{% endblock %}

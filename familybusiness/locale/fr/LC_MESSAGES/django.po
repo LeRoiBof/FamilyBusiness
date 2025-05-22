@@ -34,5 +34,5 @@ msgid "Login"
 msgstr "Connexion"
 
 #: templates/master.html:178
-msgid "Actuel version"
+msgid "Actual version"
 msgstr "Version actuelle"
