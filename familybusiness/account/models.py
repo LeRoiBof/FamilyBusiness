@@ -22,9 +22,11 @@ class AccountManager(BaseUserManager):
         return user
 
 class Account(AbstractUser):
+    username = None
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+    role = models.CharField(max_length=50, default='user')
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     objects = AccountManager()

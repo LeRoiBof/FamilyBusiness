@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth import authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
 
@@ -32,18 +33,22 @@ class RegistrationForm(forms.ModelForm):
             account.save()
         return account
 
-class LoginForm(AuthenticationForm):
-    username = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'input'}), label="Email")
+class LoginForm(forms.Form):
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'input'}), label="Email")
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'input'}), label="Mot de passe")
-
-    class Meta:
-        model = Account
-        fields = ['username', 'password']
-
-    def confirm_login_allowed(self, user):
-        if not user.is_active:
-            raise ValidationError("Ce compte est désactivé.")
 
     def clean(self):
         cleaned_data = super().clean()
+        email = cleaned_data.get('email')
+        password = cleaned_data.get('password')
+
+        if email and password:
+            self.user = authenticate(email=email, password=password)
+            if self.user is None:
+                raise forms.ValidationError("Identifiants invalides.")
+            if not self.user.is_active:
+                raise forms.ValidationError("Ce compte est désactivé.")
         return cleaned_data
+
+    def get_user(self):
+        return getattr(self, 'user', None)

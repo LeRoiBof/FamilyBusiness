@@ -15,6 +15,23 @@
             --danger: #d60044;
         }
 
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .layout-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .layout-wrapper .footer {
+            margin-top: auto;
+        }
+
+
         .is-danger {
             background-color: var(--danger);
             color: white;
@@ -77,105 +94,108 @@
 </head>
 <body>
 
-<!-- Navbar -->
-<nav class="navbar mx-4 my-4" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
-        {% if request.path != '/' %}
-        <div class="navbar-item">
-            <a href="javascript:history.back()" class="has-text-black">
-                <i class="mdi mdi-chevron-left"></i> <strong>{% trans "Back" %}</strong>
+<div class="layout-wrapper">
+
+    <!-- Navbar -->
+    <nav class="navbar mx-4 my-4" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            {% if request.path != '/' %}
+            <div class="navbar-item">
+                <a href="javascript:history.back()" class="has-text-black">
+                    <i class="mdi mdi-chevron-left"></i> <strong>{% trans "Back" %}</strong>
+                </a>
+            </div>
+            {% endif %}
+            <a href="{% url 'home' %}" class="has-text-black title m-1 p-1"><strong>Family Business</strong></a>
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbar">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
             </a>
         </div>
-        {% endif %}
-        <a href="{% url 'home' %}" class="has-text-black title m-1 p-1"><strong>Family Business</strong></a>
-        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbar">
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-        </a>
-    </div>
 
-    <div class="navbar-menu" id="navbar">
-        <div class="navbar-start"></div>
-        <div class="navbar-end">
-            <div class="navbar-item">
-                {% if user.is_authenticated %}
-                    <form action="{% url 'set_language' %}" method="post" class="navbar-item p-0 m-0">
-                        {% csrf_token %}
-                        {% get_current_language as LANGUAGE_CODE %}
-                        {% if LANGUAGE_CODE == 'fr' %}
-                            <input type="hidden" name="language" value="en">
-                            <input type="hidden" name="next" value="/en{{ request.path }}">
-                            <button type="submit" class="button is-white" title="Switch to English">
-                                <span class="icon is-small">🇬🇧</span>
-                            </button>
-                        {% else %}
-                            <input type="hidden" name="language" value="fr">
-                            <input type="hidden" name="next" value="/fr{{ request.path }}">
-                            <button type="submit" class="button is-white" title="Passer en français">
-                                <span class="icon is-small">🇫🇷</span>
-                            </button>
-                        {% endif %}
-                    </form>
+        <div class="navbar-menu" id="navbar">
+            <div class="navbar-start"></div>
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    {% if user.is_authenticated %}
+                        <form action="{% url 'set_language' %}" method="post" class="navbar-item p-0 m-0">
+                            {% csrf_token %}
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% if LANGUAGE_CODE == 'fr' %}
+                                <input type="hidden" name="language" value="en">
+                                <input type="hidden" name="next" value="/en/{{ request.path|cut:'/'|cut:LANGUAGE_CODE }}">
+                                <button type="submit" class="button is-white" title="Switch to English">
+                                    <span class="icon is-small">🇬🇧</span>
+                                </button>
+                            {% else %}
+                                <input type="hidden" name="language" value="fr">
+                                <input type="hidden" name="next" value="/fr/{{ request.path|cut:'/'|cut:LANGUAGE_CODE }}">
+                                <button type="submit" class="button is-white" title="Passer en français">
+                                    <span class="icon is-small">🇫🇷</span>
+                                </button>
+                            {% endif %}
+                        </form>
 
-                <span class="has-text-black"><strong>{{ user.get_full_name }}</strong></span>
-                <a href="{% url 'logout' %}?next={{ request.path }}" class="button ml-2">{% trans "Logout" %}</a>
-                {% else %}
-                    <form action="{% url 'set_language' %}" method="post" class="navbar-item p-0 m-0">
-                        {% csrf_token %}
-                        {% get_current_language as LANGUAGE_CODE %}
-                        {% if LANGUAGE_CODE == 'fr' %}
-                            <input type="hidden" name="language" value="en">
-                            <input type="hidden" name="next" value="/en/{{ request.path|cut:'/'|cut:LANGUAGE_CODE }}">
-                            <button type="submit" class="button is-white" title="Switch to English">
-                                <span class="icon is-small">🇬🇧</span>
-                            </button>
-                        {% else %}
-                            <input type="hidden" name="language" value="fr">
-                            <input type="hidden" name="next" value="/fr/{{ request.path|cut:'/'|cut:LANGUAGE_CODE }}">
-                            <button type="submit" class="button is-white" title="Passer en français">
-                                <span class="icon is-small">🇫🇷</span>
-                            </button>
-                        {% endif %}
-                    </form>
-                <a href="{% url 'register' %}?next={{ request.path }}" class="button is-info">{% trans "Create account" %}</a>
-                <a href="{% url 'login' %}?next={{ request.path }}" class="button ml-2">{% trans "Login" %}</a>
-                {% endif %}
+                    <span class="has-text-black"><strong>{{ user.get_full_name }}</strong></span>
+                    <a href="{% url 'logout' %}?next={{ request.path }}" class="button ml-2">{% trans "Logout" %}</a>
+                    {% else %}
+                        <form action="{% url 'set_language' %}" method="post" class="navbar-item p-0 m-0">
+                            {% csrf_token %}
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% if LANGUAGE_CODE == 'fr' %}
+                                <input type="hidden" name="language" value="en">
+                                <input type="hidden" name="next" value="/en/{{ request.path|cut:'/'|cut:LANGUAGE_CODE }}">
+                                <button type="submit" class="button is-white" title="Switch to English">
+                                    <span class="icon is-small">🇬🇧</span>
+                                </button>
+                            {% else %}
+                                <input type="hidden" name="language" value="fr">
+                                <input type="hidden" name="next" value="/fr/{{ request.path|cut:'/'|cut:LANGUAGE_CODE }}">
+                                <button type="submit" class="button is-white" title="Passer en français">
+                                    <span class="icon is-small">🇫🇷</span>
+                                </button>
+                            {% endif %}
+                        </form>
+                    <a href="{% url 'register' %}?next={{ request.path }}" class="button is-info">{% trans "Create account" %}</a>
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="button ml-2">{% trans "Login" %}</a>
+                    {% endif %}
+                </div>
             </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
-<!-- JS pour le burger menu -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const $navbarBurgers = Array.from(document.querySelectorAll('.navbar-burger'));
-        if ($navbarBurgers.length > 0) {
-            $navbarBurgers.forEach(el => {
-                el.addEventListener('click', () => {
-                    const target = el.dataset.target;
-                    const $target = document.getElementById(target);
-                    el.classList.toggle('is-active');
-                    $target.classList.toggle('is-active');
+    <!-- JS pour le burger menu -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const $navbarBurgers = Array.from(document.querySelectorAll('.navbar-burger'));
+            if ($navbarBurgers.length > 0) {
+                $navbarBurgers.forEach(el => {
+                    el.addEventListener('click', () => {
+                        const target = el.dataset.target;
+                        const $target = document.getElementById(target);
+                        el.classList.toggle('is-active');
+                        $target.classList.toggle('is-active');
+                    });
                 });
-            });
-        }
-    });
-</script>
+            }
+        });
+    </script>
 
-<!-- Contenu de la page -->
-{% block content %}{% endblock %}
+    <!-- Contenu de la page -->
+    {% block content %}{% endblock %}
 
-<!-- Footer -->
-<footer class="footer">
-    <div class="content">
-        <div class="columns">
-            <div class="column has-text-centered">
-                <a style="color: inherit" id="secret-button">{% trans "Actual version" %} : 1.1.0</a>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="content">
+            <div class="columns">
+                <div class="column has-text-centered">
+                    <a style="color: inherit" id="secret-button">{% trans "Actual version" %} : 1.1.0</a>
+                </div>
             </div>
         </div>
-    </div>
-</footer>
+    </footer>
+</div>
 
 </body>
 </html>
