@@ -1,0 +1,358 @@
+{% extends "master.html" %}
+{% load custom_filters %}
+{% load days_since %}
+
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <!-- En-tête -->
+            <div class="mb-5">
+                <h1 class="title is-3 mb-1">Historique des événements</h1>
+                <p class="subtitle is-5 has-text-grey mt-0">Suivi complet de l'activité système</p>
+            </div>
+
+            <!-- Filtres -->
+            <div class="card mb-5">
+                <div class="card-header">
+                    <div class="card-header-title">
+                        <span class="icon mr-2"><i class="mdi mdi-filter"></i></span>
+                        Filtres et recherche
+                    </div>
+                    <div class="card-header-icon">
+                        <button class="button is-small is-light" id="reset-filters">
+                            <span class="icon"><i class="mdi mdi-refresh"></i></span>
+                            <span>Réinitialiser</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <form method="get" id="filter-form">
+                        <div class="columns is-multiline">
+                            <div class="column is-one-third">
+                                <div class="field">
+                                    <label class="label">Recherche</label>
+                                    <div class="control has-icons-left">
+                                        <input class="input" type="text" name="search" value="{{ current_search }}"
+                                               placeholder="Contenu, type, utilisateur...">
+                                        <span class="icon is-small is-left"><i class="mdi mdi-magnify"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="column is-one-third">
+                                <div class="field">
+                                    <label class="label">Type d'événement</label>
+                                    <div class="control">
+                                        <div class="select is-fullwidth">
+                                            <select name="type">
+                                                <option value="">Tous les types</option>
+                                                {% for type in available_types %}
+                                                    <option value="{{ type }}"
+                                                            {% if current_type == type %}selected{% endif %}>
+                                                        {% with event_type_mapping|dict_get:type as type_info %}
+                                                            {{ type_info.label|default:type }}
+                                                        {% endwith %}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="column is-one-third">
+                                <div class="field">
+                                    <label class="label">Utilisateur</label>
+                                    <div class="control">
+                                        <div class="select is-fullwidth">
+                                            <select name="user">
+                                                <option value="">Tous les utilisateurs</option>
+                                                {% for user in users_with_events %}
+                                                    <option value="{{ user.id }}"
+                                                            {% if current_user == user.id|stringformat:"s" %}selected{% endif %}>
+                                                        {{ user.get_full_name|default:user.username }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="column is-one-third">
+                                <div class="field">
+                                    <label class="label">Date de début</label>
+                                    <input class="input flatpickr" type="text" name="date_from"
+                                           value="{{ current_date_from }}" placeholder="jj/mm/aaaa">
+                                </div>
+                            </div>
+
+                            <div class="column is-one-third">
+                                <div class="field">
+                                    <label class="label">Date de fin</label>
+                                    <input class="input flatpickr" type="text" name="date_to"
+                                           value="{{ current_date_to }}" placeholder="jj/mm/aaaa">
+                                </div>
+                            </div>
+
+                            <div class="column is-narrow">
+                                <div class="field">
+                                    <label class="label">&nbsp;</label>
+                                    <button type="submit" class="button is-primary">
+                                        <span class="icon"><i class="mdi mdi-filter-check"></i></span>
+                                        <span>Filtrer</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Liste des événements -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-title">
+                        <span class="icon mr-2"><i class="mdi mdi-history"></i></span>
+                        Événements ({{ filtered_events }})
+                    </div>
+                    <div class="card-header-icon">
+                        <span class="tag is-light">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+                    </div>
+                </div>
+
+                <div class="card-content p-0">
+                    {% if events %}
+                    <div class="event-list" style="max-height: 700px; overflow-y: auto;">
+                        {% for event in events %}
+                        <div class="event-item p-4 {% if not forloop.last %}border-bottom{% endif %}">
+                            <div class="columns is-vcentered">
+                                <div class="column is-narrow">
+                                    {% with event_type_mapping|dict_get:event.type as type_info %}
+                                    <span class="icon is-large {{ type_info.color|default:'has-text-grey' }}">
+                                        <i class="mdi mdi-36px {{ type_info.icon|default:'mdi-information' }}"></i>
+                                    </span>
+                                    {% endwith %}
+                                </div>
+                                <div class="column">
+                                    <div class="mb-1">
+                                        {% with event_type_mapping|dict_get:event.type as type_info %}
+                                        <span class="tag {{ type_info.color|default:'is-light' }} mr-2">
+                                            {{ type_info.label|default:event.type }}
+                                        </span>
+                                        {% endwith %}
+                                        <small class="has-text-grey">{{ event.date|date:"d/m/Y" }}</small>
+                                    </div>
+                                    <p class="mb-1 has-text-weight-semibold">
+                                        {{ event.user.get_full_name|default:event.user.username }}
+                                        <span class="has-text-grey ml-2 is-size-7">
+                                            ({{ event.date|days_since }} jours)
+                                        </span>
+                                    </p>
+                                    <p class="has-text-dark">{{ event.content }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="has-text-centered py-6">
+                        <span class="icon is-large has-text-grey-light">
+                            <i class="mdi mdi-48px mdi-history"></i>
+                        </span>
+                        <p class="title is-5 has-text-grey">Aucun événement trouvé</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+                <nav class="pagination is-centered mt-5" role="navigation">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}"
+                           class="pagination-previous">Précédent</a>
+                    {% else %}
+                        <a class="pagination-previous" disabled>Précédent</a>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}"
+                           class="pagination-next">Suivant</a>
+                    {% else %}
+                        <a class="pagination-next" disabled>Suivant</a>
+                    {% endif %}
+                </nav>
+            {% endif %}
+        </div>
+    </section>
+
+    <style>
+        .border-bottom {
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .event-item:hover {
+            background-color: #fafafa;
+            transition: background-color 0.2s ease;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const resetBtn = document.getElementById('reset-filters');
+            if (resetBtn) resetBtn.addEventListener('click', () => window.location.href = window.location.pathname);
+            // Configuration globale pour Flatpickr
+            const flatpickrConfig = {
+                dateFormat: "d/m/Y",
+                locale: "fr",
+                allowInput: true,
+                clickOpens: true,
+                position: "auto",
+                animate: true,
+                theme: "light"
+            };
+
+            // Initialiser Flatpickr pour le champ "Date de début"
+            const dateFromInput = document.querySelector('input[name="date_from"]');
+            if (dateFromInput) {
+                const dateFromPicker = flatpickr(dateFromInput, {
+                    ...flatpickrConfig,
+                    placeholder: "Date de début",
+                    maxDate: new Date(), // Ne peut pas sélectionner une date future
+                    onChange: function (selectedDates, dateStr, instance) {
+                        // Mettre à jour la date minimale du champ "Date de fin"
+                        if (dateToPickerInstance && selectedDates.length > 0) {
+                            dateToPickerInstance.set('minDate', selectedDates[0]);
+                        }
+
+                        // Validation visuelle
+                        if (dateStr) {
+                            dateFromInput.classList.add('is-success');
+                            dateFromInput.classList.remove('is-danger');
+                        } else {
+                            dateFromInput.classList.remove('is-success', 'is-danger');
+                        }
+                    },
+                    onOpen: function () {
+                        dateFromInput.classList.add('is-focused');
+                    },
+                    onClose: function () {
+                        dateFromInput.classList.remove('is-focused');
+                    }
+                });
+            }
+
+            // Initialiser Flatpickr pour le champ "Date de fin"
+            const dateToInput = document.querySelector('input[name="date_to"]');
+            let dateToPickerInstance = null;
+
+            if (dateToInput) {
+                dateToPickerInstance = flatpickr(dateToInput, {
+                    ...flatpickrConfig,
+                    placeholder: "Date de fin",
+                    maxDate: new Date(), // Ne peut pas sélectionner une date future
+                    onChange: function (selectedDates, dateStr, instance) {
+                        // Mettre à jour la date maximale du champ "Date de début"
+                        if (dateFromInput && selectedDates.length > 0) {
+                            const dateFromPicker = dateFromInput._flatpickr;
+                            if (dateFromPicker) {
+                                dateFromPicker.set('maxDate', selectedDates[0]);
+                            }
+                        }
+
+                        // Validation visuelle
+                        if (dateStr) {
+                            dateToInput.classList.add('is-success');
+                            dateToInput.classList.remove('is-danger');
+                        } else {
+                            dateToInput.classList.remove('is-success', 'is-danger');
+                        }
+                    },
+                    onOpen: function () {
+                        dateToInput.classList.add('is-focused');
+                    },
+                    onClose: function () {
+                        dateToInput.classList.remove('is-focused');
+                    }
+                });
+            }
+
+            // Validation croisée des dates
+            function validateDateRange() {
+                const dateFrom = dateFromInput?.value;
+                const dateTo = dateToInput?.value;
+
+                if (dateFrom && dateTo) {
+                    const fromDate = new Date(dateFrom.split('/').reverse().join('-'));
+                    const toDate = new Date(dateTo.split('/').reverse().join('-'));
+
+                    if (fromDate > toDate) {
+                        dateToInput.classList.add('is-danger');
+                        dateToInput.classList.remove('is-success');
+                        showNotification('La date de fin doit être postérieure à la date de début', 'is-warning');
+                        return false;
+                    } else {
+                        dateToInput.classList.remove('is-danger');
+                        if (dateTo) dateToInput.classList.add('is-success');
+                        return true;
+                    }
+                }
+                return true;
+            }
+
+            // Fonction utilitaire pour afficher des notifications
+            function showNotification(message, type = 'is-info') {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type} is-light`;
+                notification.innerHTML = `
+                        <button class="delete"></button>
+                        ${message}
+                    `;
+
+                // Insérer la notification en haut de la page
+                const container = document.querySelector('.container');
+                if (container) {
+                    container.insertBefore(notification, container.firstChild);
+                }
+
+                // Supprimer automatiquement après 5 secondes
+                setTimeout(() => {
+                    notification.remove();
+                }, 5000);
+
+                // Permettre la suppression manuelle
+                const deleteBtn = notification.querySelector('.delete');
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', () => notification.remove());
+                }
+            }
+
+            // Validation avant soumission du formulaire
+            const filterForm = document.getElementById('filter-form');
+            if (filterForm) {
+                filterForm.addEventListener('submit', function (e) {
+                    if (!validateDateRange()) {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            }
+
+            // Auto-submit sur changement de date (optionnel)
+            if (dateFromInput) {
+                dateFromInput.addEventListener('change', function () {
+                    // Délai pour permettre à l'utilisateur de sélectionner aussi la date de fin
+                    setTimeout(() => {
+                        if (validateDateRange()) {
+                            // Soumettre automatiquement si les deux dates sont remplies
+                            const dateToValue = dateToInput?.value;
+                            if (this.value && dateToValue) {
+                                filterForm?.submit();
+                            }
+                        }
+                    }, 1000);
+                });
+            }
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends "master.html" %}
+
+{% block content %}
+    <section class="section">
+        <div class="container">
+            <!-- En-tête -->
+            <div class="columns is-vcentered mb-6">
+                <div class="column">
+                    <h1 class="title is-2 has-text-primary">Panel Administrateur</h1>
+                    <p class="subtitle is-5 has-text-grey">
+                        Gestion et supervision de l'application
+                    </p>
+                </div>
+                <div class="column is-narrow has-text-right">
+                <span class="tag is-success is-medium">
+                    <span class="icon">
+                        <i class="mdi mdi-shield-check"></i>
+                    </span>
+                    <span>Administrateur</span>
+                </span>
+                </div>
+            </div>
+
+            <!-- Menu d'administration -->
+            <div class="columns is-multiline">
+                <!-- Historique -->
+                <div class="column is-12-mobile is-half-tablet is-one-quarter-desktop">
+                    <a href="{% url 'adminpanel:history_list' %}" class="card admin-card">
+                        <div class="card-content has-text-centered">
+                        <span class="icon is-size-1 has-text-info mb-4">
+                            <i class="mdi mdi-history mdi-48px"></i>
+                        </span>
+                            <p class="title is-4 has-text-dark">Historique</p>
+                            <p class="subtitle is-6 has-text-grey">
+                                Consulter les logs et l'historique des actions
+                            </p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Gestion Utilisateurs -->
+                <div class="column is-12-mobile is-half-tablet is-one-quarter-desktop">
+                    <a href="#" class="card admin-card">
+                        <div class="card-content has-text-centered">
+                        <span class="icon is-size-1 has-text-success mb-4">
+                            <i class="mdi mdi-account-group mdi-48px"></i>
+                        </span>
+                            <p class="title is-4 has-text-dark">Gestion Utilisateurs</p>
+                            <p class="subtitle is-6 has-text-grey">
+                                Gérer les comptes et permissions
+                            </p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Gestion Portefeuilles -->
+                <div class="column is-12-mobile is-half-tablet is-one-quarter-desktop">
+                    <a href="#" class="card admin-card">
+                        <div class="card-content has-text-centered">
+                        <span class="icon is-size-1 has-text-warning mb-4">
+                            <i class="mdi mdi-wallet mdi-48px"></i>
+                        </span>
+                            <p class="title is-4 has-text-dark">Gestion Portefeuilles</p>
+                            <p class="subtitle is-6 has-text-grey">
+                                Superviser les portefeuilles existants
+                            </p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Gestion Catégories -->
+                <div class="column is-12-mobile is-half-tablet is-one-quarter-desktop">
+                    <a href="#" class="card admin-card">
+                        <div class="card-content has-text-centered">
+                        <span class="icon is-size-1 has-text-danger mb-4">
+                            <i class="mdi mdi-tag mdi-48px"></i>
+                        </span>
+                            <p class="title is-4 has-text-dark">Gestion Catégories</p>
+                            <p class="subtitle is-6 has-text-grey">
+                                Créer et modifier les catégories
+                            </p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .admin-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            height: 100%;
+            display: block;
+            text-decoration: none;
+        }
+
+        .admin-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-color: #3273dc;
+        }
+
+        .admin-card .card-content {
+            padding: 2rem;
+        }
+    </style>
+{% endblock %}

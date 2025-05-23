@@ -30,4 +30,5 @@ urlpatterns += i18n_patterns(
     path('home/', include('home.urls')),
     path('account/', include('account.urls')),
     path('wallet/', include('wallet.urls')),
+    path('adminpanel/', include('adminpanel.urls'))
 )
