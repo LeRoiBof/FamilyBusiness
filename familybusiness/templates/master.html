@@ -114,11 +114,11 @@
     <nav class="navbar mx-4 my-4" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
             {% if request.path != '/' %}
-            <div class="navbar-item">
-                <a href="javascript:history.back()" class="has-text-black">
-                    <i class="mdi mdi-chevron-left"></i> <strong>{% trans "Back" %}</strong>
-                </a>
-            </div>
+                <div class="navbar-item">
+                    <a href="javascript:history.back()" class="has-text-black">
+                        <i class="mdi mdi-chevron-left"></i> <strong>{% trans "Back" %}</strong>
+                    </a>
+                </div>
             {% endif %}
             <a href="{% url 'home' %}" class="has-text-black title m-1 p-1"><strong>Family Business</strong></a>
             <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbar">
@@ -133,51 +133,86 @@
             <div class="navbar-end">
                 <div class="navbar-item">
                     {% if user.is_authenticated %}
-                        <form action="{% url 'set_language' %}" method="post" class="navbar-item p-0 m-0" id="language-form">
+                        <form action="{% url 'set_language' %}" method="post" class="navbar-item p-0 m-0"
+                              id="language-form">
                             {% csrf_token %}
                             {% get_current_language as LANGUAGE_CODE %}
                             {% if LANGUAGE_CODE == 'fr' %}
                                 <input type="hidden" name="language" value="en">
                                 <input type="hidden" name="next" value="{{ request.get_full_path }}" id="next-input">
-                                <button type="submit" class="button is-white language-switch-btn" title="Switch to English">
+                                <button type="submit" class="button is-white language-switch-btn"
+                                        title="Switch to English">
                                     <span class="icon is-small">🇬🇧</span>
                                 </button>
                             {% else %}
                                 <input type="hidden" name="language" value="fr">
                                 <input type="hidden" name="next" value="{{ request.get_full_path }}" id="next-input">
-                                <button type="submit" class="button is-white language-switch-btn" title="Passer en français">
+                                <button type="submit" class="button is-white language-switch-btn"
+                                        title="Passer en français">
                                     <span class="icon is-small">🇫🇷</span>
                                 </button>
                             {% endif %}
                         </form>
 
                         <span class="has-text-black"><strong>{{ user.get_full_name }}</strong></span>
-                        <a href="{% url 'logout' %}?next={{ request.path }}" class="button ml-2">{% trans "Logout" %}</a>
+                        <a href="{% url 'account:logout' %}?next={{ request.path }}"
+                           class="button ml-2">{% trans "Logout" %}</a>
                     {% else %}
-                        <form action="{% url 'set_language' %}" method="post" class="navbar-item p-0 m-0" id="language-form">
+                        <form action="{% url 'set_language' %}" method="post" class="navbar-item p-0 m-0"
+                              id="language-form">
                             {% csrf_token %}
                             {% get_current_language as LANGUAGE_CODE %}
                             {% if LANGUAGE_CODE == 'fr' %}
                                 <input type="hidden" name="language" value="en">
                                 <input type="hidden" name="next" value="{{ request.get_full_path }}" id="next-input">
-                                <button type="submit" class="button is-white language-switch-btn" title="Switch to English">
+                                <button type="submit" class="button is-white language-switch-btn"
+                                        title="Switch to English">
                                     <span class="icon is-small">🇬🇧</span>
                                 </button>
                             {% else %}
                                 <input type="hidden" name="language" value="fr">
                                 <input type="hidden" name="next" value="{{ request.get_full_path }}" id="next-input">
-                                <button type="submit" class="button is-white language-switch-btn" title="Passer en français">
+                                <button type="submit" class="button is-white language-switch-btn"
+                                        title="Passer en français">
                                     <span class="icon is-small">🇫🇷</span>
                                 </button>
                             {% endif %}
                         </form>
-                        <a href="{% url 'register' %}?next={{ request.path }}" class="button is-info">{% trans "Create account" %}</a>
-                        <a href="{% url 'login' %}?next={{ request.path }}" class="button ml-2">{% trans "Login" %}</a>
+                        <a href="{% url 'account:register' %}?next={{ request.path }}"
+                           class="button is-info">{% trans "Create account" %}</a>
+                        <a href="{% url 'account:login' %}?next={{ request.path }}"
+                           class="button ml-2">{% trans "Login" %}</a>
                     {% endif %}
                 </div>
             </div>
         </div>
     </nav>
+
+    {% if messages %}
+        <div id="messages-container" class="container mt-4">
+            {% for message in messages %}
+                <div class="notification
+                {% if message.tags == 'success' %}is-success
+                {% elif message.tags == 'error' or message.tags == 'danger' %}is-danger
+                {% elif message.tags == 'warning' %}is-warning
+                {% else %}is-info{% endif %}">
+                    <button class="delete"></button>
+                    <span class="icon mr-2">
+            {% if message.tags == 'success' %}
+                <i class="mdi mdi-check-circle-outline"></i>
+            {% elif message.tags == 'error' or message.tags == 'danger' %}
+                <i class="mdi mdi-alert-circle-outline"></i>
+            {% elif message.tags == 'warning' %}
+                <i class="mdi mdi-alert-outline"></i>
+            {% else %}
+                <i class="mdi mdi-information-outline"></i>
+            {% endif %}
+        </span>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
     <!-- JS pour le burger menu -->
     <script>
@@ -199,7 +234,7 @@
             const nextInput = document.getElementById('next-input');
 
             if (languageForm && nextInput) {
-                languageForm.addEventListener('submit', function(e) {
+                languageForm.addEventListener('submit', function (e) {
                     // Mettre à jour l'URL de redirection juste avant la soumission
                     const currentPath = window.location.pathname;
                     const currentSearch = window.location.search;
@@ -225,7 +260,7 @@
                 // Ajouter un effet visuel lors du clic
                 const languageBtn = languageForm.querySelector('.language-switch-btn');
                 if (languageBtn) {
-                    languageBtn.addEventListener('click', function() {
+                    languageBtn.addEventListener('click', function () {
                         this.classList.add('is-loading');
                         // Retirer la classe loading après un délai pour éviter qu'elle reste
                         setTimeout(() => {
@@ -234,6 +269,21 @@
                     });
                 }
             }
+
+            // Auto-dismiss after 5s
+            document.querySelectorAll('.notification').forEach((notif) => {
+                setTimeout(() => {
+                    notif.classList.add('is-hidden');
+                }, 5000);
+            });
+
+            // Manual dismiss
+            document.querySelectorAll('.notification .delete').forEach(($delete) => {
+                const $notification = $delete.parentNode;
+                $delete.addEventListener('click', () => {
+                    $notification.classList.add('is-hidden');
+                });
+            });
         });
     </script>
 
@@ -242,14 +292,17 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="content">
-            <div class="columns">
-                <div class="column has-text-centered">
-                    <a style="color: inherit" id="secret-button">{% trans "Actual version" %} : 1.1.0</a>
-                </div>
-            </div>
+        <div class="content has-text-centered">
+            <p>
+                Développé par <strong>Thomas Bernard</strong>, <strong>Marine Bodson</strong>, <strong>Maxime
+                Dupuis</strong> et <strong>Arnaud Moreau</strong>
+            </p>
+            <p class=" has-text-grey">
+                {% trans "Actual version" %} : 1.1.0
+            </p>
         </div>
     </footer>
+
 </div>
 
 </body>

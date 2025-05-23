@@ -1,0 +1,214 @@
+{% extends "master.html" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="columns is-multiline is-variable is-6">
+            <!-- Partie gauche : Situation actuelle + suggestions -->
+            <div class="column is-full-tablet is-half-desktop">
+                <!-- Situation actuelle -->
+                <div class="card mb-5">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <span class="icon mr-2">
+                                <i class="mdi mdi-chart-line"></i>
+                            </span>
+                            Situation actuelle
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="columns">
+                            <div class="column has-text-centered">
+                                <p class="heading">Solde actuel</p>
+                                <p class="title is-4 has-text-success">{{ wallet.balance|floatformat:2 }} €</p>
+                            </div>
+                            <div class="column has-text-centered">
+                                <p class="heading">Objectif actuel</p>
+                                <p class="title is-4 has-text-info">{{ wallet.objective|floatformat:2 }} €</p>
+                            </div>
+                        </div>
+
+                        {% if wallet.objective > 0 %}
+                        <div class="field mt-4">
+                            <label class="label">Progression actuelle</label>
+                            <progress class="progress is-primary"
+                                      value="{{ current_progress }}"
+                                      max="100">{{ current_progress|floatformat:1 }}%</progress>
+                            <p class="help has-text-centered">
+                                <strong>{{ current_progress|floatformat:1 }}%</strong> de votre objectif atteint
+                                {% if current_progress >= 100 %}
+                                    <span class="has-text-success">🎉 Objectif atteint !</span>
+                                {% else %}
+                                    <span class="has-text-grey">
+                                        ({{ wallet.objective|add:wallet.balance|floatformat:"-2" }} € restants)
+                                    </span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Suggestions -->
+                {% if suggested_objectives %}
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <span class="icon mr-2">
+                                <i class="mdi mdi-lightbulb-outline"></i>
+                            </span>
+                            Suggestions d'objectifs
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p class="subtitle is-6 mb-4">Basées sur votre solde actuel :</p>
+                        <div class="buttons is-flex-wrap-wrap">
+                            {% for suggestion in suggested_objectives %}
+                            <button class="button is-info is-light suggestion-btn"
+                                    data-amount="{{ suggestion|floatformat:2 }}">
+                                <span class="icon">
+                                    <i class="mdi mdi-target"></i>
+                                </span>
+                                <span>{{ suggestion|floatformat:0 }} €</span>
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <p class="help">Cliquez sur une suggestion pour l'utiliser comme objectif</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Partie droite : formulaire -->
+            <div class="column is-full-tablet is-half-desktop">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <span class="icon mr-2">
+                                <i class="mdi mdi-target"></i>
+                            </span>
+                            Nouvel objectif
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <form method="post" id="objectiveForm">
+                            {% csrf_token %}
+
+                            <div class="field">
+                                <label class="label">Montant de l'objectif</label>
+                                <div class="control has-icons-left">
+                                    <input class="input is-large"
+                                           type="number"
+                                           name="objective"
+                                           id="objective-input"
+                                           value="{{ wallet.objective|floatformat:2 }}"
+                                           step="0.01"
+                                           min="0"
+                                           max="1000000"
+                                           placeholder="Entrez votre objectif en €"
+                                           required>
+                                    <span class="icon is-large is-left">
+                                        <i class="mdi mdi-currency-eur mdi-24px"></i>
+                                    </span>
+                                </div>
+                                <p class="help">
+                                    Définissez un montant que vous souhaitez atteindre avec ce portefeuille
+                                </p>
+                            </div>
+
+                            <!-- Aperçu de la progression -->
+                            <div class="notification is-light" id="progress-preview" style="display: none;">
+                                <div class="content">
+                                    <p class="title is-6">Aperçu de la progression</p>
+                                    <progress class="progress is-info" id="preview-progress" value="0" max="100"></progress>
+                                    <p class="help" id="preview-text"></p>
+                                </div>
+                            </div>
+
+                            <div class="field is-grouped is-grouped-right mt-5">
+                                <div class="control">
+                                    <a href="{% url 'wallet:wallet_detail' wallet.id %}" class="button is-light is-medium">
+                                        Annuler
+                                    </a>
+                                </div>
+                                <div class="control">
+                                    <button type="submit" class="button is-primary is-medium" id="submit-btn">
+                                        <span class="icon">
+                                            <i class="mdi mdi-content-save"></i>
+                                        </span>
+                                        <span>Enregistrer l'objectif</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const objectiveInput = document.getElementById('objective-input');
+    const progressPreview = document.getElementById('progress-preview');
+    const previewProgress = document.getElementById('preview-progress');
+    const previewText = document.getElementById('preview-text');
+    const submitBtn = document.getElementById('submit-btn');
+    const currentBalance = {{ wallet.balance }};
+    const currentObjective = {{ wallet.objective }};
+
+    function updatePreview() {
+        const value = parseFloat(objectiveInput.value);
+        if (value && value > 0) {
+            const progress = Math.min((currentBalance / value) * 100, 100);
+            const remaining = Math.max(value - currentBalance, 0);
+
+            previewProgress.value = progress;
+            previewText.innerHTML = `
+                <strong>${progress.toFixed(1)}%</strong> de progression avec ce nouvel objectif
+                ${remaining > 0 ? `<br>Il vous reste <strong>${remaining.toFixed(2)} €</strong> à épargner` : '<br><span class="has-text-success">🎉 Objectif déjà atteint !</span>'}
+            `;
+            progressPreview.style.display = 'block';
+
+            if (value === currentObjective) {
+                submitBtn.className = 'button is-light is-medium';
+                submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-information"></i></span><span>Aucun changement</span>';
+            } else if (progress >= 100) {
+                submitBtn.className = 'button is-success is-medium';
+                submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-check"></i></span><span>Objectif atteignable !</span>';
+            } else {
+                submitBtn.className = 'button is-primary is-medium';
+                submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-content-save"></i></span><span>Enregistrer l\'objectif</span>';
+            }
+        } else {
+            progressPreview.style.display = 'none';
+            submitBtn.className = 'button is-primary is-medium';
+            submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-content-save"></i></span><span>Enregistrer l\'objectif</span>';
+        }
+    }
+
+    objectiveInput.addEventListener('input', updatePreview);
+
+    document.querySelectorAll('.suggestion-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const amount = this.dataset.amount;
+            objectiveInput.value = amount;
+            updatePreview();
+            this.classList.add('is-success');
+            setTimeout(() => this.classList.remove('is-success'), 1000);
+            document.getElementById('objectiveForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    });
+
+    updatePreview();
+
+    objectiveInput.addEventListener('blur', function() {
+        const value = parseFloat(this.value);
+        if (value && value > 0) {
+            this.value = value.toFixed(2);
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends "master.html" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+
+        <div class="columns is-centered">
+            <div class="column is-half-tablet is-one-third-desktop">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title has-text-danger">
+                            <span class="icon mr-2">
+                                <i class="mdi mdi-alert-circle"></i>
+                            </span>
+                            Confirmation de suppression
+                        </div>
+                    </div>
+                    
+                    <div class="card-content">
+                        <!-- Détails de la transaction à supprimer -->
+                        <div class="notification is-light mb-5">
+                            <div class="columns is-vcentered">
+                                <div class="column is-narrow">
+                                    <span class="icon is-large {% if transaction.is_income %}has-text-success{% else %}has-text-danger{% endif %}">
+                                        <i class="mdi mdi-48px {% if transaction.is_income %}mdi-trending-up{% else %}mdi-trending-down{% endif %}"></i>
+                                    </span>
+                                </div>
+                                <div class="column">
+                                    <p class="title is-5 mb-1">{{ transaction.title }}</p>
+                                    <div class="is-flex is-flex-wrap-wrap is-align-items-center is-size-7 has-text-grey mb-2">
+                                        <span class="tag is-light mr-2 mb-1">{{ transaction.category.name }}</span>
+                                        <span class="mr-2 mb-1"><i class="mdi mdi-calendar-clock mr-1"></i>{{ transaction.date|date:"d/m/Y à H:i" }}</span>
+                                    </div>
+                                    <p class="title is-4 {% if transaction.is_income %}has-text-success{% else %}has-text-danger{% endif %}">
+                                        {% if transaction.is_income %}+{% else %}-{% endif %}{{ transaction.amount|floatformat:2 }} €
+                                    </p>
+                                    {% if transaction.description %}
+                                        <p class="has-text-grey-dark">{{ transaction.description|linebreaks }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Message d'avertissement -->
+                        <div class="notification is-warning">
+                            <div class="content">
+                                <p><strong>⚠️ Attention !</strong></p>
+                                <p>Vous êtes sur le point de supprimer définitivement cette transaction.</p>
+                                <ul class="mt-3">
+                                    <li>Cette action est <strong>irréversible</strong></li>
+                                    <li>Le solde du portefeuille sera ajusté automatiquement</li>
+                                    {% if transaction.is_income %}
+                                    <li>Le solde sera <strong class="has-text-danger">diminué</strong> de {{ transaction.amount|floatformat:2 }} €</li>
+                                    {% else %}
+                                    <li>Le solde sera <strong class="has-text-success">augmenté</strong> de {{ transaction.amount|floatformat:2 }} €</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Impact sur le solde -->
+                        <div class="box has-background-light">
+                            <div class="level">
+                                <div class="level-left">
+                                    <div class="level-item">
+                                        <div>
+                                            <p class="heading">Solde actuel</p>
+                                            <p class="title is-5">{{ wallet.balance|floatformat:2 }} €</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="level-item">
+                                    <span class="icon is-large has-text-grey">
+                                        <i class="mdi mdi-arrow-right mdi-36px"></i>
+                                    </span>
+                                </div>
+                                <div class="level-right">
+                                    <div class="level-item">
+                                        <div>
+                                            <p class="heading">Nouveau solde</p>
+                                            <p class="title is-5 {% if transaction.is_income %}has-text-danger{% else %}has-text-success{% endif %}">
+                                                {% if transaction.is_income %}
+                                                    {{ wallet.balance|add:transaction.amount|floatformat:"-2" }} €
+                                                {% else %}
+                                                    {{ wallet.balance|add:transaction.amount|floatformat:2 }} €
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Formulaire de confirmation -->
+                        <form method="post" class="mt-5">
+                            {% csrf_token %}
+                            <div class="field is-grouped is-grouped-right">
+                                <div class="control">
+                                    <a href="{% url 'wallet:wallet_detail' wallet.id %}" class="button is-light">
+                                        <span class="icon">
+                                            <i class="mdi mdi-cancel"></i>
+                                        </span>
+                                        <span>Annuler</span>
+                                    </a>
+                                </div>
+                                <div class="control">
+                                    <button type="submit" class="button is-danger" id="delete-btn">
+                                        <span class="icon">
+                                            <i class="mdi mdi-delete"></i>
+                                        </span>
+                                        <span>Supprimer définitivement</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteBtn = document.getElementById('delete-btn');
+    let confirmClicks = 0;
+    
+    deleteBtn.addEventListener('click', function(e) {
+        if (confirmClicks === 0) {
+            e.preventDefault();
+            this.innerHTML = '<span class="icon"><i class="mdi mdi-alert"></i></span><span>Êtes-vous sûr ? Cliquez encore</span>';
+            this.classList.add('is-loading');
+            
+            setTimeout(() => {
+                this.classList.remove('is-loading');
+                confirmClicks++;
+            }, 500);
+            
+            // Reset après 3 secondes
+            setTimeout(() => {
+                if (confirmClicks === 1) {
+                    this.innerHTML = '<span class="icon"><i class="mdi mdi-delete"></i></span><span>Supprimer définitivement</span>';
+                    confirmClicks = 0;
+                }
+            }, 3000);
+        }
+    });
+});
+</script>
+{% endblock %}

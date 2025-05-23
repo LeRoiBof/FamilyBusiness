@@ -1,0 +1,354 @@
+{% extends "master.html" %}
+
+{% block head %}
+
+    <style>
+    /* Style pour le switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #f14668;
+      transition: .4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+    }
+
+    input:checked + .slider {
+      background-color: #48c78e;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .slider.is-rounded {
+      border-radius: 34px;
+    }
+
+    .slider.is-rounded:before {
+      border-radius: 50%;
+    }
+
+    /* Animation pour les boutons */
+    .quick-transaction:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: all 0.2s ease;
+    }
+    </style>
+{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="columns is-variable is-6 is-multiline">
+            <!-- Formulaire de nouvelle transaction -->
+            <div class="column is-full-tablet is-half-desktop">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <span class="icon mr-2">
+                                <i class="mdi mdi-plus-circle"></i>
+                            </span>
+                            Nouvelle transaction
+                        </div>
+                    </div>
+
+                    <div class="card-content">
+                        <form method="post" id="transactionForm">
+                            {% csrf_token %}
+
+                            <!-- Type -->
+                            <div class="field">
+                                <label class="label">{{ form.is_income.label }}</label>
+                                <div class="control">
+                                    <label class="switch">
+                                        {{ form.is_income }}
+                                        <span class="slider is-rounded"></span>
+                                    </label>
+                                    <p class="help">
+                                        <span id="transaction-type">Dépense</span> - Activez pour un revenu
+                                    </p>
+                                </div>
+                                {% for error in form.is_income.errors %}
+                                    <p class="help is-danger">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Titre -->
+                            <div class="field">
+                                <label class="label">{{ form.title.label }}</label>
+                                <div class="control has-icons-left">
+                                    {{ form.title }}
+                                    <span class="icon is-small is-left">
+                                        <i class="mdi mdi-format-title"></i>
+                                    </span>
+                                </div>
+                                {% for error in form.title.errors %}
+                                    <p class="help is-danger">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Montant -->
+                            <div class="field">
+                                <label class="label">{{ form.amount.label }}</label>
+                                <div class="control has-icons-left has-icons-right">
+                                    {{ form.amount }}
+                                    <span class="icon is-small is-left">
+                                        <i class="mdi mdi-currency-eur"></i>
+                                    </span>
+                                    <span class="icon is-small is-right has-text-success" id="amount-icon" style="display: none;">
+                                        <i class="mdi mdi-check"></i>
+                                    </span>
+                                </div>
+                                {% for error in form.amount.errors %}
+                                    <p class="help is-danger">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Catégorie -->
+                            <div class="field">
+                                <label class="label">{{ form.category.label }}</label>
+                                <div class="control has-icons-left">
+                                    <div class="select is-fullwidth">
+                                        {{ form.category }}
+                                    </div>
+                                    <span class="icon is-small is-left">
+                                        <i class="mdi mdi-tag"></i>
+                                    </span>
+                                </div>
+                                {% for error in form.category.errors %}
+                                    <p class="help is-danger">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Description -->
+                            <div class="field">
+                                <label class="label">{{ form.description.label }}</label>
+                                <div class="control">
+                                    {{ form.description }}
+                                </div>
+                                {% for error in form.description.errors %}
+                                    <p class="help is-danger">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Résumé -->
+                            <div class="notification is-light" id="transaction-summary" style="display: none;">
+                                <div class="content">
+                                    <strong>Résumé :</strong>
+                                    <p id="summary-text"></p>
+                                </div>
+                            </div>
+
+                            <!-- Boutons -->
+                            <div class="field is-grouped is-grouped-right mt-5">
+                                <div class="control">
+                                    <a href="{% url 'wallet:wallet_detail' wallet.id %}" class="button is-light">
+                                        Annuler
+                                    </a>
+                                </div>
+                                <div class="control">
+                                    <button type="submit" class="button is-primary" id="submit-btn">
+                                        <span class="icon">
+                                            <i class="mdi mdi-content-save"></i>
+                                        </span>
+                                        <span>Enregistrer la transaction</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions rapides -->
+            <div class="column is-full-tablet is-half-desktop">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <span class="icon mr-2">
+                                <i class="mdi mdi-flash"></i>
+                            </span>
+                            Transactions rapides
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="buttons is-flex-wrap-wrap">
+                            <button class="button is-small is-light quick-transaction"
+                                    data-title="Courses alimentaires"
+                                    data-category="Alimentation"
+                                    data-amount="50.00">
+                                <span class="icon"><i class="mdi mdi-cart"></i></span>
+                                <span>Courses (50€)</span>
+                            </button>
+                            <button class="button is-small is-light quick-transaction"
+                                    data-title="Essence"
+                                    data-category="Transport"
+                                    data-amount="35.00">
+                                <span class="icon"><i class="mdi mdi-gas-station"></i></span>
+                                <span>Essence (35€)</span>
+                            </button>
+                            <button class="button is-small is-light quick-transaction"
+                                    data-title="Restaurant"
+                                    data-category="Loisirs"
+                                    data-amount="25.00">
+                                <span class="icon"><i class="mdi mdi-food"></i></span>
+                                <span>Restaurant (25€)</span>
+                            </button>
+                            <button class="button is-small is-light quick-transaction"
+                                    data-title="Salaire"
+                                    data-category="Revenus"
+                                    data-amount="2000.00"
+                                    data-income="true">
+                                <span class="icon"><i class="mdi mdi-cash"></i></span>
+                                <span>Salaire (2000€)</span>
+                            </button>
+                        </div>
+                        <p class="help">Cliquez sur une transaction rapide pour pré-remplir le formulaire</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('transactionForm');
+        const isIncomeSwitch = document.getElementById('id_is_income');
+        const transactionType = document.getElementById('transaction-type');
+        const titleInput = document.getElementById('id_title');
+        const amountInput = document.getElementById('id_amount');
+        const categorySelect = document.getElementById('id_category');
+        const descriptionInput = document.getElementById('id_description');
+        const summary = document.getElementById('transaction-summary');
+        const summaryText = document.getElementById('summary-text');
+        const amountIcon = document.getElementById('amount-icon');
+        const submitBtn = document.getElementById('submit-btn');
+
+        // Gestion du switch revenus/dépenses
+        function updateTransactionType() {
+            if (isIncomeSwitch.checked) {
+                transactionType.textContent = 'Revenu';
+                transactionType.className = 'has-text-success';
+                submitBtn.className = 'button is-success';
+                submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-trending-up"></i></span><span>Ajouter ce revenu</span>';
+            } else {
+                transactionType.textContent = 'Dépense';
+                transactionType.className = 'has-text-danger';
+                submitBtn.className = 'button is-primary';
+                submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-content-save"></i></span><span>Enregistrer la transaction</span>';
+            }
+            updateSummary();
+        }
+
+        isIncomeSwitch.addEventListener('change', updateTransactionType);
+
+        // Validation du montant
+        amountInput.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            if (value && value > 0) {
+                amountIcon.style.display = 'block';
+                this.classList.add('is-success');
+                this.classList.remove('is-danger');
+            } else {
+                amountIcon.style.display = 'none';
+                this.classList.remove('is-success');
+                if (this.value) {
+                    this.classList.add('is-danger');
+                }
+            }
+            updateSummary();
+        });
+
+        // Mise à jour du résumé
+        function updateSummary() {
+            const title = titleInput.value;
+            const amount = amountInput.value;
+            const category = categorySelect.options[categorySelect.selectedIndex]?.text;
+
+            if (title && amount && category && category !== '---------') {
+                const type = isIncomeSwitch.checked ? 'revenu' : 'dépense';
+                const sign = isIncomeSwitch.checked ? '+' : '-';
+                const color = isIncomeSwitch.checked ? 'has-text-success' : 'has-text-danger';
+
+                summaryText.innerHTML = `
+                    Vous allez ajouter un <strong>${type}</strong> de
+                    <span class="${color}">${sign}${amount}€</span>
+                    intitulé "<strong>${title}</strong>"
+                    dans la catégorie "<strong>${category}</strong>".
+                `;
+                summary.style.display = 'block';
+            } else {
+                summary.style.display = 'none';
+            }
+        }
+
+        // Écouteurs pour le résumé
+        titleInput.addEventListener('input', updateSummary);
+        categorySelect.addEventListener('change', updateSummary);
+
+        // Transactions rapides
+        document.querySelectorAll('.quick-transaction').forEach(button => {
+            button.addEventListener('click', function() {
+                titleInput.value = this.dataset.title;
+                amountInput.value = this.dataset.amount;
+
+                // Sélectionner la catégorie
+                const categoryName = this.dataset.category;
+                for (let option of categorySelect.options) {
+                    if (option.text === categoryName) {
+                        option.selected = true;
+                        break;
+                    }
+                }
+
+                // Définir le type (revenu ou dépense)
+                isIncomeSwitch.checked = this.dataset.income === 'true';
+
+                updateTransactionType();
+                updateSummary();
+
+                // Animation
+                this.classList.add('is-success');
+                setTimeout(() => {
+                    this.classList.remove('is-success');
+                }, 1000);
+
+                // Scroll vers le formulaire
+                form.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Initialisation
+        updateTransactionType();
+    });
+</script>
+{% endblock %}

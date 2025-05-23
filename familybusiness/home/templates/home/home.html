@@ -13,6 +13,7 @@
         </p>
 
         <div class="columns is-centered">
+            <!-- Carte portefeuille (toujours visible) -->
             <div class="column is-4">
                 <div class="box has-text-centered">
                     <span class="icon is-large has-text-success">
@@ -25,18 +26,22 @@
                     </a>
                 </div>
             </div>
+
+            <!-- Affiché uniquement si admin -->
+            {% if user.is_authenticated and user.role == "admin" %}
             <div class="column is-4">
                 <div class="box has-text-centered">
-                    <span class="icon is-large has-text-info">
-                        <i class="mdi mdi-finance mdi-36px"></i>
+                    <span class="icon is-large has-text-link">
+                        <i class="mdi mdi-shield-account mdi-36px"></i>
                     </span>
-                    <h2 class="title is-5 mt-2">Transactions</h2>
-                    <p>Visualisez vos revenus, dépenses et statistiques financières.</p>
-                    <a href="#" class="button is-info mt-3" disabled>
-                        <i class="mdi mdi-arrow-right-bold mr-1"></i> Bientôt
+                    <h2 class="title is-5 mt-2">Administration</h2>
+                    <p>Gérez les utilisateurs, portefeuilles et paramètres du système.</p>
+                    <a href="#" class="button is-link mt-3">
+                        <i class="mdi mdi-arrow-right-bold mr-1"></i> Accéder
                     </a>
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
 </section>

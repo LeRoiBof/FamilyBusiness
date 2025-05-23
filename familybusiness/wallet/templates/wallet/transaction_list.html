@@ -1,0 +1,469 @@
+{% extends "master.html" %}
+
+{% block head %}
+<style>
+
+.transaction-item:hover {
+    background-color: #fafafa;
+    transition: background-color 0.2s ease;
+}
+
+.transaction-list {
+    scrollbar-width: thin;
+    scrollbar-color: #dbdbdb #f5f5f5;
+}
+
+.transaction-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.transaction-list::-webkit-scrollbar-track {
+    background: #f5f5f5;
+}
+
+.transaction-list::-webkit-scrollbar-thumb {
+    background: #dbdbdb;
+    border-radius: 4px;
+}
+
+.transaction-list::-webkit-scrollbar-thumb:hover {
+    background: #b5b5b5;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <!-- En-tête du portefeuille (repris de wallet_detail) -->
+        <div class="card mb-5">
+            <div class="card-content">
+                <div class="level">
+                    <div class="level-left">
+                        <div class="level-item">
+                            <div>
+                                <h1 class="title is-3 has-text-primary mb-1">{{ wallet.name }}</h1>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="level-right">
+                        <div class="buttons">
+                            <a href="{% url 'wallet:add_transaction' wallet.id %}" class="button is-success">
+                                <span class="icon">
+                                    <i class="mdi mdi-plus"></i>
+                                </span>
+                                <span>Ajouter transaction</span>
+                            </a>
+                            <a href="{% url 'wallet:wallet_detail' wallet.id %}" class="button is-primary is-light">
+                                <span class="icon">
+                                    <i class="mdi mdi-chart-line"></i>
+                                </span>
+                                <span>Tableau de bord</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Indicateurs financiers -->
+                <div class="columns is-multiline mt-4">
+                    <div class="column is-half-tablet is-one-quarter-desktop">
+                        <div class="box has-background-success-light">
+                            <div class="level">
+                                <div class="level-left">
+                                    <div>
+                                        <p class="heading">Solde actuel</p>
+                                        <p class="title is-4 has-text-success">{{ wallet.balance|floatformat:2 }} €</p>
+                                    </div>
+                                </div>
+                                <div class="level-right">
+                                    <span class="icon is-large has-text-success">
+                                        <i class="mdi mdi-wallet mdi-36px"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="column is-half-tablet is-one-quarter-desktop">
+                        <div class="box has-background-info-light">
+                            <div class="level">
+                                <div class="level-left">
+                                    <div>
+                                        <p class="heading">Objectif</p>
+                                        <p class="title is-4 has-text-info">{{ wallet.objective|floatformat:2 }} €</p>
+                                    </div>
+                                </div>
+                                <div class="level-right">
+                                    <span class="icon is-large has-text-info">
+                                        <i class="mdi mdi-target mdi-36px"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="column is-half-tablet is-one-quarter-desktop">
+                        <div class="box has-background-warning-light">
+                            <div class="level">
+                                <div class="level-left">
+                                    <div>
+                                        <p class="heading">Revenus du mois</p>
+                                        <p class="title is-4 has-text-success">{{ monthly_income|floatformat:2 }} €</p>
+                                    </div>
+                                </div>
+                                <div class="level-right">
+                                    <span class="icon is-large has-text-success">
+                                        <i class="mdi mdi-trending-up mdi-36px"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="column is-half-tablet is-one-quarter-desktop">
+                        <div class="box has-background-danger-light">
+                            <div class="level">
+                                <div class="level-left">
+                                    <div>
+                                        <p class="heading">Dépenses du mois</p>
+                                        <p class="title is-4 has-text-danger">{{ monthly_expenses|floatformat:2 }} €</p>
+                                    </div>
+                                </div>
+                                <div class="level-right">
+                                    <span class="icon is-large has-text-danger">
+                                        <i class="mdi mdi-trending-down mdi-36px"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtres et recherche -->
+        <div class="card mb-5">
+            <div class="card-header">
+                <div class="card-header-title">
+                    <span class="icon mr-2">
+                        <i class="mdi mdi-filter"></i>
+                    </span>
+                    Filtres et recherche
+                </div>
+                <div class="card-header-icon">
+                    <button class="button is-small is-light" id="reset-filters">
+                        <span class="icon">
+                            <i class="mdi mdi-refresh"></i>
+                        </span>
+                        <span>Réinitialiser</span>
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <form method="get" id="filter-form">
+                    <div class="columns">
+                        <!-- Recherche -->
+                        <div class="column">
+                            <div class="field">
+                                <label class="label">Recherche</label>
+                                <div class="control has-icons-left">
+                                    <input class="input" type="text" name="search" value="{{ current_search }}" 
+                                           placeholder="Titre ou description...">
+                                    <span class="icon is-small is-left">
+                                        <i class="mdi mdi-magnify"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Type -->
+                        <div class="column">
+                            <div class="field">
+                                <label class="label">Type</label>
+                                <div class="control">
+                                    <div class="select is-fullwidth">
+                                        <select name="type">
+                                            <option value="">Tous les types</option>
+                                            <option value="income" {% if current_type == 'income' %}selected{% endif %}>
+                                                Revenus uniquement
+                                            </option>
+                                            <option value="expense" {% if current_type == 'expense' %}selected{% endif %}>
+                                                Dépenses uniquement
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Catégorie -->
+                        <div class="column">
+                            <div class="field">
+                                <label class="label">Catégorie</label>
+                                <div class="control">
+                                    <div class="select is-fullwidth">
+                                        <select name="category">
+                                            <option value="">Toutes les catégories</option>
+                                            {% for category in categories %}
+                                                <option value="{{ category.id }}" 
+                                                        {% if current_category == category.id|stringformat:"s" %}selected{% endif %}>
+                                                    {{ category.name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Bouton de filtrage -->
+                        <div class="column is-narrow">
+                            <div class="field">
+                                <label class="label">&nbsp;</label>
+                                <div class="control">
+                                    <button type="submit" class="button is-primary">
+                                        <span class="icon">
+                                            <i class="mdi mdi-filter-check"></i>
+                                        </span>
+                                        <span>Filtrer</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- Résumé des filtres actifs -->
+                {% if current_search or current_type or selected_category %}
+                <div class="notification is-light">
+                    <button class="delete" id="clear-filters"></button>
+                    <strong>Filtres actifs :</strong>
+                    {% if current_search %}
+                        <span class="tag is-info ml-2">Recherche: "{{ current_search }}"</span>
+                    {% endif %}
+                    {% if current_type %}
+                        <span class="tag is-success ml-2">
+                            {% if current_type == 'income' %}Revenus{% else %}Dépenses{% endif %}
+                        </span>
+                    {% endif %}
+                    {% if selected_category %}
+                        <span class="tag is-warning ml-2">{{ selected_category.name }}</span>
+                    {% endif %}
+                    <span class="ml-2">{{ transactions|length }} résultat{{ transactions|length|pluralize }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Liste des transactions -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-title">
+                    <span class="icon mr-2">
+                        <i class="mdi mdi-format-list-bulleted"></i>
+                    </span>
+                    Transactions ({{ transactions|length }})
+                </div>
+                <div class="card-header-icon">
+                    <div class="field has-addons">
+                        <div class="control">
+                            <div class="select is-small">
+                                <select id="sort-select">
+                                    <option value="-date">Plus récent</option>
+                                    <option value="date">Plus ancien</option>
+                                    <option value="-amount">Montant décroissant</option>
+                                    <option value="amount">Montant croissant</option>
+                                    <option value="title">Titre A-Z</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-content p-0">
+                {% if transactions %}
+                    <div class="transaction-list">
+                        {% for transaction in transactions %}
+                        <div class="transaction-item p-4 {% if not forloop.last %}border-bottom{% endif %}"
+                             data-date="{{ transaction.date|date:'Y-m-d' }}" 
+                             data-amount="{{ transaction.amount }}" 
+                             data-title="{{ transaction.title|lower }}">
+                            <div class="media">
+                                <div class="media-left">
+                                    <span class="icon is-large {% if transaction.is_income %}has-text-success{% else %}has-text-danger{% endif %}">
+                                        <i class="mdi mdi-36px {% if transaction.is_income %}mdi-plus-circle{% else %}mdi-minus-circle{% endif %}"></i>
+                                    </span>
+                                </div>
+                                <div class="media-content">
+                                    <div class="content">
+                                        <div class="level">
+                                            <div class="level-left">
+                                                <div>
+                                                    <div class="mb-1">
+                                                        <p class="title is-6 mb-1">{{ transaction.title }}</p>
+                                                    </div>
+                                                    <div class="is-flex is-flex-wrap-wrap is-align-items-center is-size-7 has-text-grey mb-2">
+                                                        <span class="tag is-light is-small mr-2 mb-1">{{ transaction.category.name }}</span>
+                                                        <span class="mr-2 mb-1"><i class="mdi mdi-calendar-clock mr-1"></i>{{ transaction.date|date:"d/m/Y à H:i" }}</span>
+                                                        {% if transaction.user %}
+                                                            <span class="mb-1"><i class="mdi mdi-account mr-1"></i>{{ transaction.user.get_full_name }}</span>
+                                                        {% endif %}
+                                                    </div>
+                                                    {% if transaction.description %}
+                                                        <p class="is-size-7 has-text-grey-dark">{{ transaction.description|linebreaks }}</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="level-right">
+                                                <div class="has-text-right">
+                                                    <p class="title is-5 {% if transaction.is_income %}has-text-success{% else %}has-text-danger{% endif %}">
+                                                        {% if transaction.is_income %}+{% else %}-{% endif %}{{ transaction.amount|floatformat:2 }} €
+                                                    </p>
+                                                    <div class="buttons is-right">
+                                                        <a href="{% url 'wallet:edit_transaction' wallet.id transaction.id %}" 
+                                                           class="button is-small is-info is-light" title="Modifier">
+                                                            <span class="icon is-small">
+                                                                <i class="mdi mdi-pencil"></i>
+                                                            </span>
+                                                        </a>
+                                                        <a href="{% url 'wallet:delete_transaction' wallet.id transaction.id %}" 
+                                                           class="button is-small is-danger is-light" title="Supprimer">
+                                                            <span class="icon is-small">
+                                                                <i class="mdi mdi-delete"></i>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="has-text-centered py-6">
+                        <span class="icon is-large has-text-grey-light">
+                            <i class="mdi mdi-48px mdi-file-document-outline"></i>
+                        </span>
+                        <p class="title is-5 has-text-grey">Aucune transaction trouvée</p>
+                        {% if current_search or current_type or current_category %}
+                            <p class="subtitle is-6 has-text-grey">
+                                Essayez de modifier vos filtres ou 
+                                <button class="button is-text is-small" id="clear-all-filters">
+                                    réinitialisez la recherche
+                                </button>
+                            </p>
+                        {% else %}
+                            <p class="subtitle is-6 has-text-grey">
+                                Commencez par ajouter votre première transaction
+                            </p>
+                            <a href="{% url 'wallet:add_transaction' wallet.id %}" class="button is-primary mt-3">
+                                <span class="icon">
+                                    <i class="mdi mdi-plus"></i>
+                                </span>
+                                <span>Ajouter une transaction</span>
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('filter-form');
+    const resetBtn = document.getElementById('reset-filters');
+    const clearFiltersBtn = document.getElementById('clear-filters');
+    const clearAllFiltersBtn = document.getElementById('clear-all-filters');
+    const sortSelect = document.getElementById('sort-select');
+    
+    // Filtrage en temps réel sur la recherche
+    const searchInput = form.querySelector('input[name="search"]');
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            filterTransactions();
+        }, 300);
+    });
+    
+    // Tri des transactions
+    sortSelect.addEventListener('change', function() {
+        sortTransactions(this.value);
+    });
+    
+    // Réinitialiser les filtres
+    function resetFilters() {
+        form.reset();
+        window.location.href = window.location.pathname;
+    }
+    
+    resetBtn.addEventListener('click', resetFilters);
+    if (clearFiltersBtn) clearFiltersBtn.addEventListener('click', resetFilters);
+    if (clearAllFiltersBtn) clearAllFiltersBtn.addEventListener('click', resetFilters);
+    
+    // Filtrage côté client pour la recherche instantanée
+    function filterTransactions() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const transactions = document.querySelectorAll('.transaction-item');
+        let visibleCount = 0;
+        
+        transactions.forEach(transaction => {
+            const title = transaction.querySelector('.title').textContent.toLowerCase();
+            const description = transaction.querySelector('.has-text-grey-dark');
+            const descText = description ? description.textContent.toLowerCase() : '';
+            
+            if (title.includes(searchTerm) || descText.includes(searchTerm)) {
+                transaction.style.display = 'block';
+                visibleCount++;
+            } else {
+                transaction.style.display = 'none';
+            }
+        });
+        
+        // Mettre à jour le compteur
+        const counter = document.querySelector('.card-header-title');
+        counter.innerHTML = `
+            <span class="icon mr-2">
+                <i class="mdi mdi-format-list-bulleted"></i>
+            </span>
+            Transactions (${visibleCount})
+        `;
+    }
+    
+    // Tri des transactions
+    function sortTransactions(sortBy) {
+        const container = document.querySelector('.transaction-list');
+        const transactions = Array.from(container.querySelectorAll('.transaction-item'));
+        
+        transactions.sort((a, b) => {
+            switch(sortBy) {
+                case 'date':
+                    return new Date(a.dataset.date) - new Date(b.dataset.date);
+                case '-date':
+                    return new Date(b.dataset.date) - new Date(a.dataset.date);
+                case 'amount':
+                    return parseFloat(a.dataset.amount) - parseFloat(b.dataset.amount);
+                case '-amount':
+                    return parseFloat(b.dataset.amount) - parseFloat(a.dataset.amount);
+                case 'title':
+                    return a.dataset.title.localeCompare(b.dataset.title);
+                default:
+                    return 0;
+            }
+        });
+        
+        // Réorganiser les éléments
+        transactions.forEach(transaction => {
+            container.appendChild(transaction);
+        });
+    }
+});
+</script>
+{% endblock %}
