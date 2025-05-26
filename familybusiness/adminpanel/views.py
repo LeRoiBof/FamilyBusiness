@@ -194,6 +194,12 @@ def create_user(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Utilisateur créé avec succès.")
+            Event.objects.create(
+                date=now(),
+                content=f"Nouvel utilisateur créé : {form.cleaned_data['first_name']} {form.cleaned_data['last_name']}",
+                user=request.user,
+                type='ADMIN_ACTION'
+            )
             return redirect('adminpanel:user_management')
     else:
         form = UserCreationForm()
@@ -213,17 +219,23 @@ def edit_user(request, user_id):
         return redirect('adminpanel:user_management')
 
     if request.method == 'POST':
-        form = UserEditForm(request.POST, instance=user_to_edit)
+        form = UserEditForm(request.POST, instance=user_to_edit, current_user_id=user_id)
         if form.is_valid():
             form.save()
             messages.success(request, f'Utilisateur {user_to_edit.get_full_name()} modifié avec succès !')
+            Event.objects.create(
+                date=now(),
+                content=f"Utilisateur modifié : {user_to_edit.get_full_name()}",
+                user=request.user,
+                type='ADMIN_ACTION'
+            )
             return redirect('adminpanel:user_management')
         else:
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f"{field} : {error}")
     else:
-        form = UserEditForm(instance=user_to_edit)
+        form = UserEditForm(instance=user_to_edit, current_user_id=user_id)
 
     # Récupérer la dernière connexion de l'utilisateur
     if Event.objects.filter(user=user_to_edit, type='LOGIN').exists():
@@ -262,6 +274,12 @@ def delete_user(request, user_id):
             user_name = user_to_delete.get_full_name()
             user_to_delete.delete()
             messages.success(request, f'Utilisateur {user_name} supprimé avec succès.')
+            Event.objects.create(
+                date=now(),
+                content=f"Utilisateur supprimé : {user_name}",
+                user=request.user,
+                type='ADMIN_ACTION'
+            )
             return redirect('adminpanel:user_management')
         except Exception as e:
             messages.error(request, f'Erreur lors de la suppression : {str(e)}')
@@ -368,9 +386,21 @@ def delete_wallet(request, wallet_id):
 
             messages.success(request,
                              f'Portefeuille "{wallet_name}" et ses {transaction_count} transaction(s) supprimé(s) avec succès.')
+            Event.objects.create(
+                date=now(),
+                content=f"Portefeuille supprimé : {wallet_name}",
+                user=request.user,
+                type='ADMIN_ACTION'
+            )
             return redirect('adminpanel:wallet_management')
         except Exception as e:
             messages.error(request, f'Erreur lors de la suppression : {str(e)}')
+            Event.objects.create(
+                date=now(),
+                content=f"Erreur lors de la suppression du portefeuille {wallet.name}: {str(e)}",
+                user=request.user,
+                type='ERROR'
+            )
 
     # Informations sur l'impact de la suppression
     transactions = wallet.transactions.all()
@@ -396,6 +426,12 @@ def export_transactions_csv(request, wallet_id):
     # Optionnel : vérifier les permissions (admin uniquement)
     if not request.user.is_staff:
         messages.error(request, "Vous n'avez pas la permission d'exporter les transactions.")
+        Event.objects.create(
+            date=now(),
+            content=f"Tentative d'export de transactions par {request.user.get_full_name()} pour le portefeuille {wallet.name} sans permission.",
+            user=request.user,
+            type='ERROR'
+        )
         return redirect('adminpanel:wallet_management')
 
     transactions = Transaction.objects.filter(wallet=wallet).order_by('date')
@@ -415,6 +451,13 @@ def export_transactions_csv(request, wallet_id):
             'Revenu' if transaction.is_income else 'Dépense',
             transaction.user.get_full_name() if transaction.user else 'Inconnu'
         ])
+
+    Event.objects.create(
+        date=now(),
+        content=f"Export des transactions du portefeuille {wallet.name} par {request.user.get_full_name()}",
+        user=request.user,
+        type='ADMIN_ACTION'
+    )
 
     return response
 
@@ -501,6 +544,12 @@ def create_category(request):
             else:
                 category = form.save()
                 messages.success(request, f'Catégorie "{category.name}" créée avec succès !')
+                Event.objects.create(
+                    date=now(),
+                    content=f"Nouvelle catégorie créée : {category.name}",
+                    user=request.user,
+                    type='ADMIN_ACTION'
+                )
                 return redirect('adminpanel:category_management')
         else:
             messages.error(request, 'Veuillez corriger les erreurs du formulaire.')
@@ -534,6 +583,12 @@ def edit_category(request, category_id):
                 old_name = category.name
                 category = form.save()
                 messages.success(request, f'Catégorie modifiée : "{old_name}" → "{category.name}"')
+                Event.objects.create(
+                    date=now(),
+                    content=f"Catégorie modifiée : {old_name} → {category.name}",
+                    user=request.user,
+                    type='ADMIN_ACTION'
+                )
                 return redirect('adminpanel:category_management')
         else:
             messages.error(request, 'Veuillez corriger les erreurs du formulaire.')
@@ -566,6 +621,12 @@ def delete_category(request, category_id):
 
                 messages.success(request,
                                  f'Catégorie "{category_name}" et ses {transaction_count} transaction(s) supprimée(s) avec succès.')
+                Event.objects.create(
+                    date=now(),
+                    content=f"Catégorie supprimée : {category_name}",
+                    user=request.user,
+                    type='ADMIN_ACTION'
+                )
                 return redirect('adminpanel:category_management')
             except Exception as e:
                 messages.error(request, f'Erreur lors de la suppression : {str(e)}')

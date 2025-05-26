@@ -94,6 +94,10 @@ class UserEditForm(forms.ModelForm):
             'is_active': forms.CheckboxInput(attrs={'class': 'checkbox'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        self.current_user_id = kwargs.pop('current_user_id', None)
+        super().__init__(*args, **kwargs)
+
     def clean_email(self):
         email = self.cleaned_data.get('email')
         existing_user = Account.objects.filter(email=email).exclude(id=self.current_user_id).first()
