@@ -1,0 +1,66 @@
+{% extends "master.html" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <!-- En-tête -->
+        <div class="mb-5">
+            <h1 class="title is-3 mb-1">Créer un utilisateur</h1>
+            <p class="subtitle is-6 has-text-grey mt-1">Ajouter un nouveau compte utilisateur</p>
+        </div>
+
+        <!-- Formulaire -->
+        <div class="columns is-centered">
+            <div class="column is-half-tablet is-one-third-desktop">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <span class="icon mr-2">
+                                <i class="mdi mdi-account-plus"></i>
+                            </span>
+                            Nouveau compte utilisateur
+                        </div>
+                    </div>
+
+                    <div class="card-content">
+                        <form method="post" id="createUserForm">
+                            {% csrf_token %}
+                            {% for field in form %}
+                                <div class="field">
+                                    <label class="label">{{ field.label }}</label>
+                                    <div class="control">
+                                        {{ field }}
+                                    </div>
+                                    {% if field.errors %}
+                                        <p class="help is-danger">
+                                            {% for error in field.errors %}
+                                                {{ error }}<br>
+                                            {% endfor %}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+
+                            <div class="field is-grouped is-grouped-right mt-4">
+                                <div class="control">
+                                    <a href="{% url 'adminpanel:user_management' %}" class="button is-light">
+                                        <span class="icon">
+                                            <i class="mdi mdi-close"></i>
+                                        </span>
+                                        <span>Annuler</span>
+                                    </a>
+                                </div>
+                                <div class="control">
+                                    <button type="submit" class="button is-success ml-2" id="submit-btn">
+                                        <i class="mdi mdi-account-plus mr-1"></i> Créer l'utilisateur
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

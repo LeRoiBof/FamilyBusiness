@@ -1,0 +1,126 @@
+{% extends "master.html" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <!-- En-tête -->
+        <div class="level mb-5">
+            <div class="level-left">
+                <div class="level-item">
+                    <div>
+                        <h1 class="title is-3 has-text-danger">Supprimer la catégorie</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="columns is-centered">
+            <div class="column is-half-tablet is-two-thirds-desktop">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title has-text-danger">
+                            <span class="icon mr-2">
+                                <i class="mdi mdi-delete"></i>
+                            </span>
+                            Confirmation de suppression
+                        </div>
+                    </div>
+
+                    <div class="card-content">
+                        <!-- Infos catégorie -->
+                        <div class="notification is-light mb-5">
+                            <div class="media">
+                                <div class="media-left">
+                                    <span class="icon is-large has-text-warning">
+                                        <i class="mdi mdi-48px mdi-tag"></i>
+                                    </span>
+                                </div>
+                                <div class="media-content">
+                                    <p class="title is-4">{{ category.name }}</p>
+                                    <div class="tags">
+                                        {% if impact_info.transaction_count > 0 %}
+                                            <span class="tag is-warning">
+                                                <i class="mdi mdi-cash mr-1"></i>{{ impact_info.transaction_count }} transaction{{ impact_info.transaction_count|pluralize }}
+                                            </span>
+                                            <span class="tag is-info">
+                                                <i class="mdi mdi-wallet mr-1"></i>{{ impact_info.wallets_affected }} portefeuille{{ impact_info.wallets_affected|pluralize }}
+                                            </span>
+                                        {% else %}
+                                            <span class="tag is-light">
+                                                <i class="mdi mdi-minus"></i> Catégorie inutilisée
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if impact_info.transaction_count > 0 %}
+                            <div class="notification is-danger is-light">
+                                <p><strong><i class="mdi mdi-alert-circle"></i> Attention :</strong> Cette action supprimera également toutes les transactions associées !</p>
+                                <ul class="mt-3">
+                                    <li><strong>{{ impact_info.transaction_count }}</strong> transaction{{ impact_info.transaction_count|pluralize }} supprimée{{ impact_info.transaction_count|pluralize }}</li>
+                                    <li>Historique financier de {{ impact_info.wallets_affected }} portefeuille{{ impact_info.wallets_affected|pluralize }}</li>
+                                    <li>Action <strong>irréversible</strong></li>
+                                </ul>
+                            </div>
+                        {% else %}
+                            <div class="notification is-info">
+                                <p><strong>Bonne nouvelle !</strong> Cette catégorie n'est utilisée dans aucune transaction.</p>
+                                <p>Vous pouvez la supprimer sans impact.</p>
+                            </div>
+                        {% endif %}
+
+                        <!-- Formulaire -->
+                        <form method="post" class="mt-4">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete">
+                            <div class="field is-grouped is-grouped-right">
+                                <div class="control">
+                                    <a href="{% url 'adminpanel:category_management' %}" class="button is-light is-medium">
+                                        <i class="mdi mdi-cancel"></i> Annuler
+                                    </a>
+                                </div>
+                                <div class="control">
+                                    <button type="submit" class="button is-danger is-medium">
+                                        <i class="mdi mdi-delete mr-1"></i> Supprimer la catégorie
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- Transactions récentes -->
+                        {% if impact_info.transaction_count > 0 and impact_info.recent_transactions %}
+                        <div class="mt-6">
+                            <h2 class="subtitle is-5 mb-3">
+                                <i class="mdi mdi-clock-outline mr-1"></i>
+                                Transactions récentes utilisant cette catégorie
+                            </h2>
+                            {% for transaction in impact_info.recent_transactions %}
+                                <div class="media mb-2">
+                                    <div class="media-left">
+                                        <span class="icon {% if transaction.is_income %}has-text-success{% else %}has-text-danger{% endif %}">
+                                            <i class="mdi {% if transaction.is_income %}mdi-plus-circle{% else %}mdi-minus-circle{% endif %}"></i>
+                                        </span>
+                                    </div>
+                                    <div class="media-content">
+                                        <p class="mb-0"><strong>{{ transaction.title }}</strong></p>
+                                        <p class="is-size-7 has-text-grey">
+                                            {{ transaction.date|date:"d/m/Y" }} —
+                                            <span class="{% if transaction.is_income %}has-text-success{% else %}has-text-danger{% endif %}">
+                                                {% if transaction.is_income %}+{% else %}-{% endif %}{{ transaction.amount|floatformat:2 }} €
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                                {% if not forloop.last %}<hr class="my-2">{% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

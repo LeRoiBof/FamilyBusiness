@@ -1,0 +1,137 @@
+{% extends "master.html" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <!-- En-tête -->
+        <div class="level mb-5">
+            <div class="level-left">
+                <div class="level-item">
+                    <div>
+                        <h1 class="title is-3 mb-1">Modifier l'utilisateur</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="columns">
+            <!-- Formulaire -->
+            <div class="column is-two-thirds">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <span class="icon mr-2"><i class="mdi mdi-account-edit"></i></span>
+                            Modifier les informations
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <form method="post" id="editUserForm">
+                            {% csrf_token %}
+                            {% for field in form %}
+                                <div class="field">
+                                    <label class="label">{{ field.label }}</label>
+                                    <div class="control">
+                                        {{ field }}
+                                    </div>
+                                    {% if field.errors %}
+                                        <p class="help is-danger">
+                                            {% for error in field.errors %}
+                                                {{ error }}<br>
+                                            {% endfor %}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+
+                            <div class="field is-grouped is-grouped-right">
+                                <div class="control">
+                                    <a href="{% url 'adminpanel:user_management' %}" class="button is-light is-medium">
+                                        <i class="mdi mdi-close mr-1"></i> Annuler
+                                    </a>
+                                </div>
+                                <div class="control">
+                                    <button type="submit" class="button is-primary is-medium" id="submit_btn">
+                                        <span class="icon"><i class="mdi mdi-content-save"></i></span>
+                                        <span>Enregistrer les modifications</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profil utilisateur (aperçu) -->
+            <div class="column is-one-third">
+                <div class="card mb-5">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <span class="icon mr-2"><i class="mdi mdi-account-details"></i></span>
+                            Informations actuelles
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="media">
+                            <div class="media-left">
+                                <span class="icon is-large {% if user_to_edit.is_staff %}has-text-warning{% else %}has-text-primary{% endif %}">
+                                    <i class="mdi mdi-48px {% if user_to_edit.is_staff %}mdi-shield-account{% else %}mdi-account{% endif %}"></i>
+                                </span>
+                            </div>
+                            <div class="media-content">
+                                <p class="title is-5">{{ user_to_edit.get_full_name }}</p>
+                                <p class="subtitle is-6">{{ user_to_edit.email }}</p>
+                                <div class="tags">
+                                    {% if user_to_edit.is_staff %}
+                                        <span class="tag is-warning"><i class="mdi mdi-shield mr-1"></i> Admin</span>
+                                    {% else %}
+                                        <span class="tag is-light">{{ user_to_edit.role|default:"Utilisateur"|capfirst }}</span>
+                                    {% endif %}
+
+                                    {% if user_to_edit.is_active %}
+                                        <span class="tag is-success">Actif</span>
+                                    {% else %}
+                                        <span class="tag is-danger">Inactif</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="content mt-4">
+                            <p><strong>Inscrit le :</strong> {{ user_to_edit.date_joined|date:"d/m/Y à H:i" }}</p>
+                            <p><strong>Dernière connexion :</strong>
+                                {% if user_to_edit.last_login %}
+                                    {{ user_to_edit.last_login|date:"d/m/Y à H:i" }}
+                                {% else %}
+                                    Jamais connecté
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions supplémentaires -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <span class="icon mr-2"><i class="mdi mdi-cog"></i></span>
+                            Actions supplémentaires
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="buttons is-fullwidth">
+                            <button class="button is-info is-light is-fullwidth" id="reset_password_btn">
+                                <i class="mdi mdi-key-change mr-1"></i> Réinitialiser le mot de passe
+                            </button>
+                            {% if user_to_edit != user %}
+                                <a href="{% url 'adminpanel:delete_user' user_to_edit.id %}"
+                                   class="button is-danger is-light is-fullwidth">
+                                    <i class="mdi mdi-account-remove mr-1"></i> Supprimer l'utilisateur
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

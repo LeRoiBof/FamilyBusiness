@@ -40,7 +40,7 @@
 
                 <!-- Gestion Utilisateurs -->
                 <div class="column is-12-mobile is-half-tablet is-one-quarter-desktop">
-                    <a href="#" class="card admin-card">
+                    <a href="{% url 'adminpanel:user_management' %}" class="card admin-card">
                         <div class="card-content has-text-centered">
                         <span class="icon is-size-1 has-text-success mb-4">
                             <i class="mdi mdi-account-group mdi-48px"></i>
@@ -55,7 +55,7 @@
 
                 <!-- Gestion Portefeuilles -->
                 <div class="column is-12-mobile is-half-tablet is-one-quarter-desktop">
-                    <a href="#" class="card admin-card">
+                    <a href="{% url 'adminpanel:wallet_management' %}" class="card admin-card">
                         <div class="card-content has-text-centered">
                         <span class="icon is-size-1 has-text-warning mb-4">
                             <i class="mdi mdi-wallet mdi-48px"></i>
@@ -70,7 +70,7 @@
 
                 <!-- Gestion Catégories -->
                 <div class="column is-12-mobile is-half-tablet is-one-quarter-desktop">
-                    <a href="#" class="card admin-card">
+                    <a href="{% url 'adminpanel:category_management' %}" class="card admin-card">
                         <div class="card-content has-text-centered">
                         <span class="icon is-size-1 has-text-danger mb-4">
                             <i class="mdi mdi-tag mdi-48px"></i>

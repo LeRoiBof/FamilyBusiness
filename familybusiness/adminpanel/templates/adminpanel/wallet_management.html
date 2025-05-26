@@ -1,0 +1,351 @@
+{% extends "master.html" %}
+
+{% block head %}
+<style>
+    .tight-progress {
+        margin-bottom: 0 !important;
+        line-height: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <!-- En-tête -->
+        <div class="level mb-5">
+            <div class="level-left">
+                <div class="level-item">
+                    <div>
+                        <h1 class="title is-3 mb-1">Gestion des portefeuilles</h1>
+                        <p class="subtitle is-5 has-text-grey mt-1">Administration des portefeuilles et transactions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="buttons">
+                    <a href="{% url 'adminpanel:admin_panel' %}" class="button is-light">
+                        <span class="icon">
+                            <i class="mdi mdi-arrow-left"></i>
+                        </span>
+                        <span>Retour au panel</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="card mb-5">
+            <div class="card-header">
+                <div class="card-header-title">
+                    <span class="icon mr-2">
+                        <i class="mdi mdi-filter"></i>
+                    </span>
+                    Filtres et recherche
+                </div>
+                <div class="card-header-icon">
+                    <button class="button is-small is-light" id="resetFilters">
+                        <span class="icon">
+                            <i class="mdi mdi-refresh"></i>
+                        </span>
+                        <span>Réinitialiser</span>
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <form method="get" id="filterForm">
+                    <div class="columns">
+                        <!-- Recherche -->
+                        <div class="column">
+                            <div class="field">
+                                <label class="label">Recherche</label>
+                                <div class="control has-icons-left">
+                                    <input class="input" type="text" name="search" value="{{ current_search }}"
+                                           placeholder="Nom, propriétaire...">
+                                    <span class="icon is-small is-left">
+                                        <i class="mdi mdi-magnify"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Propriétaire -->
+                        <div class="column">
+                            <div class="field">
+                                <label class="label">Propriétaire</label>
+                                <div class="control">
+                                    <div class="select is-fullwidth">
+                                        <select name="owner">
+                                            <option value="">Tous les propriétaires</option>
+                                            {% for owner in wallet_owners %}
+                                                <option value="{{ owner.id }}" {% if current_owner == owner.id|stringformat:"s" %}selected{% endif %}>
+                                                    {{ owner.get_full_name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bouton de filtrage -->
+                        <div class="column is-narrow">
+                            <div class="field">
+                                <label class="label">&nbsp;</label>
+                                <div class="control">
+                                    <button type="submit" class="button is-primary">
+                                        <span class="icon">
+                                            <i class="mdi mdi-filter-check"></i>
+                                        </span>
+                                        <span>Filtrer</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Résumé des filtres actifs -->
+                {% if current_search or current_owner or current_balance_range %}
+                <div class="notification is-light">
+                    <button class="delete" id="clearFilters"></button>
+                    <strong>Filtres actifs :</strong>
+                    {% if current_search %}
+                        <span class="tag is-info ml-2">Recherche: "{{ current_search }}"</span>
+                    {% endif %}
+                    {% if current_owner %}
+                        <span class="tag is-success ml-2">Propriétaire filtré</span>
+                    {% endif %}
+                    <span class="ml-2">{{ filtered_count }} résultat{{ filtered_count|pluralize }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Liste des portefeuilles -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-title">
+                    <span class="icon mr-2">
+                        <i class="mdi mdi-wallet"></i>
+                    </span>
+                    Portefeuilles ({{ filtered_count }})
+                </div>
+                <div class="card-header-icon">
+                    {% if page_obj.has_other_pages %}
+                        <span class="tag is-light">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card-content p-0">
+                {% if wallets_with_stats %}
+                    <div class="table-container">
+                        <table class="table is-fullwidth is-hoverable">
+                            <thead>
+                                <tr>
+                                    <th>Portefeuille</th>
+                                    <th>Propriétaire</th>
+                                    <th>Solde</th>
+                                    <th>Objectif</th>
+                                    <th>Progression</th>
+                                    <th>Statistiques</th>
+                                    <th>Dernière activité</th>
+                                    <th class="has-text-centered">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for wallet_data in wallets_with_stats %}
+                                <tr>
+                                    <td>
+                                        <div class="media">
+                                            <div class="media-left">
+                                                <span class="icon is-large {% if wallet_data.is_shared %}has-text-info{% else %}has-text-primary{% endif %}">
+                                                    <i class="mdi mdi-36px {% if wallet_data.is_shared %}mdi-wallet-membership{% else %}mdi-wallet{% endif %}"></i>
+                                                </span>
+                                            </div>
+                                            <div class="media-content">
+                                                <p class="title is-6 mb-1 has-text-dark">
+                                                    {{ wallet_data.wallet.name }}
+                                                </p>
+                                                <div class="tags">
+                                                    {% if wallet_data.is_shared %}
+                                                        <span class="tag is-info is-small">
+                                                            <span class="icon is-small">
+                                                                <i class="mdi mdi-account-group"></i>
+                                                            </span>
+                                                            <span>Partagé</span>
+                                                        </span>
+                                                    {% endif %}
+                                                    {% if not wallet_data.is_active %}
+                                                        <span class="tag is-light is-small">Inactif</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="content">
+                                            <p class="has-text-weight-semibold mb-0">{{ wallet_data.wallet.owner.get_full_name }}</p>
+                                            <p class="is-size-7 has-text-grey mt-1">{{ wallet_data.wallet.owner.email }}</p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="title is-6 {% if wallet_data.wallet.balance > 0 %}has-text-success{% else %}has-text-grey{% endif %}">
+                                            {{ wallet_data.wallet.balance|floatformat:2 }} €
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="has-text-info">{{ wallet_data.wallet.objective|floatformat:2 }} €</span>
+                                    </td>
+                                    <td>
+                                        {% if wallet_data.wallet.objective > 0 %}
+                                            <div class="mt-0 mb-0">
+                                                <p class="is-size-7 has-text-centered">{{ wallet_data.progress|floatformat:1 }}%</p>
+                                                <progress class="progress is-small {% if wallet_data.progress >= 100 %}is-success{% elif wallet_data.progress >= 50 %}is-warning{% else %}is-danger{% endif %}"
+                                                          value="{{ wallet_data.progress }}" max="100">
+                                                    {{ wallet_data.progress|floatformat:1 }}%
+                                                </progress>
+                                            </div>
+                                        {% else %}
+                                            <span class="has-text-grey">Aucun objectif</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="content is-small">
+                                            <p class="mb-1">
+                                                <span class="icon is-small has-text-info">
+                                                    <i class="mdi mdi-account-group"></i>
+                                                </span>
+                                                {{ wallet_data.user_count }} utilisateur{{ wallet_data.user_count|pluralize }}
+                                            </p>
+                                            <p class="mb-0">
+                                                <span class="icon is-small has-text-success">
+                                                    <i class="mdi mdi-cash"></i>
+                                                </span>
+                                                {{ wallet_data.transaction_count }} transaction{{ wallet_data.transaction_count|pluralize }}
+                                            </p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if wallet_data.last_transaction %}
+                                            <div class="content">
+                                                <p class="is-size-7">{{ wallet_data.last_transaction.date|date:"d/m/Y" }}</p>
+                                                <p class="is-size-7 has-text-grey">{{ wallet_data.last_transaction.title|truncatechars:20 }}</p>
+                                            </div>
+                                        {% else %}
+                                            <span class="has-text-grey-light">Aucune</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="has-text-centered">
+                                        <div class="buttons is-centered">
+                                            <a href="{% url 'adminpanel:delete_wallet' wallet_data.wallet.id %}"
+                                               class="button is-small is-danger is-light" title="Supprimer">
+                                                <span class="icon is-small">
+                                                    <i class="mdi mdi-delete"></i>
+                                                </span>
+                                            </a>
+
+                                            {% if wallet_data.transaction_count > 0 %}
+                                            <a href="{% url 'adminpanel:export_transactions_csv' wallet_data.wallet.id %}"
+                                               class="button is-small is-info is-light" title="Exporter les transactions CSV">
+                                                <span class="icon is-small"><i class="mdi mdi-file-export"></i></span>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="has-text-centered py-6">
+                        <span class="icon is-large has-text-grey-light">
+                            <i class="mdi mdi-48px mdi-wallet"></i>
+                        </span>
+                        <p class="title is-5 has-text-grey">Aucun portefeuille trouvé</p>
+                        {% if current_search or current_owner or current_balance_range %}
+                            <p class="subtitle is-6 has-text-grey">
+                                Essayez de modifier vos filtres
+                            </p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav class="pagination is-centered mt-5" role="navigation">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_owner %}&owner={{ current_owner }}{% endif %}{% if current_balance_range %}&balance_range={{ current_balance_range }}{% endif %}"
+                   class="pagination-previous">Précédent</a>
+            {% else %}
+                <a class="pagination-previous" disabled>Précédent</a>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_owner %}&owner={{ current_owner }}{% endif %}{% if current_balance_range %}&balance_range={{ current_balance_range }}{% endif %}"
+                   class="pagination-next">Suivant</a>
+            {% else %}
+                <a class="pagination-next" disabled>Suivant</a>
+            {% endif %}
+
+            <ul class="pagination-list">
+                {% for page_num in page_obj.paginator.page_range %}
+                    {% if page_num == page_obj.number %}
+                        <li><a class="pagination-link is-current">{{ page_num }}</a></li>
+                    {% elif page_num == 1 or page_num == page_obj.paginator.num_pages or page_num >= page_obj.number|add:'-2' and page_num <= page_obj.number|add:'2' %}
+                        <li>
+                            <a href="?page={{ page_num }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_owner %}&owner={{ current_owner }}{% endif %}{% if current_balance_range %}&balance_range={{ current_balance_range }}{% endif %}"
+                               class="pagination-link">{{ page_num }}</a>
+                        </li>
+                    {% elif page_num == 2 or page_num == page_obj.paginator.num_pages|add:'-1' %}
+                        <li><span class="pagination-ellipsis">&hellip;</span></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('filterForm');
+    const resetBtn = document.getElementById('resetFilters');
+    const clearFiltersBtn = document.getElementById('clearFilters');
+    const clearAllFiltersBtn = document.getElementById('clearAllFilters');
+
+    // Réinitialiser les filtres
+    function resetFilters() {
+        form.reset();
+        window.location.href = window.location.pathname;
+    }
+
+    resetBtn.addEventListener('click', resetFilters);
+    if (clearFiltersBtn) clearFiltersBtn.addEventListener('click', resetFilters);
+    if (clearAllFiltersBtn) clearAllFiltersBtn.addEventListener('click', resetFilters);
+
+    // Auto-submit sur changement de filtre
+    form.addEventListener('change', function(e) {
+        if (e.target.type === 'select-one') {
+            form.submit();
+        }
+    });
+
+    // Animation des barres de progression
+    const progressBars = document.querySelectorAll('.progress');
+    progressBars.forEach(bar => {
+        const value = bar.getAttribute('value');
+        bar.style.width = '0%';
+        bar.style.transition = 'width 1s ease';
+
+        setTimeout(() => {
+            bar.style.width = '100%';
+        }, 100);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends "master.html" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <!-- En-tête -->
+        <div class="level mb-5">
+            <div class="level-left">
+                <div class="level-item">
+                    <div>
+                        <h1 class="title is-3 mb-1">Modifier la catégorie</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    <a href="{% url 'adminpanel:category_management' %}" class="button is-light">
+                        <span class="icon">
+                            <i class="mdi mdi-arrow-left"></i>
+                        </span>
+                        <span>Retour à la liste</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="columns is-centered">
+            <div class="column is-half">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <span class="icon mr-2">
+                                <i class="mdi mdi-tag-edit"></i>
+                            </span>
+                            Modifier les informations
+                        </div>
+                    </div>
+
+                    <div class="card-content">
+                        <form method="post" id="editCategoryForm">
+                            {% csrf_token %}
+
+                            <!-- Nom de la catégorie -->
+                            <div class="field">
+                                <label class="label">{{ form.name.label }}</label>
+                                <div class="control has-icons-left has-icons-right">
+                                    {{ form.name }}
+                                    <span class="icon is-small is-left">
+                                        <i class="mdi mdi-tag"></i>
+                                    </span>
+                                    <span class="icon is-small is-right has-text-success" id="nameIcon" style="display: none;">
+                                        <i class="mdi mdi-check"></i>
+                                    </span>
+                                </div>
+                                {% if form.name.errors %}
+                                    {% for error in form.name.errors %}
+                                        <p class="help is-danger">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <!-- Aperçu des modifications -->
+                            <div class="notification is-light" id="changePreview" style="display: none;">
+                                <div class="content">
+                                    <p class="title is-6">Aperçu des modifications</p>
+                                    <div class="level">
+                                        <div class="level-left">
+                                            <div>
+                                                <p class="heading">Nom actuel</p>
+                                                <p class="title is-6">{{ category.name }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="level-item">
+                                            <span class="icon is-large has-text-info">
+                                                <i class="mdi mdi-arrow-right mdi-36px"></i>
+                                            </span>
+                                        </div>
+                                        <div class="level-right">
+                                            <div>
+                                                <p class="heading">Nouveau nom</p>
+                                                <p class="title is-6" id="previewNewName"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Boutons -->
+                            <div class="field is-grouped is-grouped-right mt-5">
+                                <div class="control">
+                                    <a href="{% url 'adminpanel:category_management' %}" class="button is-light is-medium">
+                                        Annuler
+                                    </a>
+                                </div>
+                                <div class="control">
+                                    <button type="submit" class="button is-primary is-medium" id="submitBtn">
+                                        <span class="icon">
+                                            <i class="mdi mdi-content-save"></i>
+                                        </span>
+                                        <span>Enregistrer les modifications</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('editCategoryForm');
+    const nameInput = document.querySelector('input[name="name"]');
+    const nameIcon = document.getElementById('nameIcon');
+    const changePreview = document.getElementById('changePreview');
+    const previewNewName = document.getElementById('previewNewName');
+    const submitBtn = document.getElementById('submitBtn');
+    const originalName = "{{ category.name }}";
+    
+    // Validation du nom en temps réel
+    nameInput.addEventListener('input', function() {
+        const value = this.value.trim();
+        
+        if (value !== originalName) {
+            this.classList.add('is-success');
+            this.classList.remove('is-danger');
+            updatePreview(value);
+            
+            // Changer le bouton pour indiquer qu'il y a des modifications
+            submitBtn.classList.remove('is-light');
+            submitBtn.classList.add('is-primary');
+            submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-content-save"></i></span><span>Enregistrer les modifications</span>';
+        } else if (value === originalName) {
+            this.classList.remove('is-success', 'is-danger');
+            changePreview.style.display = 'none';
+            
+            // Bouton en mode "pas de changement"
+            submitBtn.classList.add('is-light');
+            submitBtn.classList.remove('is-primary');
+            submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-information"></i></span><span>Aucun changement</span>';
+        } else {
+            this.classList.remove('is-success');
+            if (value.length > 0) {
+                this.classList.add('is-danger');
+            }
+            changePreview.style.display = 'none';
+        }
+    });
+    
+    // Mise à jour de l'aperçu des modifications
+    function updatePreview(newName) {
+        if (newName && newName !== originalName) {
+            previewNewName.textContent = newName;
+            changePreview.style.display = 'block';
+        } else {
+            changePreview.style.display = 'none';
+        }
+    }
+});
+</script>
+{% endblock %}

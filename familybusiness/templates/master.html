@@ -102,6 +102,26 @@
             transform: scale(0.95);
         }
 
+        #messages-container {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 9999;
+            width: 400px;
+        }
+
+        .notification.toast {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .notification.toast.fade-out {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.0.1"></script>
@@ -191,30 +211,31 @@
     </nav>
 
     {% if messages %}
-        <div id="messages-container" class="container mt-4">
+        <div id="messages-container">
             {% for message in messages %}
-                <div class="notification
+                <div class="notification toast
                 {% if message.tags == 'success' %}is-success
                 {% elif message.tags == 'error' or message.tags == 'danger' %}is-danger
                 {% elif message.tags == 'warning' %}is-warning
                 {% else %}is-info{% endif %}">
                     <button class="delete"></button>
                     <span class="icon mr-2">
-            {% if message.tags == 'success' %}
-                <i class="mdi mdi-check-circle-outline"></i>
-            {% elif message.tags == 'error' or message.tags == 'danger' %}
-                <i class="mdi mdi-alert-circle-outline"></i>
-            {% elif message.tags == 'warning' %}
-                <i class="mdi mdi-alert-outline"></i>
-            {% else %}
-                <i class="mdi mdi-information-outline"></i>
-            {% endif %}
-        </span>
+                        {% if message.tags == 'success' %}
+                            <i class="mdi mdi-check-circle-outline"></i>
+                        {% elif message.tags == 'error' or message.tags == 'danger' %}
+                            <i class="mdi mdi-alert-circle-outline"></i>
+                        {% elif message.tags == 'warning' %}
+                            <i class="mdi mdi-alert-outline"></i>
+                        {% else %}
+                            <i class="mdi mdi-information-outline"></i>
+                        {% endif %}
+                    </span>
                     {{ message }}
                 </div>
             {% endfor %}
         </div>
     {% endif %}
+
 
     <!-- JS pour le burger menu -->
     <script>
@@ -272,12 +293,16 @@
                 }
             }
 
-            // Auto-dismiss after 5s
-            document.querySelectorAll('.notification').forEach((notif) => {
+            // Auto-dismiss after 5s with fade out
+            document.querySelectorAll('.notification.toast:not(.no-dismiss)').forEach((notif) => {
                 setTimeout(() => {
-                    notif.classList.add('is-hidden');
+                    notif.classList.add('fade-out');
+                    setTimeout(() => {
+                        notif.remove();
+                    }, 500); // le temps du fade-out
                 }, 5000);
             });
+
 
             // Manual dismiss
             document.querySelectorAll('.notification .delete').forEach(($delete) => {

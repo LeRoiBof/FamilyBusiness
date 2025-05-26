@@ -45,11 +45,11 @@ def login_view(request):
     return render(request, 'account/login.html', {'form': form})
 
 def logout_view(request):
-    logout(request)
     Event.objects.create(
         date=date.today(),
         content=f"Déconnexion de {request.user.first_name} {request.user.last_name}",
         user=request.user,
         type='LOGOUT'
     )
+    logout(request)
     return redirect('account:login')

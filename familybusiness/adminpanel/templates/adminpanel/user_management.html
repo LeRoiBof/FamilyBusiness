@@ -1,0 +1,411 @@
+{% extends "master.html" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <!-- En-tête -->
+        <div class="level mb-5">
+            <div class="level-left">
+                <div class="level-item">
+                    <div>
+                        <h1 class="title is-3 mb-1">Gestion des utilisateurs</h1>
+                        <p class="subtitle is-6 has-text-grey-light mt-1">
+                            Administration des comptes utilisateurs
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="buttons">
+                    <a href="{% url 'adminpanel:create_user' %}" class="button is-success">
+                        <span class="icon">
+                            <i class="mdi mdi-account-plus"></i>
+                        </span>
+                        <span>Créer un utilisateur</span>
+                    </a>
+                    <a href="{% url 'adminpanel:admin_panel' %}" class="button is-light">
+                        <span class="icon">
+                            <i class="mdi mdi-arrow-left"></i>
+                        </span>
+                        <span>Retour au panel</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="columns mb-5">
+            <div class="column">
+                <div class="box has-background-primary-light">
+                    <div class="level">
+                        <div class="level-left">
+                            <div>
+                                <p class="heading">Total utilisateurs</p>
+                                <p class="title is-4 has-text-primary">{{ total_users }}</p>
+                            </div>
+                        </div>
+                        <div class="level-right">
+                            <span class="icon is-large has-text-primary">
+                                <i class="mdi mdi-account-group mdi-36px"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="box has-background-success-light">
+                    <div class="level">
+                        <div class="level-left">
+                            <div>
+                                <p class="heading">Utilisateurs actifs</p>
+                                <p class="title is-4 has-text-success">{{ active_users }}</p>
+                            </div>
+                        </div>
+                        <div class="level-right">
+                            <span class="icon is-large has-text-success">
+                                <i class="mdi mdi-account-check mdi-36px"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="box has-background-warning-light">
+                    <div class="level">
+                        <div class="level-left">
+                            <div>
+                                <p class="heading">Administrateurs</p>
+                                <p class="title is-4 has-text-warning">{{ admin_users }}</p>
+                            </div>
+                        </div>
+                        <div class="level-right">
+                            <span class="icon is-large has-text-warning">
+                                <i class="mdi mdi-shield-account mdi-36px"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="card mb-5">
+            <div class="card-header">
+                <div class="card-header-title">
+                    <span class="icon mr-2">
+                        <i class="mdi mdi-filter"></i>
+                    </span>
+                    Filtres et recherche
+                </div>
+                <div class="card-header-icon">
+                    <button class="button is-small is-light" id="reset-filters">
+                        <span class="icon">
+                            <i class="mdi mdi-refresh"></i>
+                        </span>
+                        <span>Réinitialiser</span>
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <form method="get" id="filter-form">
+                    <div class="columns">
+                        <!-- Recherche -->
+                        <div class="column">
+                            <div class="field">
+                                <label class="label">Recherche</label>
+                                <div class="control has-icons-left">
+                                    <input class="input" type="text" name="search" value="{{ current_search }}"
+                                           placeholder="Nom, prénom, email...">
+                                    <span class="icon is-small is-left">
+                                        <i class="mdi mdi-magnify"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rôle -->
+                        <div class="column">
+                            <div class="field">
+                                <label class="label">Rôle</label>
+                                <div class="control">
+                                    <div class="select is-fullwidth">
+                                        <select name="role">
+                                            <option value="">Tous les rôles</option>
+                                            <option value="admin" {% if current_role == 'admin' %}selected{% endif %}>
+                                                Administrateur
+                                            </option>
+                                            <option value="user" {% if current_role == 'user' %}selected{% endif %}>
+                                                Utilisateur
+                                            </option>
+                                            {% for role in available_roles %}
+                                                <option value="{{ role }}" {% if current_role == role %}selected{% endif %}>
+                                                    {{ role|capfirst }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Statut -->
+                        <div class="column">
+                            <div class="field">
+                                <label class="label">Statut</label>
+                                <div class="control">
+                                    <div class="select is-fullwidth">
+                                        <select name="status">
+                                            <option value="">Tous les statuts</option>
+                                            <option value="active" {% if current_status == 'active' %}selected{% endif %}>
+                                                Actif
+                                            </option>
+                                            <option value="inactive" {% if current_status == 'inactive' %}selected{% endif %}>
+                                                Inactif
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bouton de filtrage -->
+                        <div class="column is-narrow">
+                            <div class="field">
+                                <label class="label">&nbsp;</label>
+                                <div class="control">
+                                    <button type="submit" class="button is-primary">
+                                        <span class="icon">
+                                            <i class="mdi mdi-filter-check"></i>
+                                        </span>
+                                        <span>Filtrer</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Résumé des filtres actifs -->
+                {% if current_search or current_role or current_status %}
+                <div class="notification is-light">
+                    <button class="delete" id="clear-filters"></button>
+                    <strong>Filtres actifs :</strong>
+                    {% if current_search %}
+                        <span class="tag is-info ml-2">Recherche: "{{ current_search }}"</span>
+                    {% endif %}
+                    {% if current_role %}
+                        <span class="tag is-success ml-2">Rôle: {{ current_role|capfirst }}</span>
+                    {% endif %}
+                    {% if current_status %}
+                        <span class="tag is-warning ml-2">Statut: {{ current_status|capfirst }}</span>
+                    {% endif %}
+                    <span class="ml-2">{{ filtered_count }} résultat{{ filtered_count|pluralize }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Liste des utilisateurs -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-title">
+                    <span class="icon mr-2">
+                        <i class="mdi mdi-account-group"></i>
+                    </span>
+                    Utilisateurs ({{ filtered_count }})
+                </div>
+                <div class="card-header-icon">
+                    {% if page_obj.has_other_pages %}
+                        <span class="tag is-light">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card-content p-0">
+                {% if users_with_stats %}
+                    <div class="table-container">
+                        <table class="table is-fullwidth is-hoverable ">
+                            <thead>
+                                <tr>
+                                    <th>Utilisateur</th>
+                                    <th>Email</th>
+                                    <th>Rôle</th>
+                                    <th>Statut</th>
+                                    <th>Dernière activité</th>
+                                    <th class="has-text-centered">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user_data in users_with_stats %}
+                                <tr>
+                                    <td>
+                                        <div class="media">
+                                            <div class="media-left">
+                                                <span class="icon is-large {% if user_data.user.is_staff %}has-text-warning{% else %}has-text-primary{% endif %}">
+                                                    <i class="mdi mdi-36px {% if user_data.user.is_staff %}mdi-shield-account{% else %}mdi-account{% endif %}"></i>
+                                                </span>
+                                            </div>
+                                            <div class="media-content">
+                                                <p class="title is-6" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px;">
+                                                    {{ user_data.user.get_full_name }}
+                                                </p>
+                                                <p class="subtitle is-7 has-text-grey">
+                                                    Inscrit le {{ user_data.user.date_joined|date:"d/m/Y" }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="has-text-grey-dark">{{ user_data.user.email }}</span>
+                                    </td>
+                                    <td>
+                                        {% if user_data.user.is_staff %}
+                                            <span class="tag is-warning">
+                                                <span class="icon is-small">
+                                                    <i class="mdi mdi-shield"></i>
+                                                </span>
+                                                <span>Admin</span>
+                                            </span>
+                                        {% else %}
+                                            <span class="tag is-light">
+                                                {{ user_data.user.role|default:"Utilisateur"|capfirst }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user_data.user.is_active %}
+                                            <span class="tag is-success">
+                                                <span class="icon is-small">
+                                                    <i class="mdi mdi-check"></i>
+                                                </span>
+                                                <span>Actif</span>
+                                            </span>
+                                        {% else %}
+                                            <span class="tag is-danger">
+                                                <span class="icon is-small">
+                                                    <i class="mdi mdi-close"></i>
+                                                </span>
+                                                <span>Inactif</span>
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user_data.last_activity %}
+                                            <span class="has-text-grey">{{ user_data.last_activity|date:"d/m/Y" }}</span>
+                                        {% else %}
+                                            <span class="has-text-grey-light">Aucune</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="has-text-centered">
+                                        <div class="buttons is-centered">
+                                            <a href="{% url 'adminpanel:edit_user' user_data.user.id %}"
+                                               class="button is-small is-info is-light" title="Modifier">
+                                                <span class="icon is-small">
+                                                    <i class="mdi mdi-pencil"></i>
+                                                </span>
+                                            </a>
+                                            {% if user_data.user != user %}
+                                                <a href="{% url 'adminpanel:delete_user' user_data.user.id %}"
+                                                   class="button is-small is-danger is-light" title="Supprimer">
+                                                    <span class="icon is-small">
+                                                        <i class="mdi mdi-delete"></i>
+                                                    </span>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="has-text-centered py-6">
+                        <span class="icon is-large has-text-grey-light">
+                            <i class="mdi mdi-48px mdi-account-group"></i>
+                        </span>
+                        <p class="title is-5 has-text-grey">Aucun utilisateur trouvé</p>
+                        {% if current_search or current_role or current_status %}
+                            <p class="subtitle is-6 has-text-grey">
+                                Essayez de modifier vos filtres ou
+                                <button class="button is-text is-small" id="clear-all-filters">
+                                    réinitialisez la recherche
+                                </button>
+                            </p>
+                        {% else %}
+                            <p class="subtitle is-6 has-text-grey">
+                                Commencez par créer votre premier utilisateur
+                            </p>
+                            <a href="{% url 'adminpanel:create_user' %}" class="button is-primary mt-3">
+                                <span class="icon">
+                                    <i class="mdi mdi-account-plus"></i>
+                                </span>
+                                <span>Créer un utilisateur</span>
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav class="pagination is-centered mt-5" role="navigation">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_role %}&role={{ current_role }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}"
+                   class="pagination-previous">Précédent</a>
+            {% else %}
+                <a class="pagination-previous" disabled>Précédent</a>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_role %}&role={{ current_role }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}"
+                   class="pagination-next">Suivant</a>
+            {% else %}
+                <a class="pagination-next" disabled>Suivant</a>
+            {% endif %}
+
+            <ul class="pagination-list">
+                {% for page_num in page_obj.paginator.page_range %}
+                    {% if page_num == page_obj.number %}
+                        <li><a class="pagination-link is-current">{{ page_num }}</a></li>
+                    {% elif page_num == 1 or page_num == page_obj.paginator.num_pages or page_num >= page_obj.number|add:'-2' and page_num <= page_obj.number|add:'2' %}
+                        <li>
+                            <a href="?page={{ page_num }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_role %}&role={{ current_role }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}"></a>
+                        </li>
+                    {% elif page_num == 2 or page_num == page_obj.paginator.num_pages|add:'-1' %}
+                        <li><span class="pagination-ellipsis">&hellip;</span></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('filter-form');
+    const resetBtn = document.getElementById('reset-filters');
+    const clearFiltersBtn = document.getElementById('clear-filters');
+    const clearAllFiltersBtn = document.getElementById('clear-all-filters');
+
+    // Réinitialiser les filtres
+    function resetFilters() {
+        form.reset();
+        window.location.href = window.location.pathname;
+    }
+
+    resetBtn.addEventListener('click', resetFilters);
+    if (clearFiltersBtn) clearFiltersBtn.addEventListener('click', resetFilters);
+    if (clearAllFiltersBtn) clearAllFiltersBtn.addEventListener('click', resetFilters);
+
+    // Auto-submit sur changement de filtre
+    form.addEventListener('change', function(e) {
+        if (e.target.type === 'select-one') {
+            form.submit();
+        }
+    });
+});
+</script>
+{% endblock %}

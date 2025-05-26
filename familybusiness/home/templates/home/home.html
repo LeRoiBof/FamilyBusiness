@@ -28,7 +28,7 @@
             </div>
 
             <!-- Affiché uniquement si admin -->
-            {% if user.is_authenticated and user.role == "admin" %}
+            {% if user.is_authenticated and user.is_staff %}
             <div class="column is-4">
                 <div class="box has-text-centered">
                     <span class="icon is-large has-text-link">

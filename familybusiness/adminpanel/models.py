@@ -23,8 +23,17 @@ class Event(models.Model):
 
     date = models.DateField()
     content = models.TextField()
-    user = models.ForeignKey('account.Account', on_delete=models.CASCADE)
     type = models.CharField(max_length=50, choices=TYPES)
+    user = models.ForeignKey(
+        'account.Account',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='events'
+    )
+
+    user_name_snapshot = models.CharField(max_length=255, blank=True)
 
     def __str__(self):
-        return f"{self.type} - {self.date.strftime('%Y-%m-%d')} - {self.user.get_full_name()}"
+        user_display = self.user.get_full_name() if self.user else self.user_name_snapshot or "Utilisateur supprimé"
+        return f"{self.type} - {self.date.strftime('%Y-%m-%d')} - {user_display}"
