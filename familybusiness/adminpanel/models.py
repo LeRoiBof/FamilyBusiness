@@ -13,6 +13,7 @@ class Event(models.Model):
         ('TRANSACTION_CREATE', 'Ajout transaction'),
         ('TRANSACTION_DELETE', 'Suppression transaction'),
         ('TRANSACTION_UPDATE', 'Modification transaction'),
+        ('TRANSACTION_EXPORT', 'Export transaction'),
         ('OBJECTIVE_UPDATE', 'Modification objectif'),
         ('USER_REGISTER', 'Inscription utilisateur'),
         ('PASSWORD_CHANGE', 'Changement mot de passe'),

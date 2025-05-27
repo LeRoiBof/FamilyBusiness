@@ -132,29 +132,19 @@ def wallet_detail(request, wallet_id):
         total=Sum('amount'))['total'] or 0
 
     # Données pour le graphique d'évolution (du 1er du mois jusqu'à aujourd'hui)
-    start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).date()
+    start_of_month_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).date()
     today = now.date()
-    days_in_current_month = (today - start_of_month).days + 1
+    days_in_current_month = (today - start_of_month_date).days + 1
 
     daily_data = defaultdict(lambda: {'income': 0, 'expense': 0})
 
-    # Données de test si pas de transactions
-    if not transactions.exists():
-        # Générer des données de test
-        import random
-        for i in range(days_in_current_month):
-            date = start_of_month + timedelta(days=i)
-            # Simulation de données aléatoires
-            daily_data[date]['income'] = random.uniform(0, 150) if random.random() > 0.7 else 0
-            daily_data[date]['expense'] = random.uniform(10, 80)
-    else:
-        # Utiliser les vraies données
-        for transaction in transactions.filter(date__gte=start_of_month):
-            key = transaction.date.date()
-            if transaction.is_income:
-                daily_data[key]['income'] += float(transaction.amount)
-            else:
-                daily_data[key]['expense'] += float(transaction.amount)
+    # Utiliser uniquement les vraies données
+    for transaction in transactions.filter(date__gte=start_of_month):
+        key = transaction.date.date()
+        if transaction.is_income:
+            daily_data[key]['income'] += float(transaction.amount)
+        else:
+            daily_data[key]['expense'] += float(transaction.amount)
 
     # Préparer les données pour Chart.js
     dates = []
@@ -162,26 +152,30 @@ def wallet_detail(request, wallet_id):
     incomes = []
 
     for i in range(days_in_current_month):
-        date = start_of_month + timedelta(days=i)
+        date = start_of_month_date + timedelta(days=i)
         dates.append(date.strftime('%d/%m'))
         expenses.append(daily_data[date]['expense'])
         incomes.append(daily_data[date]['income'])
 
-    # Données pour le graphique des catégories
-    if transactions.exists():
-        cat_data = transactions.filter(is_income=False).values(
-            'category__name').annotate(total=Sum('amount'))
-        category_labels = [c['category__name'] for c in cat_data if c['total']]
-        category_values = [float(c['total']) for c in cat_data if c['total']]
-    else:
-        # Données de test pour les catégories
-        category_labels = ['Alimentation', 'Transport', 'Loisirs', 'Shopping', 'Services']
-        category_values = [450.50, 120.30, 89.90, 234.60, 78.40]
+    # Données pour le graphique des catégories (uniquement les vraies données)
+    cat_data = (
+        transactions.filter(is_income=False)
+        .values('category')  # group by category ID
+        .annotate(total=Sum('amount'))
+        .order_by('category')
+    )
+    categories = {
+        c.id: c.name for c in Category.objects.filter(
+            id__in=[entry['category'] for entry in cat_data]
+        )
+    }
+    category_labels = [categories[entry['category']] for entry in cat_data]
+    category_values = [float(entry['total']) for entry in cat_data]
 
-    # Si pas de données de catégories, utiliser des valeurs par défaut
+    # Si pas de données de catégories, listes vides
     if not category_labels:
-        category_labels = ['Divers']
-        category_values = [0]
+        category_labels = []
+        category_values = []
 
     context = {
         'wallet': wallet,

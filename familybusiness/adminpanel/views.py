@@ -423,12 +423,11 @@ def delete_wallet(request, wallet_id):
 def export_transactions_csv(request, wallet_id):
     wallet = get_object_or_404(Wallet, id=wallet_id)
 
-    # Optionnel : vérifier les permissions (admin uniquement)
-    if not request.user.is_staff:
-        messages.error(request, "Vous n'avez pas la permission d'exporter les transactions.")
+    if request.user not in wallet.users.all() and not request.user.is_staff:
+        messages.error(request, "Vous n'avez pas la permission d'exporter les transactions de ce portefeuille.")
         Event.objects.create(
             date=now(),
-            content=f"Tentative d'export de transactions par {request.user.get_full_name()} pour le portefeuille {wallet.name} sans permission.",
+            content=f"Tentative d'export des transactions du portefeuille {wallet.name} par {request.user.get_full_name()} sans permission",
             user=request.user,
             type='ERROR'
         )
@@ -447,6 +446,7 @@ def export_transactions_csv(request, wallet_id):
         writer.writerow([
             transaction.date.strftime('%d/%m/%Y'),
             transaction.title,
+            transaction.category.name if transaction.category else 'Aucune catégorie',
             f"{transaction.amount:.2f}",
             'Revenu' if transaction.is_income else 'Dépense',
             transaction.user.get_full_name() if transaction.user else 'Inconnu'
@@ -456,7 +456,7 @@ def export_transactions_csv(request, wallet_id):
         date=now(),
         content=f"Export des transactions du portefeuille {wallet.name} par {request.user.get_full_name()}",
         user=request.user,
-        type='ADMIN_ACTION'
+        type='TRANSACTION_EXPORT'
     )
 
     return response

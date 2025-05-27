@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from adminpanel.views import export_transactions_csv
 
 app_name = "wallet"
 
@@ -16,5 +17,6 @@ urlpatterns = [
     path('wallets/<int:wallet_id>/edit-objective/', views.edit_objective, name='edit_objective'),
     path('wallets/<int:wallet_id>/add-member/', views.add_member, name='add_member'),
     path('<int:wallet_id>/remove-member/<int:user_id>/', views.remove_member, name='remove_member'),
+    path('wallets/<int:wallet_id>/export/', export_transactions_csv, name='export_transactions_csv'),
 
 ]
