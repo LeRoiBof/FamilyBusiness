@@ -1,86 +1,146 @@
 {% extends "master.html" %}
 
-{% block head %}
-    <style>
-        html {
-            height: 100%;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        .field-error {
-            margin-top: 0.5rem;
-            padding: 0.5rem;
-            border-radius: 4px;
-            background-color: #feecf0;
-            color: #cc0f35;
-            font-size: 0.9rem;
-            border-left: 4px solid #f14668;
-        }
-    </style>
-    {% load static %}
-{% endblock %}
-
 {% block content %}
 <section class="section">
     <div class="container">
-        <h1 class="title">Inscription</h1>
-
-        {% if form.non_field_errors %}
-            <div class="notification is-danger">
-                <button class="delete"></button>
-                <ul>
-                    {% for error in form.non_field_errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
-
-        <form method="post" class="box">
-            {% csrf_token %}
-
-            {% for field in form %}
-                <div class="field">
-                    <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    <div class="control {% if field.errors %}has-icons-right{% endif %}">
-                        {{ field }}
-                        {% if field.errors %}
-                            <span class="icon is-small is-right">
-                                <i class="fas fa-exclamation-circle"></i>
+        <div class="columns is-centered">
+            <div class="column is-half-tablet is-two-thirds-desktop">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <span class="icon mr-2">
+                                <i class="mdi mdi-account-plus"></i>
                             </span>
-                        {% endif %}
-                    </div>
-                    {% if field.errors %}
-                        <div class="field-error">
-                            {% for error in field.errors %}
-                                {{ error }}{% if not forloop.last %}<br>{% endif %}
-                            {% endfor %}
+                            Créer un compte
                         </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
+                    </div>
 
-            <div class="field">
-                <div class="control">
-                    <button type="submit" class="button is-success">S'inscrire</button>
+                    <div class="card-content">
+                        <div class="content has-text-centered mb-5">
+                            <span class="icon is-large has-text-success">
+                                <i class="mdi mdi-48px mdi-account-circle-outline"></i>
+                            </span>
+                            <p class="subtitle is-6 has-text-grey">
+                                Créez votre compte pour commencer à gérer vos finances
+                            </p>
+                        </div>
+
+                        <!-- Erreurs globales -->
+                        {% if form.non_field_errors %}
+                            <div class="notification is-danger is-light mb-4">
+                                <button class="delete"></button>
+                                {% for error in form.non_field_errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <div class="columns">
+                                {% for field in form %}
+                                    {% if field.name == 'first_name' or field.name == 'last_name' %}
+                                        <div class="column">
+                                            <div class="field">
+                                                <label class="label">{{ field.label }}</label>
+                                                <div class="control has-icons-left {% if field.errors %}has-icons-right{% endif %}">
+                                                    {{ field }}
+                                                    <span class="icon is-small is-left">
+                                                        <i class="mdi mdi-account"></i>
+                                                    </span>
+                                                    {% if field.errors %}
+                                                        <span class="icon is-small is-right has-text-danger">
+                                                            <i class="mdi mdi-alert-circle"></i>
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                                {% if field.errors %}
+                                                    {% for error in field.errors %}
+                                                        <p class="help is-danger">{{ error }}</p>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+
+                            {% for field in form %}
+                                {% if field.name != 'first_name' and field.name != 'last_name' %}
+                                    <div class="field">
+                                        <label class="label">{{ field.label }}</label>
+                                        <div class="control has-icons-left {% if field.errors %}has-icons-right{% endif %}">
+                                            {{ field }}
+                                            <span class="icon is-small is-left">
+                                                {% if field.name == 'email' %}
+                                                    <i class="mdi mdi-email"></i>
+                                                {% elif 'password' in field.name %}
+                                                    <i class="mdi mdi-lock"></i>
+                                                {% else %}
+                                                    <i class="mdi mdi-account"></i>
+                                                {% endif %}
+                                            </span>
+                                            {% if field.errors %}
+                                                <span class="icon is-small is-right has-text-danger">
+                                                    <i class="mdi mdi-alert-circle"></i>
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        {% if field.errors %}
+                                            {% for error in field.errors %}
+                                                <p class="help is-danger">{{ error }}</p>
+                                            {% endfor %}
+                                        {% endif %}
+
+                                        <!-- Aide contextuelle pour les champs -->
+                                        {% if field.name == 'password1' %}
+                                            <p class="help">Minimum 8 caractères recommandés</p>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+
+                            <div class="field mt-5">
+                                <div class="control">
+                                    <button type="submit" class="button is-success is-fullwidth is-medium">
+                                        <span class="icon">
+                                            <i class="mdi mdi-account-plus"></i>
+                                        </span>
+                                        <span>Créer mon compte</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Lien vers connexion -->
+                <div class="has-text-centered mt-5">
+                    <p>
+                        <span class="has-text-grey">Vous avez déjà un compte ? </span>
+                        <a href="{% url 'account:login' %}" class="has-text-primary">
+                            <strong>Se connecter</strong>
+                        </a>
+                    </p>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </section>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.notification .delete').forEach(button => {
-            button.addEventListener('click', () => {
-                button.parentNode.remove();
-            });
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestion de la fermeture des notifications
+    document.querySelectorAll('.notification .delete').forEach(button => {
+        button.addEventListener('click', function() {
+            this.parentNode.style.opacity = '0';
+            this.parentNode.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                this.parentNode.remove();
+            }, 300);
         });
     });
+});
 </script>
 {% endblock %}

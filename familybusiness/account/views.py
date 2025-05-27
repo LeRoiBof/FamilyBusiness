@@ -1,11 +1,13 @@
 from datetime import date
 
 from django.contrib import messages
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-from .forms import RegistrationForm, LoginForm
+from .forms import RegistrationForm, LoginForm, ResetPasswordForm
 from django.contrib.auth.decorators import login_required
 from adminpanel.models import Event
+from .models import Account, PasswordResetToken
+
 
 # Create your views here.
 
@@ -38,8 +40,6 @@ def login_view(request):
                 type='LOGIN'
             )
             return redirect('home:home')
-        else:
-            messages.error(request, "Invalid login credentials.")
     else:
         form = LoginForm()
     return render(request, 'account/login.html', {'form': form})
@@ -53,3 +53,44 @@ def logout_view(request):
     )
     logout(request)
     return redirect('account:login')
+
+def request_password_reset(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        user = Account.objects.filter(email=email).first()
+        if user:
+            token = PasswordResetToken.objects.create(user=user)
+            return render(request, 'account/token_display.html', {'token': token.token})
+        messages.error(request, "Aucun compte avec cet email.")
+    return render(request, 'account/request_password_reset.html')
+
+
+def reset_password(request, token):
+    token_obj = get_object_or_404(PasswordResetToken, token=token)
+    if not token_obj.is_valid():
+        messages.error(request, "Token expiré.")
+        return redirect('account:request_password_reset')
+
+    if request.method == 'POST':
+        form = ResetPasswordForm(request.POST)
+        if form.is_valid():
+            token_obj.user.set_password(form.cleaned_data['password'])
+            token_obj.user.save()
+            token_obj.delete()
+            messages.success(request, "Mot de passe réinitialisé.")
+            return redirect('account:login')
+    else:
+        form = ResetPasswordForm()
+
+    return render(request, 'account/reset_password.html', {'form': form})
+
+def generate_new_token(request, token):
+    token_obj = get_object_or_404(PasswordResetToken, token=token)
+    if not token_obj.is_valid():
+        messages.error(request, "Token expiré.")
+        return redirect('account:request_password_reset')
+
+    new_token = PasswordResetToken.objects.create(user=token_obj.user)
+    token_obj.delete()
+    return render(request, 'account/token_display.html', {'token': new_token.token})
+

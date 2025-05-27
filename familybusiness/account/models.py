@@ -1,6 +1,11 @@
+import uuid
+from datetime import timedelta
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Permission, Group
 from django.contrib.auth.models import PermissionsMixin
+from django.utils import timezone
+
 
 # Create your models here.
 
@@ -42,3 +47,11 @@ class Account(AbstractUser):
 
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}"
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    token = models.UUIDField(default=uuid.uuid4, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_valid(self):
+        return timezone.now() < self.created_at + timedelta(minutes=15)

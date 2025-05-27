@@ -1,46 +1,103 @@
 {% extends "master.html" %}
 
-{% block head %}
-    {% load static %}
-{% endblock %}
-
 {% block content %}
 <section class="section">
     <div class="container">
-        <h1 class="title">Connexion</h1>
-        {% if form.non_field_errors %}
-            <div class="notification is-danger mt-4">
-                <ul>
-                    {% for error in form.non_field_errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
-
-        <form method="post" class="box">
-            {% csrf_token %}
-
-            {% for field in form %}
-                <div class="field">
-                    <label class="label">{{ field.label }}</label>
-                    <div class="control">
-                        {{ field }}
+        <div class="columns is-centered">
+            <div class="column is-half-tablet is-one-third-desktop">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <span class="icon mr-2">
+                                <i class="mdi mdi-login"></i>
+                            </span>
+                            Connexion
+                        </div>
                     </div>
-                    {% if field.errors %}
-                        <p class="help is-danger">
-                            {% for error in field.errors %}
-                                {{ error }}<br>
-                            {% endfor %}
-                        </p>
-                    {% endif %}
-                </div>
-            {% endfor %}
 
-            <div class="control">
-                <button type="submit" class="button is-success">Se connecter</button>
+                    <div class="card-content">
+                        <div class="content has-text-centered mb-5">
+                            <span class="icon is-large has-text-primary">
+                                <i class="mdi mdi-48px mdi-account-circle"></i>
+                            </span>
+                            <p class="subtitle is-6 has-text-grey">
+                                Connectez-vous pour accéder à votre compte
+                            </p>
+                        </div>
+
+                        <!-- Erreurs globales -->
+                        {% if form.non_field_errors %}
+                            <div class="notification is-danger is-light mb-4">
+                                {% for error in form.non_field_errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <form method="post">
+                            {% csrf_token %}
+
+                            {% for field in form %}
+                                <div class="field">
+                                    <label class="label">{{ field.label }}</label>
+                                    <div class="control has-icons-left {% if field.errors %}has-icons-right{% endif %}">
+                                        {{ field }}
+                                        <span class="icon is-small is-left">
+                                            {% if field.name == 'email' %}
+                                                <i class="mdi mdi-email"></i>
+                                            {% elif field.name == 'password' %}
+                                                <i class="mdi mdi-lock"></i>
+                                            {% else %}
+                                                <i class="mdi mdi-account"></i>
+                                            {% endif %}
+                                        </span>
+                                        {% if field.errors %}
+                                            <span class="icon is-small is-right has-text-danger">
+                                                <i class="mdi mdi-alert-circle"></i>
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    {% if field.errors %}
+                                        {% for error in field.errors %}
+                                            <p class="help is-danger">{{ error }}</p>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+
+                            <div class="field mt-5">
+                                <div class="control">
+                                    <button type="submit" class="button is-primary is-fullwidth is-medium">
+                                        <span class="icon">
+                                            <i class="mdi mdi-login"></i>
+                                        </span>
+                                        <span>Se connecter</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Actions supplémentaires -->
+                <div class="has-text-centered mt-5">
+                    <p>
+                        <a href="{% url 'account:request_password_reset' %}" class="has-text-grey">
+                            <span class="icon is-small">
+                                <i class="mdi mdi-lock-reset"></i>
+                            </span>
+                            Mot de passe oublié ?
+                        </a>
+                    </p>
+                    <p class="mt-3">
+                        <span class="has-text-grey">Vous n'avez pas de compte ? </span>
+                        <a href="{% url 'account:register' %}" class="has-text-primary">
+                            <strong>Créer un compte</strong>
+                        </a>
+                    </p>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
 </section>
 {% endblock %}

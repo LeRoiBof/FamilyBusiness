@@ -1,0 +1,267 @@
+{% extends 'master.html' %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="columns is-centered">
+            <div class="column is-half-tablet is-two-thirds-desktop">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title has-text-success">
+                            <span class="icon mr-2">
+                                <i class="mdi mdi-check-circle"></i>
+                            </span>
+                            Lien de réinitialisation généré
+                        </div>
+                    </div>
+
+                    <div class="card-content">
+                        <div class="content has-text-centered mb-5">
+                            <span class="icon is-large has-text-success">
+                                <i class="mdi mdi-48px mdi-email-check"></i>
+                            </span>
+                            <p class="title is-5 mt-3">Lien de réinitialisation créé !</p>
+                            <p class="subtitle is-6 has-text-grey">
+                                Utilisez ce lien sécurisé pour définir votre nouveau mot de passe
+                            </p>
+                        </div>
+
+                        <!-- Alerte d'expiration -->
+                        <div class="notification is-warning is-light mb-5">
+                            <div class="media">
+                                <div class="media-left">
+                                    <span class="icon is-large has-text-warning">
+                                        <i class="mdi mdi-24px mdi-clock-alert"></i>
+                                    </span>
+                                </div>
+                                <div class="media-content">
+                                    <p><strong>Attention :</strong> Ce lien expire dans <strong>15 minutes</strong> pour votre sécurité.</p>
+                                    <p class="mt-2">Expiration : <span id="expirationTime" class="has-text-weight-bold"></span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lien de réinitialisation -->
+                        {% url 'account:reset_password' token=token as reset_url %}
+                        <div class="field">
+                            <label class="label">Lien de réinitialisation</label>
+                            <div class="field has-addons">
+                                <div class="control is-expanded">
+                                    <input class="input" type="text" id="resetLink" readonly
+                                           value="{{ request.scheme }}://{{ request.get_host }}{{ reset_url }}">
+                                </div>
+                                <div class="control">
+                                    <button class="button is-primary" id="copyBtn">
+                                        <span class="icon is-small">
+                                            <i class="mdi mdi-content-copy"></i>
+                                        </span>
+                                        <span>Copier</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="help">Copiez ce lien et collez-le dans votre navigateur</p>
+                        </div>
+
+                        <!-- Bouton d'accès direct -->
+                        <div class="field mt-5">
+                            <div class="control">
+                                <a href="{{ reset_url }}" class="button is-success is-fullwidth is-medium">
+                                    <span class="icon">
+                                        <i class="mdi mdi-open-in-new"></i>
+                                    </span>
+                                    <span>Accéder directement au formulaire</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Compte à rebours -->
+                        <div class="has-text-centered mt-4">
+                            <p class="is-size-7 has-text-grey">
+                                Temps restant : <span id="countdown" class="has-text-weight-bold has-text-danger">15:00</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions supplémentaires -->
+                <div class="has-text-centered mt-5">
+                    <p>
+                        <a href="{% url 'account:generate_new_token' token %}" class="has-text-grey">
+                            <span class="icon is-small">
+                                <i class="mdi mdi-refresh"></i>
+                            </span>
+                            Générer un nouveau lien
+                        </a>
+                    </p>
+                    <p class="mt-2">
+                        <a href="{% url 'account:login' %}" class="has-text-grey">
+                            <span class="icon is-small">
+                                <i class="mdi mdi-arrow-left"></i>
+                            </span>
+                            Retour à la connexion
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const resetLink = document.getElementById('resetLink');
+    const copyBtn = document.getElementById('copyBtn');
+    const countdownEl = document.getElementById('countdown');
+    const expirationTimeEl = document.getElementById('expirationTime');
+
+    // Calculer l'heure d'expiration (15 minutes à partir de maintenant)
+    const now = new Date();
+    const expirationTime = new Date(now.getTime() + 15 * 60 * 1000);
+
+    // Afficher l'heure d'expiration
+    expirationTimeEl.textContent = expirationTime.toLocaleTimeString('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    // Fonction de copie du lien
+    copyBtn.addEventListener('click', function() {
+        resetLink.select();
+        resetLink.setSelectionRange(0, 99999); // Pour mobile
+
+        navigator.clipboard.writeText(resetLink.value).then(function() {
+            // Feedback visuel de succès
+            copyBtn.classList.remove('is-primary');
+            copyBtn.classList.add('is-success');
+            copyBtn.innerHTML = '<span class="icon is-small"><i class="mdi mdi-check"></i></span><span>Copié !</span>';
+
+            // Notification de succès
+            showNotification('Lien copié dans le presse-papiers !', 'is-success');
+
+            // Restaurer le bouton après 3 secondes
+            setTimeout(() => {
+                copyBtn.classList.remove('is-success');
+                copyBtn.classList.add('is-primary');
+                copyBtn.innerHTML = '<span class="icon is-small"><i class="mdi mdi-content-copy"></i></span><span>Copier</span>';
+            }, 3000);
+        }, function() {
+            // Fallback pour les navigateurs plus anciens
+            try {
+                document.execCommand('copy');
+                showNotification('Lien copié dans le presse-papiers !', 'is-success');
+            } catch (err) {
+                showNotification('Erreur lors de la copie. Veuillez copier manuellement.', 'is-danger');
+            }
+        });
+    });
+
+    // Compte à rebours
+    function updateCountdown() {
+        const now = new Date();
+        const timeLeft = expirationTime - now;
+
+        if (timeLeft <= 0) {
+            countdownEl.textContent = '00:00';
+            countdownEl.classList.add('has-text-danger');
+
+            // Afficher une notification d'expiration
+            showNotification('Le lien de réinitialisation a expiré. Veuillez en générer un nouveau.', 'is-danger');
+
+            // Désactiver le bouton de copie et le lien
+            copyBtn.disabled = true;
+            copyBtn.classList.add('is-light');
+            document.querySelector('a.button.is-success').classList.add('is-disabled');
+
+            return;
+        }
+
+        const minutes = Math.floor(timeLeft / 60000);
+        const seconds = Math.floor((timeLeft % 60000) / 1000);
+
+        countdownEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+        // Changer la couleur selon le temps restant
+        if (timeLeft < 5 * 60 * 1000) { // Moins de 5 minutes
+            countdownEl.classList.remove('has-text-warning');
+            countdownEl.classList.add('has-text-danger');
+        } else if (timeLeft < 10 * 60 * 1000) { // Moins de 10 minutes
+            countdownEl.classList.remove('has-text-success');
+            countdownEl.classList.add('has-text-warning');
+        } else {
+            countdownEl.classList.add('has-text-success');
+        }
+    }
+
+    // Mettre à jour le compte à rebours chaque seconde
+    updateCountdown();
+    const countdownInterval = setInterval(updateCountdown, 1000);
+
+    // Fonction pour afficher des notifications
+    function showNotification(message, type = 'is-info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type} is-light`;
+        notification.style.position = 'fixed';
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '1000';
+        notification.style.minWidth = '300px';
+        notification.innerHTML = `
+            <button class="delete"></button>
+            ${message}
+        `;
+
+        document.body.appendChild(notification);
+
+        // Animation d'apparition
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        notification.style.transition = 'all 0.3s ease';
+
+        setTimeout(() => {
+            notification.style.opacity = '1';
+            notification.style.transform = 'translateX(0)';
+        }, 10);
+
+        // Supprimer automatiquement après 5 secondes
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 5000);
+
+        // Permettre la suppression manuelle
+        const deleteBtn = notification.querySelector('.delete');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            });
+        }
+    }
+
+    // Sélectionner automatiquement le lien au clic
+    resetLink.addEventListener('click', function() {
+        this.select();
+    });
+
+    // Double-clic pour copier automatiquement
+    resetLink.addEventListener('dblclick', function() {
+        copyBtn.click();
+    });
+
+    // Notification d'accueil
+    setTimeout(() => {
+        showNotification('Lien de réinitialisation généré avec succès ! Vous avez 15 minutes pour l\'utiliser.', 'is-success');
+    }, 500);
+});
+</script>
+{% endblock %}
