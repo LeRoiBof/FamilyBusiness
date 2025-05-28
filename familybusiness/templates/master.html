@@ -163,14 +163,14 @@
                                 <input type="hidden" name="language" value="en">
                                 <input type="hidden" name="next" value="{{ request.get_full_path }}" id="next-input">
                                 <button type="submit" class="button is-white language-switch-btn"
-                                        title="Switch to English">
+                                        title="{% trans 'switch_to_english' %}">
                                     <span class="icon is-small">🇬🇧</span>
                                 </button>
                             {% else %}
                                 <input type="hidden" name="language" value="fr">
                                 <input type="hidden" name="next" value="{{ request.get_full_path }}" id="next-input">
                                 <button type="submit" class="button is-white language-switch-btn"
-                                        title="Passer en français">
+                                        title="{% trans 'switch_to_french' %}">
                                     <span class="icon is-small">🇫🇷</span>
                                 </button>
                             {% endif %}
@@ -188,20 +188,20 @@
                                 <input type="hidden" name="language" value="en">
                                 <input type="hidden" name="next" value="{{ request.get_full_path }}" id="next-input">
                                 <button type="submit" class="button is-white language-switch-btn"
-                                        title="Switch to English">
+                                        title="{% trans 'switch_to_english' %}">
                                     <span class="icon is-small">🇬🇧</span>
                                 </button>
                             {% else %}
                                 <input type="hidden" name="language" value="fr">
                                 <input type="hidden" name="next" value="{{ request.get_full_path }}" id="next-input">
                                 <button type="submit" class="button is-white language-switch-btn"
-                                        title="Passer en français">
+                                        title="{% trans 'switch_to_french' %}">
                                     <span class="icon is-small">🇫🇷</span>
                                 </button>
                             {% endif %}
                         </form>
                         <a href="{% url 'account:register' %}?next={{ request.path }}"
-                           class="button is-info">{% trans "Create account" %}</a>
+                           class="button is-info">{% trans "create_account" %}</a>
                         <a href="{% url 'account:login' %}?next={{ request.path }}"
                            class="button ml-2">{% trans "Login" %}</a>
                     {% endif %}
@@ -321,8 +321,8 @@
     <footer class="footer">
         <div class="content has-text-centered">
             <p>
-                Développé par <strong>Thomas Bernard</strong>, <strong>Marine Bodson</strong>, <strong>Maxime
-                Dupuis</strong> et <strong>Arnaud Moreau</strong>
+                {% trans "developed_by" %} <strong>Thomas Bernard</strong>, <strong>Marine Bodson</strong>, <strong>Maxime
+                Dupuis</strong> {% trans "and" %} <strong>Arnaud Moreau</strong>
             </p>
             <p class=" has-text-grey">
                 {% trans "Actual version" %} : 1.1.0

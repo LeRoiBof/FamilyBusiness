@@ -1,4 +1,5 @@
 {% extends "master.html" %}
+{% load i18n %}
 
 {% block content %}
 <section class="section">
@@ -12,10 +13,10 @@
                             <span class="icon mr-2">
                                 <i class="mdi mdi-alert-circle"></i>
                             </span>
-                            Confirmation de suppression
+                            {% trans "deletion_confirmation" %}
                         </div>
                     </div>
-                    
+
                     <div class="card-content">
                         <!-- Détails de la transaction à supprimer -->
                         <div class="notification is-light mb-5">
@@ -44,15 +45,15 @@
                         <!-- Message d'avertissement -->
                         <div class="notification is-warning">
                             <div class="content">
-                                <p><strong>⚠️ Attention !</strong></p>
-                                <p>Vous êtes sur le point de supprimer définitivement cette transaction.</p>
+                                <p><strong><i class="mdi mdi-alert"></i>{% trans "warning_attention" %} !</strong></p>
+                                <p>{% trans "about_to_delete_transaction_permanently" %}</p>
                                 <ul class="mt-3">
-                                    <li>Cette action est <strong>irréversible</strong></li>
-                                    <li>Le solde du portefeuille sera ajusté automatiquement</li>
+                                    <li>{% trans "action_is_irreversible" %}</li>
+                                    <li>{% trans "wallet_balance_will_be_adjusted" %}</li>
                                     {% if transaction.is_income %}
-                                    <li>Le solde sera <strong class="has-text-danger">diminué</strong> de {{ transaction.amount|floatformat:2 }} €</li>
+                                    <li>{% trans "balance_will_be_decreased_by" %} <strong class="has-text-danger">{{ transaction.amount|floatformat:2 }} €</strong></li>
                                     {% else %}
-                                    <li>Le solde sera <strong class="has-text-success">augmenté</strong> de {{ transaction.amount|floatformat:2 }} €</li>
+                                    <li>{% trans "balance_will_be_increased_by" %} <strong class="has-text-success">{{ transaction.amount|floatformat:2 }} €</strong></li>
                                     {% endif %}
                                 </ul>
                             </div>
@@ -64,7 +65,7 @@
                                 <div class="level-left">
                                     <div class="level-item">
                                         <div>
-                                            <p class="heading">Solde actuel</p>
+                                            <p class="heading">{% trans "current_balance" %}</p>
                                             <p class="title is-5">{{ wallet.balance|floatformat:2 }} €</p>
                                         </div>
                                     </div>
@@ -77,7 +78,7 @@
                                 <div class="level-right">
                                     <div class="level-item">
                                         <div>
-                                            <p class="heading">Nouveau solde</p>
+                                            <p class="heading">{% trans "new_balance" %}</p>
                                             <p class="title is-5 {% if transaction.is_income %}has-text-danger{% else %}has-text-success{% endif %}">
                                                 {% if transaction.is_income %}
                                                     {{ wallet.balance|add:transaction.amount|floatformat:"-2" }} €
@@ -100,7 +101,7 @@
                                         <span class="icon">
                                             <i class="mdi mdi-cancel"></i>
                                         </span>
-                                        <span>Annuler</span>
+                                        <span>{% trans "cancel" %}</span>
                                     </a>
                                 </div>
                                 <div class="control">
@@ -108,7 +109,7 @@
                                         <span class="icon">
                                             <i class="mdi mdi-delete"></i>
                                         </span>
-                                        <span>Supprimer définitivement</span>
+                                        <span>{% trans "delete_permanently" %}</span>
                                     </button>
                                 </div>
                             </div>
@@ -125,22 +126,22 @@
 document.addEventListener('DOMContentLoaded', function() {
     const deleteBtn = document.getElementById('delete-btn');
     let confirmClicks = 0;
-    
+
     deleteBtn.addEventListener('click', function(e) {
         if (confirmClicks === 0) {
             e.preventDefault();
-            this.innerHTML = '<span class="icon"><i class="mdi mdi-alert"></i></span><span>Êtes-vous sûr ? Cliquez encore</span>';
+            this.innerHTML = '<span class="icon"><i class="mdi mdi-alert"></i></span><span>{% trans "are_you_sure_click_again" %}</span>';
             this.classList.add('is-loading');
-            
+
             setTimeout(() => {
                 this.classList.remove('is-loading');
                 confirmClicks++;
             }, 500);
-            
+
             // Reset après 3 secondes
             setTimeout(() => {
                 if (confirmClicks === 1) {
-                    this.innerHTML = '<span class="icon"><i class="mdi mdi-delete"></i></span><span>Supprimer définitivement</span>';
+                    this.innerHTML = '<span class="icon"><i class="mdi mdi-delete"></i></span><span>{% trans "delete_permanently" %}</span>';
                     confirmClicks = 0;
                 }
             }, 3000);

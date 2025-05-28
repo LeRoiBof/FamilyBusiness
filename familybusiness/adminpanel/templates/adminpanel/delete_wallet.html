@@ -1,4 +1,5 @@
 {% extends "master.html" %}
+{% load i18n %}
 
 {% block content %}
 <section class="section">
@@ -7,7 +8,7 @@
         <div class="level mb-5">
             <div class="level-left">
                 <div class="level-item">
-                    <h1 class="title is-3 has-text-danger">Supprimer le portefeuille</h1>
+                    <h1 class="title is-3 has-text-danger">{% trans "delete_wallet" %}</h1>
                 </div>
             </div>
         </div>
@@ -19,7 +20,7 @@
                     <div class="card-header">
                         <div class="card-header-title has-text-danger">
                             <span class="icon mr-2"><i class="mdi mdi-alert-circle"></i></span>
-                            Confirmation de suppression
+                            {% trans "deletion_confirmation" %}
                         </div>
                     </div>
 
@@ -34,12 +35,12 @@
                                 </div>
                                 <div class="media-content">
                                     <p class="title is-4">{{ wallet.name }}</p>
-                                    <p class="subtitle is-6 has-text-grey mb-2">Propriétaire : {{ wallet.owner.get_full_name }}</p>
+                                    <p class="subtitle is-6 has-text-grey mb-2">{% trans "owner" %}: {{ wallet.owner.get_full_name }}</p>
                                     <div class="tags">
-                                        <span class="tag is-info"><i class="mdi mdi-currency-eur mr-1"></i> Solde : {{ wallet.balance|floatformat:2 }} €</span>
-                                        <span class="tag is-warning"><i class="mdi mdi-target mr-1"></i> Objectif : {{ wallet.objective|floatformat:2 }} €</span>
+                                        <span class="tag is-info"><i class="mdi mdi-currency-eur mr-1"></i> {% trans "balance" %}: {{ wallet.balance|floatformat:2 }} €</span>
+                                        <span class="tag is-warning"><i class="mdi mdi-target mr-1"></i> {% trans "objective" %}: {{ wallet.objective|floatformat:2 }} €</span>
                                         {% if impact_info.users_affected|length > 1 %}
-                                            <span class="tag is-primary"><i class="mdi mdi-account-group mr-1"></i> Partagé</span>
+                                            <span class="tag is-primary"><i class="mdi mdi-account-group mr-1"></i> {% trans "shared" %}</span>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -48,9 +49,9 @@
 
                         <!-- Impact -->
                         <div class="notification is-warning no-dismiss">
-                            <p><strong><i class="mdi mdi-alert"></i> Impact de la suppression :</strong></p>
+                            <p><strong><i class="mdi mdi-alert"></i> {% trans "deletion_impact" %}:</strong></p>
                             <ul class="mt-3">
-                                <li><strong>{{ impact_info.transaction_count }}</strong> transaction{{ impact_info.transaction_count|pluralize }} supprimée{{ impact_info.transaction_count|pluralize }}</li>
+                                <li><strong>{{ impact_info.transaction_count }}</strong> {% trans "transaction" %}{{ impact_info.transaction_count|pluralize }} {% trans "deleted_plural" %}{{ impact_info.transaction_count|pluralize }}</li>
                             </ul>
                         </div>
 
@@ -60,11 +61,11 @@
                             <div class="card-header">
                                 <div class="card-header-title">
                                     <span class="icon mr-2"><i class="mdi mdi-account-group"></i></span>
-                                    Utilisateurs affectés
+                                    {% trans "affected_users" %}
                                 </div>
                             </div>
                             <div class="card-content">
-                                <p class="mb-3">Les utilisateurs suivants perdront l'accès :</p>
+                                <p class="mb-3">{% trans "following_users_will_lose_access" %}:</p>
                                 {% for user in impact_info.users_affected %}
                                 <div class="media">
                                     <div class="media-left">
@@ -76,7 +77,7 @@
                                         <p class="has-text-weight-semibold">
                                             {{ user.get_full_name }}
                                             {% if user.id == wallet.owner.id %}
-                                                <span class="tag is-warning is-small ml-2">Propriétaire</span>
+                                                <span class="tag is-warning is-small ml-2">{% trans "owner" %}</span>
                                             {% endif %}
                                         </p>
                                         <p class="is-size-7 has-text-grey">{{ user.email }}</p>
@@ -90,13 +91,13 @@
 
                         <!-- Avertissements -->
                         <div class="notification is-danger mt-5 no-dismiss">
-                            <p><strong><i class="mdi mdi-shield-alert"></i> Mesures de sécurité :</strong></p>
+                            <p><strong><i class="mdi mdi-shield-alert"></i> {% trans "security_measures" %}:</strong></p>
                             <ul class="mt-3">
-                                <li>Suppression <strong>définitive</strong></li>
-                                <li>Transactions définitivement perdues</li>
-                                <li>Historique non récupérable</li>
-                                <li>Accès révoqué</li>
-                                <li>Événement enregistré</li>
+                                <li>{% trans "permanent_deletion" %}</li>
+                                <li>{% trans "transactions_permanently_lost" %}</li>
+                                <li>{% trans "history_not_recoverable" %}</li>
+                                <li>{% trans "access_revoked" %}</li>
+                                <li>{% trans "event_recorded" %}</li>
                             </ul>
                         </div>
 
@@ -106,12 +107,12 @@
                             <div class="field is-grouped is-grouped-right">
                                 <div class="control">
                                     <a href="{% url 'adminpanel:wallet_management' %}" class="button is-light is-medium">
-                                        <i class="mdi mdi-close mr-1"></i> Annuler
+                                        <i class="mdi mdi-close mr-1"></i> {% trans "cancel" %}
                                     </a>
                                 </div>
                                 <div class="control">
                                     <button type="submit" class="button is-danger is-medium" id="deleteBtn">
-                                        <i class="mdi mdi-delete mr-1"></i> Supprimer définitivement
+                                        <i class="mdi mdi-delete mr-1"></i> {% trans "delete_permanently" %}
                                     </button>
                                 </div>
                             </div>

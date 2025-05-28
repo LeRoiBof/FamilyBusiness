@@ -1,24 +1,25 @@
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 Account = get_user_model()
 
 class UserCreationForm(forms.ModelForm):
     password = forms.CharField(
-        label="Mot de passe",
+        label=_("password"),
         widget=forms.PasswordInput(attrs={
             'class': 'input',
-            'placeholder': 'Mot de passe'
+            'placeholder': _("password")
         }),
         min_length=8
     )
 
     confirm_password = forms.CharField(
-        label="Confirmer le mot de passe",
+        label=_("confirm_password"),
         widget=forms.PasswordInput(attrs={
             'class': 'input',
-            'placeholder': 'Confirmer le mot de passe'
+            'placeholder': _("confirm_password")
         })
     )
 
@@ -26,24 +27,24 @@ class UserCreationForm(forms.ModelForm):
         model = Account
         fields = ['first_name', 'last_name', 'email', 'is_staff', 'is_active']
         labels = {
-            'first_name': 'Prénom',
-            'last_name': 'Nom de famille',
-            'email': 'Adresse email',
-            'is_staff': "Droits d'administration",
-            'is_active': 'Compte actif',
+            'first_name': _("first_name"),
+            'last_name': _("last_name"),
+            'email': _("email_address"),
+            'is_staff': _("admin_rights"),
+            'is_active': _("active_account"),
         }
         widgets = {
             'first_name': forms.TextInput(attrs={
                 'class': 'input',
-                'placeholder': 'Prénom'
+                'placeholder': _("first_name")
             }),
             'last_name': forms.TextInput(attrs={
                 'class': 'input',
-                'placeholder': 'Nom de famille'
+                'placeholder': _("last_name")
             }),
             'email': forms.EmailInput(attrs={
                 'class': 'input',
-                'placeholder': 'email@exemple.com'
+                'placeholder': _("email_example")
             }),
             'is_staff': forms.CheckboxInput(attrs={
                 'class': 'checkbox'
@@ -56,7 +57,7 @@ class UserCreationForm(forms.ModelForm):
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if Account.objects.filter(email=email).exists():
-            raise ValidationError("Cet email est déjà utilisé.")
+            raise ValidationError(_("email_already_used"))
         return email
 
     def clean(self):
@@ -65,7 +66,7 @@ class UserCreationForm(forms.ModelForm):
         confirm = cleaned_data.get("confirm_password")
 
         if password and confirm and password != confirm:
-            self.add_error("confirm_password", "Les mots de passe ne correspondent pas.")
+            self.add_error("confirm_password", _("passwords_do_not_match"))
         return cleaned_data
 
     def save(self, commit=True):
@@ -80,16 +81,16 @@ class UserEditForm(forms.ModelForm):
         model = Account
         fields = ['first_name', 'last_name', 'email', 'is_staff', 'is_active']
         labels = {
-            'first_name': 'Prénom',
-            'last_name': 'Nom de famille',
-            'email': 'Adresse email',
-            'is_staff': "Droits d'administration",
-            'is_active': 'Compte actif',
+            'first_name': _("first_name"),
+            'last_name': _("last_name"),
+            'email': _("email_address"),
+            'is_staff': _("admin_rights"),
+            'is_active': _("active_account"),
         }
         widgets = {
-            'first_name': forms.TextInput(attrs={'class': 'input', 'placeholder': 'Prénom'}),
-            'last_name': forms.TextInput(attrs={'class': 'input', 'placeholder': 'Nom de famille'}),
-            'email': forms.EmailInput(attrs={'class': 'input', 'placeholder': 'email@exemple.com'}),
+            'first_name': forms.TextInput(attrs={'class': 'input', 'placeholder': _("first_name")}),
+            'last_name': forms.TextInput(attrs={'class': 'input', 'placeholder': _("last_name")}),
+            'email': forms.EmailInput(attrs={'class': 'input', 'placeholder': _("email_example")}),
             'is_staff': forms.CheckboxInput(attrs={'class': 'checkbox'}),
             'is_active': forms.CheckboxInput(attrs={'class': 'checkbox'}),
         }
@@ -102,6 +103,5 @@ class UserEditForm(forms.ModelForm):
         email = self.cleaned_data.get('email')
         existing_user = Account.objects.filter(email=email).exclude(id=self.current_user_id).first()
         if existing_user:
-            raise ValidationError("Cet email est déjà utilisé.")
+            raise ValidationError(_("email_already_used"))
         return email
-

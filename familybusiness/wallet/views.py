@@ -9,6 +9,7 @@ from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from account.models import Account
 from .forms import WalletForm, TransactionForm
@@ -34,23 +35,23 @@ def wallet_create(request):
             wallet.users.add(request.user)
             Event.objects.create(
                 date=timezone.now(),
-                content=f"Nouveau portefeuille créé : {wallet.name}",
+                content=_("new_wallet_created") + f": {wallet.name}",
                 user=request.user,
                 type='WALLET_CREATE'
             )
             return redirect('wallet:wallet_list')
     else:
         form = WalletForm()
-    return render(request, 'wallet/wallet_form.html', {'form': form, 'title': 'Créer un Wallet'})
+    return render(request, 'wallet/wallet_form.html', {'form': form, 'title': _("create_wallet")})
 
 @login_required(login_url='account:login')
 def wallet_update(request, wallet_id):
     wallet = Wallet.objects.get(id=wallet_id)
     if request.user != wallet.owner:
-        messages.error(request, "Vous n'avez pas accès à ce portefeuille.")
+        messages.error(request, _("no_access_to_wallet"))
         Event.objects.create(
             date=timezone.now(),
-            content=f"Tentative de modification d'un portefeuille non autorisée : {wallet.name}",
+            content=_("unauthorized_wallet_modification_attempt") + f": {wallet.name}",
             user=request.user,
             type='ERROR'
         )
@@ -60,26 +61,26 @@ def wallet_update(request, wallet_id):
         form = WalletForm(request.POST, instance=wallet)
         if form.is_valid():
             form.save()
-            messages.success(request, f'Wallet {wallet.name} modifié avec succès !')
+            messages.success(request, _("wallet_modified_successfully").format(wallet_name=wallet.name))
             Event.objects.create(
                 date=timezone.now(),
-                content=f"Portefeuille modifié : {wallet.name}",
+                content=_("wallet_modified") + f": {wallet.name}",
                 user=request.user,
                 type='WALLET_UPDATE'
             )
             return redirect('wallet:wallet_list')
     else:
         form = WalletForm(instance=wallet)
-    return render(request, 'wallet/wallet_form.html', {'form': form, 'title': 'Modifier le Wallet'})
+    return render(request, 'wallet/wallet_form.html', {'form': form, 'title': _("edit_wallet")})
 
 @login_required(login_url='account:login')
 def wallet_delete(request, wallet_id):
     wallet = Wallet.objects.get(id=wallet_id)
     if request.user != wallet.owner:
-        messages.error(request, "Vous n'êtes pas autorisé à supprimer ce portefeuille.")
+        messages.error(request, _("not_authorized_to_delete_wallet"))
         Event.objects.create(
             date=timezone.now(),
-            content=f"Tentative de suppression d'un portefeuille non autorisée : {wallet.name}",
+            content=_("unauthorized_wallet_deletion_attempt") + f": {wallet.name}",
             user=request.user,
             type='ERROR'
         )
@@ -87,10 +88,10 @@ def wallet_delete(request, wallet_id):
 
     if request.method == 'POST':
         wallet.delete()
-        messages.success(request, f'Wallet {wallet.name} supprimé avec succès !')
+        messages.success(request, _("wallet_deleted_successfully").format(wallet_name=wallet.name))
         Event.objects.create(
             date=timezone.now(),
-            content=f"Portefeuille supprimé : {wallet.name}",
+            content=_("wallet_deleted") + f": {wallet.name}",
             user=request.user,
             type='WALLET_DELETE'
         )
@@ -106,10 +107,10 @@ def wallet_detail(request, wallet_id):
 
     # Vérifier que l'utilisateur a accès à ce portefeuille
     if request.user not in wallet.users.all():
-        messages.error(request, "Vous n'avez pas accès à ce portefeuille.")
+        messages.error(request, _("no_access_to_wallet"))
         Event.objects.create(
             date=timezone.now(),
-            content=f"Tentative d'accès à un portefeuille non autorisé : {wallet.name}",
+            content=_("unauthorized_wallet_access_attempt") + f": {wallet.name}",
             user=request.user,
             type='ERROR'
         )
@@ -206,10 +207,10 @@ def add_transaction(request, wallet_id):
 
     # Vérifier que l'utilisateur a accès à ce portefeuille
     if request.user not in wallet.users.all():
-        messages.error(request, "Vous n'avez pas accès à ce portefeuille.")
+        messages.error(request, _("no_access_to_wallet"))
         Event.objects.create(
             date=timezone.now(),
-            content=f"Tentative d'ajout d'une transaction à un portefeuille non autorisé : {wallet.name}",
+            content=_("unauthorized_transaction_addition_attempt") + f": {wallet.name}",
             user=request.user,
             type='ERROR'
         )
@@ -226,15 +227,15 @@ def add_transaction(request, wallet_id):
             # Mettre à jour le solde du portefeuille
             if transaction.is_income:
                 wallet.balance += transaction.amount
-                messages.success(request, f'Revenu de {transaction.amount}€ ajouté avec succès !')
+                messages.success(request, _("income_added_successfully").format(amount=transaction.amount))
             else:
                 wallet.balance -= transaction.amount
-                messages.success(request, f'Dépense de {transaction.amount}€ enregistrée avec succès !')
+                messages.success(request, _("expense_recorded_successfully").format(amount=transaction.amount))
 
             wallet.save()
             Event.objects.create(
                 date=timezone.now(),
-                content=f"Transaction ajoutée ({f"Dépense" if not transaction.is_income else "Revenu"}): {transaction.title} - {transaction.amount}€",
+                content=_("transaction_added") + f" ({_('expense') if not transaction.is_income else _('income')}): {transaction.title} - {transaction.amount}€",
                 user=request.user,
                 type='TRANSACTION_CREATE'
             )
@@ -262,10 +263,10 @@ def edit_transaction(request, wallet_id, transaction_id):
 
     # Vérifier que l'utilisateur a accès à ce portefeuille
     if request.user not in wallet.users.all():
-        messages.error(request, "Vous n'avez pas accès à ce portefeuille.")
+        messages.error(request, _("no_access_to_wallet"))
         Event.objects.create(
             date=timezone.now(),
-            content=f"Tentative de modification d'une transaction dans un portefeuille non autorisé : {wallet.name}",
+            content=_("unauthorized_transaction_modification_attempt") + f": {wallet.name}",
             user=request.user,
             type='ERROR'
         )
@@ -290,15 +291,15 @@ def edit_transaction(request, wallet_id, transaction_id):
             # Appliquer la nouvelle transaction au solde
             if transaction.is_income:
                 wallet.balance += transaction.amount
-                messages.success(request, 'Revenu modifié avec succès !')
+                messages.success(request, _("income_modified_successfully"))
             else:
                 wallet.balance -= transaction.amount
-                messages.success(request, 'Dépense modifiée avec succès !')
+                messages.success(request, _("expense_modified_successfully"))
 
             wallet.save()
             Event.objects.create(
                 date=timezone.now(),
-                content=f"Transaction modifiée ({f"Dépense" if not transaction.is_income else "Revenu"}): {transaction.title} - {transaction.amount}€",
+                content=_("transaction_modified") + f" ({_('expense') if not transaction.is_income else _('income')}): {transaction.title} - {transaction.amount}€",
                 user=request.user,
                 type='TRANSACTION_UPDATE'
             )
@@ -327,10 +328,10 @@ def delete_transaction(request, wallet_id, transaction_id):
 
     # Vérifier que l'utilisateur a accès à ce portefeuille
     if request.user not in wallet.users.all():
-        messages.error(request, "Vous n'avez pas accès à ce portefeuille.")
+        messages.error(request, _("no_access_to_wallet"))
         Event.objects.create(
             date=timezone.now(),
-            content=f"Tentative de suppression d'une transaction dans un portefeuille non autorisé : {wallet.name}",
+            content=_("unauthorized_transaction_deletion_attempt") + f": {wallet.name}",
             user=request.user,
             type='ERROR'
         )
@@ -340,17 +341,17 @@ def delete_transaction(request, wallet_id, transaction_id):
         # Ajuster le solde du portefeuille
         if transaction.is_income:
             wallet.balance -= transaction.amount
-            messages.success(request, f'Revenu de {transaction.amount}€ supprimé.')
+            messages.success(request, _("income_deleted").format(amount=transaction.amount))
         else:
             wallet.balance += transaction.amount
-            messages.success(request, f'Dépense de {transaction.amount}€ supprimée.')
+            messages.success(request, _("expense_deleted").format(amount=transaction.amount))
 
         wallet.save()
         transaction.delete()
 
         Event.objects.create(
             date=timezone.now(),
-            content=f"Transaction supprimée ({f"Dépense" if not transaction.is_income else "Revenu"}): {transaction.title} - {transaction.amount}€",
+            content=_("transaction_deleted") + f" ({_('expense') if not transaction.is_income else _('income')}): {transaction.title} - {transaction.amount}€",
             user=request.user,
             type='TRANSACTION_DELETE'
         )
@@ -374,10 +375,10 @@ def transaction_list(request, wallet_id):
 
     # Vérifier que l'utilisateur a accès à ce portefeuille
     if request.user not in wallet.users.all():
-        messages.error(request, "Vous n'avez pas accès à ce portefeuille.")
+        messages.error(request, _("no_access_to_wallet"))
         Event.objects.create(
             date=timezone.now(),
-            content=f"Tentative d'accès à la liste des transactions d'un portefeuille non autorisé : {wallet.name}",
+            content=_("unauthorized_transaction_list_access_attempt") + f": {wallet.name}",
             user=request.user,
             type='ERROR'
         )
@@ -434,10 +435,10 @@ def edit_objective(request, wallet_id):
 
     # Vérifier que l'utilisateur a accès à ce portefeuille
     if request.user not in wallet.users.all():
-        messages.error(request, "Vous n'avez pas accès à ce portefeuille.")
+        messages.error(request, _("no_access_to_wallet"))
         Event.objects.create(
             date=timezone.now(),
-            content=f"Tentative de modification de l'objectif d'un portefeuille non autorisé : {wallet.name}",
+            content=_("unauthorized_objective_modification_attempt") + f": {wallet.name}",
             user=request.user,
             type='ERROR'
         )
@@ -449,29 +450,31 @@ def edit_objective(request, wallet_id):
             try:
                 objective_value = float(objective)
                 if objective_value < 0:
-                    messages.error(request, 'L\'objectif ne peut pas être négatif.')
+                    messages.error(request, _("objective_cannot_be_negative"))
                 else:
                     old_objective = wallet.objective
                     wallet.objective = objective_value
                     wallet.save()
 
                     if old_objective != objective_value:
-                        messages.success(request,
-                                         f'Objectif mis à jour : {objective_value}€ (anciennement {old_objective}€)')
+                        messages.success(request, _("objective_updated_successfully").format(
+                            new_objective=objective_value,
+                            old_objective=old_objective
+                        ))
                     else:
-                        messages.info(request, 'L\'objectif n\'a pas changé.')
+                        messages.info(request, _("objective_unchanged"))
 
                     Event.objects.create(
                         date=timezone.now(),
-                        content=f"Objectif modifié : {wallet.name} - {old_objective}€ à {objective_value}€",
+                        content=_("objective_modified") + f": {wallet.name} - {old_objective}€ → {objective_value}€",
                         user=request.user,
                         type='OBJECTIVE_UPDATE'
                     )
                     return redirect('wallet:wallet_detail', wallet_id=wallet.id)
             except ValueError:
-                messages.error(request, 'Veuillez entrer un montant valide.')
+                messages.error(request, _("please_enter_valid_amount"))
         else:
-            messages.error(request, 'Veuillez entrer un objectif.')
+            messages.error(request, _("please_enter_objective"))
 
     # Calculer quelques statistiques utiles
     current_progress = 0
@@ -507,10 +510,10 @@ def add_member(request, wallet_id):
 
     # Vérifier que l'utilisateur a accès à ce portefeuille
     if request.user != wallet.owner:
-        messages.error(request, "Vous n'avez pas accès à ce portefeuille.")
+        messages.error(request, _("no_access_to_wallet"))
         Event.objects.create(
             date=timezone.now(),
-            content=f"Tentative d'ajout d'un membre à un portefeuille non autorisé : {wallet.name}",
+            content=_("unauthorized_member_addition_attempt") + f": {wallet.name}",
             user=request.user,
             type='ERROR'
         )
@@ -520,10 +523,10 @@ def add_member(request, wallet_id):
         user_id = request.POST.get('user_id')
         user = get_object_or_404(Account, id=user_id)
         wallet.users.add(user)
-        messages.success(request, f'{user.get_full_name()} a été ajouté au portefeuille.')
+        messages.success(request, _("member_added_to_wallet").format(user_name=user.get_full_name()))
         Event.objects.create(
             date=timezone.now(),
-            content=f"Membre ajouté au portefeuille : {user.get_full_name()}",
+            content=_("member_added_to_wallet_log") + f": {user.get_full_name()}",
             user=request.user,
             type='WALLET_UPDATE'
         )
@@ -540,10 +543,10 @@ def remove_member(request, wallet_id, user_id):
 
     # Vérifier que l'utilisateur a accès à ce portefeuille
     if request.user != wallet.owner:
-        messages.error(request, "Vous n'avez pas accès à ce portefeuille.")
+        messages.error(request, _("no_access_to_wallet"))
         Event.objects.create(
             date=timezone.now(),
-            content=f"Tentative de retrait d'un membre d'un portefeuille non autorisé : {wallet.name}",
+            content=_("unauthorized_member_removal_attempt") + f": {wallet.name}",
             user=request.user,
             type='ERROR'
         )
@@ -552,14 +555,14 @@ def remove_member(request, wallet_id, user_id):
     user = get_object_or_404(Account, id=user_id)
     if request.user != user:
         wallet.users.remove(user)
-        messages.success(request, f'{user.get_full_name()} a été retiré du portefeuille.')
+        messages.success(request, _("member_removed_from_wallet").format(user_name=user.get_full_name()))
         Event.objects.create(
             date=timezone.now(),
-            content=f"Membre retiré du portefeuille : {user.get_full_name()}",
+            content=_("member_removed_from_wallet_log") + f": {user.get_full_name()}",
             user=request.user,
             type='WALLET_UPDATE'
         )
         return redirect('wallet:wallet_detail', wallet_id=wallet.id)
     else:
-        messages.error(request, "Vous ne pouvez pas vous retirer vous-même du portefeuille.")
+        messages.error(request, _("cannot_remove_yourself_from_wallet"))
         return redirect('wallet:wallet_detail', wallet_id=wallet.id)

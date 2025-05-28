@@ -1,4 +1,5 @@
 {% extends "master.html" %}
+{% load i18n %}
 
 {% block head %}
 
@@ -76,7 +77,7 @@
                             <span class="icon mr-2">
                                 <i class="mdi mdi-plus-circle"></i>
                             </span>
-                            Nouvelle transaction
+                            {% trans "new_transaction" %}
                         </div>
                     </div>
 
@@ -93,7 +94,7 @@
                                         <span class="slider is-rounded"></span>
                                     </label>
                                     <p class="help">
-                                        <span id="transaction-type">Dépense</span> - Activez pour un revenu
+                                        <span id="transaction-type">{% trans "expense" %}</span> - {% trans "activate_for_income" %}
                                     </p>
                                 </div>
                                 {% for error in form.is_income.errors %}
@@ -162,7 +163,7 @@
                             <!-- Résumé -->
                             <div class="notification is-light" id="transaction-summary" style="display: none;">
                                 <div class="content">
-                                    <strong>Résumé :</strong>
+                                    <strong>{% trans "summary" %} :</strong>
                                     <p id="summary-text"></p>
                                 </div>
                             </div>
@@ -171,7 +172,7 @@
                             <div class="field is-grouped is-grouped-right mt-5">
                                 <div class="control">
                                     <a href="{% url 'wallet:wallet_detail' wallet.id %}" class="button is-light">
-                                        Annuler
+                                        {% trans "cancel" %}
                                     </a>
                                 </div>
                                 <div class="control">
@@ -179,7 +180,7 @@
                                         <span class="icon">
                                             <i class="mdi mdi-content-save"></i>
                                         </span>
-                                        <span>Enregistrer la transaction</span>
+                                        <span>{% trans "save_transaction" %}</span>
                                     </button>
                                 </div>
                             </div>
@@ -205,18 +206,27 @@
         const amountIcon = document.getElementById('amount-icon');
         const submitBtn = document.getElementById('submit-btn');
 
+        // Traductions pour JavaScript
+        const translations = {
+            'income': "{% trans 'income' %}",
+            'expense': "{% trans 'expense' %}",
+            'add_this_income': "{% trans 'add_this_income' %}",
+            'save_transaction': "{% trans 'save_transaction' %}",
+            'summary_template': "{% trans 'transaction_summary_template' %}"
+        };
+
         // Gestion du switch revenus/dépenses
         function updateTransactionType() {
             if (isIncomeSwitch.checked) {
-                transactionType.textContent = 'Revenu';
+                transactionType.textContent = translations.income;
                 transactionType.className = 'has-text-success';
                 submitBtn.className = 'button is-success';
-                submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-trending-up"></i></span><span>Ajouter ce revenu</span>';
+                submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-trending-up"></i></span><span>' + translations.add_this_income + '</span>';
             } else {
-                transactionType.textContent = 'Dépense';
+                transactionType.textContent = translations.expense;
                 transactionType.className = 'has-text-danger';
                 submitBtn.className = 'button is-primary';
-                submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-content-save"></i></span><span>Enregistrer la transaction</span>';
+                submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-content-save"></i></span><span>' + translations.save_transaction + '</span>';
             }
             updateSummary();
         }
@@ -247,15 +257,15 @@
             const category = categorySelect.options[categorySelect.selectedIndex]?.text;
 
             if (title && amount && category && category !== '---------') {
-                const type = isIncomeSwitch.checked ? 'revenu' : 'dépense';
+                const type = isIncomeSwitch.checked ? translations.income : translations.expense;
                 const sign = isIncomeSwitch.checked ? '+' : '-';
                 const color = isIncomeSwitch.checked ? 'has-text-success' : 'has-text-danger';
 
                 summaryText.innerHTML = `
-                    Vous allez ajouter un <strong>${type}</strong> de
+                    {% trans "you_will_add_a" %} <strong>${type}</strong> {% trans "of" %}
                     <span class="${color}">${sign}${amount}€</span>
-                    intitulé "<strong>${title}</strong>"
-                    dans la catégorie "<strong>${category}</strong>".
+                    {% trans "titled" %} "<strong>${title}</strong>"
+                    {% trans "in_category" %} "<strong>${category}</strong>".
                 `;
                 summary.style.display = 'block';
             } else {

@@ -3,6 +3,7 @@ from datetime import date
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
+from django.utils.translation import gettext as _
 from .forms import RegistrationForm, LoginForm, ResetPasswordForm
 from django.contrib.auth.decorators import login_required
 from adminpanel.models import Event
@@ -18,7 +19,7 @@ def register_view(request):
             form.save()
             Event.objects.create(
                 date=date.today(),
-                content=f"Nouveau compte créé pour {form.cleaned_data['first_name']} {form.cleaned_data['last_name']}",
+                content=_("new_account_created_for") + f" {form.cleaned_data['first_name']} {form.cleaned_data['last_name']}",
                 user=form.instance,
                 type='USER_REGISTER'
             )
@@ -35,7 +36,7 @@ def login_view(request):
             login(request, user)
             Event.objects.create(
                 date=date.today(),
-                content=f"Connexion de {user.first_name} {user.last_name}",
+                content=_("login_for") + f" {user.first_name} {user.last_name}",
                 user=user,
                 type='LOGIN'
             )
@@ -47,7 +48,7 @@ def login_view(request):
 def logout_view(request):
     Event.objects.create(
         date=date.today(),
-        content=f"Déconnexion de {request.user.first_name} {request.user.last_name}",
+        content=_("logout_for") + f" {request.user.first_name} {request.user.last_name}",
         user=request.user,
         type='LOGOUT'
     )
@@ -61,14 +62,14 @@ def request_password_reset(request):
         if user:
             token = PasswordResetToken.objects.create(user=user)
             return render(request, 'account/token_display.html', {'token': token.token})
-        messages.error(request, "Aucun compte avec cet email.")
+        messages.error(request, _("no_account_with_this_email"))
     return render(request, 'account/request_password_reset.html')
 
 
 def reset_password(request, token):
     token_obj = get_object_or_404(PasswordResetToken, token=token)
     if not token_obj.is_valid():
-        messages.error(request, "Token expiré.")
+        messages.error(request, _("token_expired"))
         return redirect('account:request_password_reset')
 
     if request.method == 'POST':
@@ -77,7 +78,7 @@ def reset_password(request, token):
             token_obj.user.set_password(form.cleaned_data['password'])
             token_obj.user.save()
             token_obj.delete()
-            messages.success(request, "Mot de passe réinitialisé.")
+            messages.success(request, _("password_reset_successfully"))
             return redirect('account:login')
     else:
         form = ResetPasswordForm()
@@ -87,10 +88,9 @@ def reset_password(request, token):
 def generate_new_token(request, token):
     token_obj = get_object_or_404(PasswordResetToken, token=token)
     if not token_obj.is_valid():
-        messages.error(request, "Token expiré.")
+        messages.error(request, _("token_expired"))
         return redirect('account:request_password_reset')
 
     new_token = PasswordResetToken.objects.create(user=token_obj.user)
     token_obj.delete()
     return render(request, 'account/token_display.html', {'token': new_token.token})
-

@@ -1,4 +1,5 @@
 {% extends "master.html" %}
+{% load i18n %}
 
 {% block content %}
 <section class="section">
@@ -8,7 +9,7 @@
             <div class="level-left">
                 <div class="level-item">
                     <div>
-                        <h1 class="title is-3 mb-1">Modifier la catégorie</h1>
+                        <h1 class="title is-3 mb-1">{% trans "edit_category" %}</h1>
                     </div>
                 </div>
             </div>
@@ -18,7 +19,7 @@
                         <span class="icon">
                             <i class="mdi mdi-arrow-left"></i>
                         </span>
-                        <span>Retour à la liste</span>
+                        <span>{% trans "back_to_list" %}</span>
                     </a>
                 </div>
             </div>
@@ -32,7 +33,7 @@
                             <span class="icon mr-2">
                                 <i class="mdi mdi-tag-edit"></i>
                             </span>
-                            Modifier les informations
+                            {% trans "edit_information" %}
                         </div>
                     </div>
 
@@ -62,11 +63,11 @@
                             <!-- Aperçu des modifications -->
                             <div class="notification is-light" id="changePreview" style="display: none;">
                                 <div class="content">
-                                    <p class="title is-6">Aperçu des modifications</p>
+                                    <p class="title is-6">{% trans "changes_preview" %}</p>
                                     <div class="level">
                                         <div class="level-left">
                                             <div>
-                                                <p class="heading">Nom actuel</p>
+                                                <p class="heading">{% trans "current_name" %}</p>
                                                 <p class="title is-6">{{ category.name }}</p>
                                             </div>
                                         </div>
@@ -77,7 +78,7 @@
                                         </div>
                                         <div class="level-right">
                                             <div>
-                                                <p class="heading">Nouveau nom</p>
+                                                <p class="heading">{% trans "new_name" %}</p>
                                                 <p class="title is-6" id="previewNewName"></p>
                                             </div>
                                         </div>
@@ -89,7 +90,7 @@
                             <div class="field is-grouped is-grouped-right mt-5">
                                 <div class="control">
                                     <a href="{% url 'adminpanel:category_management' %}" class="button is-light is-medium">
-                                        Annuler
+                                        {% trans "cancel" %}
                                     </a>
                                 </div>
                                 <div class="control">
@@ -97,7 +98,7 @@
                                         <span class="icon">
                                             <i class="mdi mdi-content-save"></i>
                                         </span>
-                                        <span>Enregistrer les modifications</span>
+                                        <span>{% trans "save_changes" %}</span>
                                     </button>
                                 </div>
                             </div>
@@ -118,28 +119,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewNewName = document.getElementById('previewNewName');
     const submitBtn = document.getElementById('submitBtn');
     const originalName = "{{ category.name }}";
-    
+
     // Validation du nom en temps réel
     nameInput.addEventListener('input', function() {
         const value = this.value.trim();
-        
+
         if (value !== originalName) {
             this.classList.add('is-success');
             this.classList.remove('is-danger');
             updatePreview(value);
-            
+
             // Changer le bouton pour indiquer qu'il y a des modifications
             submitBtn.classList.remove('is-light');
             submitBtn.classList.add('is-primary');
-            submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-content-save"></i></span><span>Enregistrer les modifications</span>';
+            submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-content-save"></i></span><span>{% trans "save_changes" %}</span>';
         } else if (value === originalName) {
             this.classList.remove('is-success', 'is-danger');
             changePreview.style.display = 'none';
-            
+
             // Bouton en mode "pas de changement"
             submitBtn.classList.add('is-light');
             submitBtn.classList.remove('is-primary');
-            submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-information"></i></span><span>Aucun changement</span>';
+            submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-information"></i></span><span>{% trans "no_changes" %}</span>';
         } else {
             this.classList.remove('is-success');
             if (value.length > 0) {

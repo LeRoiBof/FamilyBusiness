@@ -1,4 +1,5 @@
 {% extends "master.html" %}
+{% load i18n %}
 
 {% block content %}
 <section class="section">
@@ -8,7 +9,7 @@
             <div class="level-left">
                 <div class="level-item">
                     <div>
-                        <h1 class="title is-3 has-text-danger">Supprimer la catégorie</h1>
+                        <h1 class="title is-3 has-text-danger">{% trans "delete_category" %}</h1>
                     </div>
                 </div>
             </div>
@@ -22,7 +23,7 @@
                             <span class="icon mr-2">
                                 <i class="mdi mdi-delete"></i>
                             </span>
-                            Confirmation de suppression
+                            {% trans "deletion_confirmation" %}
                         </div>
                     </div>
 
@@ -40,14 +41,14 @@
                                     <div class="tags">
                                         {% if impact_info.transaction_count > 0 %}
                                             <span class="tag is-warning">
-                                                <i class="mdi mdi-cash mr-1"></i>{{ impact_info.transaction_count }} transaction{{ impact_info.transaction_count|pluralize }}
+                                                <i class="mdi mdi-cash mr-1"></i>{{ impact_info.transaction_count }} {% trans "transaction" %}{{ impact_info.transaction_count|pluralize }}
                                             </span>
                                             <span class="tag is-info">
-                                                <i class="mdi mdi-wallet mr-1"></i>{{ impact_info.wallets_affected }} portefeuille{{ impact_info.wallets_affected|pluralize }}
+                                                <i class="mdi mdi-wallet mr-1"></i>{{ impact_info.wallets_affected }} {% trans "wallet" %}{{ impact_info.wallets_affected|pluralize }}
                                             </span>
                                         {% else %}
                                             <span class="tag is-light">
-                                                <i class="mdi mdi-minus"></i> Catégorie inutilisée
+                                                <i class="mdi mdi-minus"></i> {% trans "category_unused" %}
                                             </span>
                                         {% endif %}
                                     </div>
@@ -57,17 +58,17 @@
 
                         {% if impact_info.transaction_count > 0 %}
                             <div class="notification is-danger is-light">
-                                <p><strong><i class="mdi mdi-alert-circle"></i> Attention :</strong> Cette action supprimera également toutes les transactions associées !</p>
+                                <p><strong><i class="mdi mdi-alert-circle"></i> {% trans "warning" %}:</strong> {% trans "delete_category_warning" %}</p>
                                 <ul class="mt-3">
-                                    <li><strong>{{ impact_info.transaction_count }}</strong> transaction{{ impact_info.transaction_count|pluralize }} supprimée{{ impact_info.transaction_count|pluralize }}</li>
-                                    <li>Historique financier de {{ impact_info.wallets_affected }} portefeuille{{ impact_info.wallets_affected|pluralize }}</li>
-                                    <li>Action <strong>irréversible</strong></li>
+                                    <li><strong>{{ impact_info.transaction_count }}</strong> {% trans "transaction" %}{{ impact_info.transaction_count|pluralize }} {% trans "deleted_plural" %}{{ impact_info.transaction_count|pluralize }}</li>
+                                    <li>{% trans "financial_history_affected" %} {{ impact_info.wallets_affected }} {% trans "wallet" %}{{ impact_info.wallets_affected|pluralize }}</li>
+                                    <li>{% trans "action_irreversible" %}</li>
                                 </ul>
                             </div>
                         {% else %}
                             <div class="notification is-info">
-                                <p><strong>Bonne nouvelle !</strong> Cette catégorie n'est utilisée dans aucune transaction.</p>
-                                <p>Vous pouvez la supprimer sans impact.</p>
+                                <p><strong>{% trans "good_news" %}!</strong> {% trans "category_not_used_in_transactions" %}</p>
+                                <p>{% trans "safe_to_delete" %}</p>
                             </div>
                         {% endif %}
 
@@ -78,12 +79,12 @@
                             <div class="field is-grouped is-grouped-right">
                                 <div class="control">
                                     <a href="{% url 'adminpanel:category_management' %}" class="button is-light is-medium">
-                                        <i class="mdi mdi-cancel"></i> Annuler
+                                        <i class="mdi mdi-cancel"></i> {% trans "cancel" %}
                                     </a>
                                 </div>
                                 <div class="control">
                                     <button type="submit" class="button is-danger is-medium">
-                                        <i class="mdi mdi-delete mr-1"></i> Supprimer la catégorie
+                                        <i class="mdi mdi-delete mr-1"></i> {% trans "delete_category_button" %}
                                     </button>
                                 </div>
                             </div>
@@ -94,7 +95,7 @@
                         <div class="mt-6">
                             <h2 class="subtitle is-5 mb-3">
                                 <i class="mdi mdi-clock-outline mr-1"></i>
-                                Transactions récentes utilisant cette catégorie
+                                {% trans "recent_transactions_using_category" %}
                             </h2>
                             {% for transaction in impact_info.recent_transactions %}
                                 <div class="media mb-2">

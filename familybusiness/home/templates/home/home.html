@@ -1,4 +1,5 @@
 {% extends 'master.html' %}
+{% load i18n %}
 
 {% block content %}
 <section class="section has-background-light">
@@ -7,9 +8,9 @@
             {% load static %}
             <img src="{% static 'logo/business.png' %}" alt="Logo Family Business" class="logo">
         </span>
-        <h1 class="title is-2 mt-4">Bienvenue sur <span class="has-text-primary">Family Business</span></h1>
+        <h1 class="title is-2 mt-4">{% trans "welcome_to" %} <span class="has-text-primary">Family Business</span></h1>
         <p class="subtitle is-5 mb-6">
-            Gérez vos budgets familiaux avec simplicité, sécurité et style.
+            {% trans "manage_family_budgets_with_simplicity" %}
         </p>
 
         <div class="columns is-centered">
@@ -19,10 +20,10 @@
                     <span class="icon is-large has-text-success">
                         <i class="mdi mdi-wallet mdi-36px"></i>
                     </span>
-                    <h2 class="title is-5 mt-2">Vos portefeuilles</h2>
-                    <p>Créez, partagez et suivez les finances de votre famille en temps réel.</p>
+                    <h2 class="title is-5 mt-2">{% trans "your_wallets" %}</h2>
+                    <p>{% trans "create_share_track_family_finances" %}</p>
                     <a href="{% url 'wallet:wallet_list' %}" class="button is-success mt-3">
-                        <i class="mdi mdi-arrow-right-bold mr-1"></i> Accéder
+                        <i class="mdi mdi-arrow-right-bold mr-1"></i> {% trans "access" %}
                     </a>
                 </div>
             </div>
@@ -34,10 +35,10 @@
                     <span class="icon is-large has-text-link">
                         <i class="mdi mdi-shield-account mdi-36px"></i>
                     </span>
-                    <h2 class="title is-5 mt-2">Administration</h2>
-                    <p>Gérez les utilisateurs, portefeuilles et paramètres du système.</p>
+                    <h2 class="title is-5 mt-2">{% trans "administration" %}</h2>
+                    <p>{% trans "manage_users_wallets_system_settings" %}</p>
                     <a href="{% url 'adminpanel:admin_panel' %}" class="button is-link mt-3">
-                        <i class="mdi mdi-arrow-right-bold mr-1"></i> Accéder
+                        <i class="mdi mdi-arrow-right-bold mr-1"></i> {% trans "access" %}
                     </a>
                 </div>
             </div>

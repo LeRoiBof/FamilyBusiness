@@ -1,4 +1,5 @@
 {% extends "master.html" %}
+{% load i18n %}
 
 {% block head %}
 <style>
@@ -52,18 +53,18 @@
                                 <span class="icon">
                                     <i class="mdi mdi-plus"></i>
                                 </span>
-                                <span>Ajouter transaction</span>
+                                <span>{% trans "add_transaction" %}</span>
                             </a>
                             <a href="{% url 'wallet:wallet_detail' wallet.id %}" class="button is-primary is-light">
                                 <span class="icon">
                                     <i class="mdi mdi-chart-line"></i>
                                 </span>
-                                <span>Tableau de bord</span>
+                                <span>{% trans "dashboard" %}</span>
                             </a>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Indicateurs financiers -->
                 <div class="columns is-multiline mt-4">
                     <div class="column is-half-tablet is-one-quarter-desktop">
@@ -71,7 +72,7 @@
                             <div class="level">
                                 <div class="level-left">
                                     <div>
-                                        <p class="heading">Solde actuel</p>
+                                        <p class="heading">{% trans "current_balance" %}</p>
                                         <p class="title is-4 has-text-success">{{ wallet.balance|floatformat:2 }} €</p>
                                     </div>
                                 </div>
@@ -83,13 +84,13 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="column is-half-tablet is-one-quarter-desktop">
                         <div class="box has-background-info-light">
                             <div class="level">
                                 <div class="level-left">
                                     <div>
-                                        <p class="heading">Objectif</p>
+                                        <p class="heading">{% trans "objective" %}</p>
                                         <p class="title is-4 has-text-info">{{ wallet.objective|floatformat:2 }} €</p>
                                     </div>
                                 </div>
@@ -101,13 +102,13 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="column is-half-tablet is-one-quarter-desktop">
                         <div class="box has-background-warning-light">
                             <div class="level">
                                 <div class="level-left">
                                     <div>
-                                        <p class="heading">Revenus du mois</p>
+                                        <p class="heading">{% trans "monthly_income" %}</p>
                                         <p class="title is-4 has-text-success">{{ monthly_income|floatformat:2 }} €</p>
                                     </div>
                                 </div>
@@ -125,7 +126,7 @@
                             <div class="level">
                                 <div class="level-left">
                                     <div>
-                                        <p class="heading">Dépenses du mois</p>
+                                        <p class="heading">{% trans "monthly_expenses" %}</p>
                                         <p class="title is-4 has-text-danger">{{ monthly_expenses|floatformat:2 }} €</p>
                                     </div>
                                 </div>
@@ -148,14 +149,14 @@
                     <span class="icon mr-2">
                         <i class="mdi mdi-filter"></i>
                     </span>
-                    Filtres et recherche
+                    {% trans "filters_and_search" %}
                 </div>
                 <div class="card-header-icon">
                     <button class="button is-small is-light" id="reset-filters">
                         <span class="icon">
                             <i class="mdi mdi-refresh"></i>
                         </span>
-                        <span>Réinitialiser</span>
+                        <span>{% trans "reset" %}</span>
                     </button>
                 </div>
             </div>
@@ -165,47 +166,47 @@
                         <!-- Recherche -->
                         <div class="column">
                             <div class="field">
-                                <label class="label">Recherche</label>
+                                <label class="label">{% trans "search" %}</label>
                                 <div class="control has-icons-left">
-                                    <input class="input" type="text" name="search" value="{{ current_search }}" 
-                                           placeholder="Titre ou description...">
+                                    <input class="input" type="text" name="search" value="{{ current_search }}"
+                                           placeholder="{% trans 'title_or_description_placeholder' %}">
                                     <span class="icon is-small is-left">
                                         <i class="mdi mdi-magnify"></i>
                                     </span>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Type -->
                         <div class="column">
                             <div class="field">
-                                <label class="label">Type</label>
+                                <label class="label">{% trans "type" %}</label>
                                 <div class="control">
                                     <div class="select is-fullwidth">
                                         <select name="type">
-                                            <option value="">Tous les types</option>
+                                            <option value="">{% trans "all_types" %}</option>
                                             <option value="income" {% if current_type == 'income' %}selected{% endif %}>
-                                                Revenus uniquement
+                                                {% trans "income_only" %}
                                             </option>
                                             <option value="expense" {% if current_type == 'expense' %}selected{% endif %}>
-                                                Dépenses uniquement
+                                                {% trans "expenses_only" %}
                                             </option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Catégorie -->
                         <div class="column">
                             <div class="field">
-                                <label class="label">Catégorie</label>
+                                <label class="label">{% trans "category" %}</label>
                                 <div class="control">
                                     <div class="select is-fullwidth">
                                         <select name="category">
-                                            <option value="">Toutes les catégories</option>
+                                            <option value="">{% trans "all_categories" %}</option>
                                             {% for category in categories %}
-                                                <option value="{{ category.id }}" 
+                                                <option value="{{ category.id }}"
                                                         {% if current_category == category.id|stringformat:"s" %}selected{% endif %}>
                                                     {{ category.name }}
                                                 </option>
@@ -215,7 +216,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Bouton de filtrage -->
                         <div class="column is-narrow">
                             <div class="field">
@@ -225,31 +226,31 @@
                                         <span class="icon">
                                             <i class="mdi mdi-filter-check"></i>
                                         </span>
-                                        <span>Filtrer</span>
+                                        <span>{% trans "filter" %}</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </form>
-                
+
                 <!-- Résumé des filtres actifs -->
                 {% if current_search or current_type or selected_category %}
                 <div class="notification is-light">
                     <button class="delete" id="clear-filters"></button>
-                    <strong>Filtres actifs :</strong>
+                    <strong>{% trans "active_filters" %} :</strong>
                     {% if current_search %}
-                        <span class="tag is-info ml-2">Recherche: "{{ current_search }}"</span>
+                        <span class="tag is-info ml-2">{% trans "search_label" %}: "{{ current_search }}"</span>
                     {% endif %}
                     {% if current_type %}
                         <span class="tag is-success ml-2">
-                            {% if current_type == 'income' %}Revenus{% else %}Dépenses{% endif %}
+                            {% if current_type == 'income' %}{% trans "income" %}{% else %}{% trans "expenses" %}{% endif %}
                         </span>
                     {% endif %}
                     {% if selected_category %}
                         <span class="tag is-warning ml-2">{{ selected_category.name }}</span>
                     {% endif %}
-                    <span class="ml-2">{{ transactions|length }} résultat{{ transactions|length|pluralize }}</span>
+                    <span class="ml-2">{{ transactions|length }} {% trans "result" %}{{ transactions|length|pluralize }}</span>
                 </div>
                 {% endif %}
             </div>
@@ -262,32 +263,32 @@
                     <span class="icon mr-2">
                         <i class="mdi mdi-format-list-bulleted"></i>
                     </span>
-                    Transactions ({{ transactions|length }})
+                    {% trans "transactions" %} ({{ transactions|length }})
                 </div>
                 <div class="card-header-icon">
                     <div class="field has-addons">
                         <div class="control">
                             <div class="select is-small">
                                 <select id="sort-select">
-                                    <option value="-date">Plus récent</option>
-                                    <option value="date">Plus ancien</option>
-                                    <option value="-amount">Montant décroissant</option>
-                                    <option value="amount">Montant croissant</option>
-                                    <option value="title">Titre A-Z</option>
+                                    <option value="-date">{% trans "most_recent" %}</option>
+                                    <option value="date">{% trans "oldest" %}</option>
+                                    <option value="-amount">{% trans "amount_descending" %}</option>
+                                    <option value="amount">{% trans "amount_ascending" %}</option>
+                                    <option value="title">{% trans "title_a_z" %}</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <div class="card-content p-0">
                 {% if transactions %}
                     <div class="transaction-list">
                         {% for transaction in transactions %}
                         <div class="transaction-item p-4 {% if not forloop.last %}border-bottom{% endif %}"
-                             data-date="{{ transaction.date|date:'Y-m-d' }}" 
-                             data-amount="{{ transaction.amount }}" 
+                             data-date="{{ transaction.date|date:'Y-m-d' }}"
+                             data-amount="{{ transaction.amount }}"
                              data-title="{{ transaction.title|lower }}">
                             <div class="media">
                                 <div class="media-left">
@@ -321,14 +322,14 @@
                                                         {% if transaction.is_income %}+{% else %}-{% endif %}{{ transaction.amount|floatformat:2 }} €
                                                     </p>
                                                     <div class="buttons is-right">
-                                                        <a href="{% url 'wallet:edit_transaction' wallet.id transaction.id %}" 
-                                                           class="button is-small is-info is-light" title="Modifier">
+                                                        <a href="{% url 'wallet:edit_transaction' wallet.id transaction.id %}"
+                                                           class="button is-small is-info is-light" title="{% trans 'edit' %}">
                                                             <span class="icon is-small">
                                                                 <i class="mdi mdi-pencil"></i>
                                                             </span>
                                                         </a>
-                                                        <a href="{% url 'wallet:delete_transaction' wallet.id transaction.id %}" 
-                                                           class="button is-small is-danger is-light" title="Supprimer">
+                                                        <a href="{% url 'wallet:delete_transaction' wallet.id transaction.id %}"
+                                                           class="button is-small is-danger is-light" title="{% trans 'delete' %}">
                                                             <span class="icon is-small">
                                                                 <i class="mdi mdi-delete"></i>
                                                             </span>
@@ -348,23 +349,23 @@
                         <span class="icon is-large has-text-grey-light">
                             <i class="mdi mdi-48px mdi-file-document-outline"></i>
                         </span>
-                        <p class="title is-5 has-text-grey">Aucune transaction trouvée</p>
+                        <p class="title is-5 has-text-grey">{% trans "no_transaction_found" %}</p>
                         {% if current_search or current_type or current_category %}
                             <p class="subtitle is-6 has-text-grey">
-                                Essayez de modifier vos filtres ou 
+                                {% trans "try_modifying_filters_or" %}
                                 <button class="button is-text is-small" id="clear-all-filters">
-                                    réinitialisez la recherche
+                                    {% trans "reset_search" %}
                                 </button>
                             </p>
                         {% else %}
                             <p class="subtitle is-6 has-text-grey">
-                                Commencez par ajouter votre première transaction
+                                {% trans "start_by_adding_first_transaction" %}
                             </p>
                             <a href="{% url 'wallet:add_transaction' wallet.id %}" class="button is-primary mt-3">
                                 <span class="icon">
                                     <i class="mdi mdi-plus"></i>
                                 </span>
-                                <span>Ajouter une transaction</span>
+                                <span>{% trans "add_transaction" %}</span>
                             </a>
                         {% endif %}
                     </div>
@@ -381,44 +382,49 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearFiltersBtn = document.getElementById('clear-filters');
     const clearAllFiltersBtn = document.getElementById('clear-all-filters');
     const sortSelect = document.getElementById('sort-select');
-    
+
+    // Traductions pour JavaScript
+    const translations = {
+        'transactions': "{% trans 'transactions' %}"
+    };
+
     // Filtrage en temps réel sur la recherche
     const searchInput = form.querySelector('input[name="search"]');
     let searchTimeout;
-    
+
     searchInput.addEventListener('input', function() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
             filterTransactions();
         }, 300);
     });
-    
+
     // Tri des transactions
     sortSelect.addEventListener('change', function() {
         sortTransactions(this.value);
     });
-    
+
     // Réinitialiser les filtres
     function resetFilters() {
         form.reset();
         window.location.href = window.location.pathname;
     }
-    
+
     resetBtn.addEventListener('click', resetFilters);
     if (clearFiltersBtn) clearFiltersBtn.addEventListener('click', resetFilters);
     if (clearAllFiltersBtn) clearAllFiltersBtn.addEventListener('click', resetFilters);
-    
+
     // Filtrage côté client pour la recherche instantanée
     function filterTransactions() {
         const searchTerm = searchInput.value.toLowerCase();
         const transactions = document.querySelectorAll('.transaction-item');
         let visibleCount = 0;
-        
+
         transactions.forEach(transaction => {
             const title = transaction.querySelector('.title').textContent.toLowerCase();
             const description = transaction.querySelector('.has-text-grey-dark');
             const descText = description ? description.textContent.toLowerCase() : '';
-            
+
             if (title.includes(searchTerm) || descText.includes(searchTerm)) {
                 transaction.style.display = 'block';
                 visibleCount++;
@@ -426,14 +432,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 transaction.style.display = 'none';
             }
         });
-        
+
         // Mettre à jour le compteur
         const counter = document.querySelector('.card-header-title');
         counter.innerHTML = `
             <span class="icon mr-2">
                 <i class="mdi mdi-format-list-bulleted"></i>
             </span>
-            Transactions (${visibleCount})
+            ${translations.transactions} (${visibleCount})
         `;
     }
     

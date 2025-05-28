@@ -1,4 +1,5 @@
 {% extends "master.html" %}
+{% load i18n %}
 
 {% block content %}
 <section class="section">
@@ -11,7 +12,7 @@
                             <span class="icon mr-2">
                                 <i class="mdi mdi-account-plus"></i>
                             </span>
-                            Créer un compte
+                            {% trans "create_account" %}
                         </div>
                     </div>
 
@@ -21,7 +22,7 @@
                                 <i class="mdi mdi-48px mdi-account-circle-outline"></i>
                             </span>
                             <p class="subtitle is-6 has-text-grey">
-                                Créez votre compte pour commencer à gérer vos finances
+                                {% trans "create_account_to_manage_finances" %}
                             </p>
                         </div>
 
@@ -95,7 +96,7 @@
 
                                         <!-- Aide contextuelle pour les champs -->
                                         {% if field.name == 'password1' %}
-                                            <p class="help">Minimum 8 caractères recommandés</p>
+                                            <p class="help">{% trans "minimum_8_characters_recommended" %}</p>
                                         {% endif %}
                                     </div>
                                 {% endif %}
@@ -107,7 +108,7 @@
                                         <span class="icon">
                                             <i class="mdi mdi-account-plus"></i>
                                         </span>
-                                        <span>Créer mon compte</span>
+                                        <span>{% trans "create_my_account" %}</span>
                                     </button>
                                 </div>
                             </div>
@@ -118,9 +119,9 @@
                 <!-- Lien vers connexion -->
                 <div class="has-text-centered mt-5">
                     <p>
-                        <span class="has-text-grey">Vous avez déjà un compte ? </span>
+                        <span class="has-text-grey">{% trans "already_have_account" %} </span>
                         <a href="{% url 'account:login' %}" class="has-text-primary">
-                            <strong>Se connecter</strong>
+                            <strong>{% trans "sign_in" %}</strong>
                         </a>
                     </p>
                 </div>

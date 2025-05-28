@@ -1,4 +1,5 @@
 {% extends "master.html" %}
+{% load i18n %}
 
 {% block content %}
 <section class="section">
@@ -8,9 +9,9 @@
             <div class="level-left">
                 <div class="level-item">
                     <div>
-                        <h1 class="title is-3 mb-1">Gestion des utilisateurs</h1>
+                        <h1 class="title is-3 mb-1">{% trans "user_management" %}</h1>
                         <p class="subtitle is-6 has-text-grey-light mt-1">
-                            Administration des comptes utilisateurs
+                            {% trans "user_account_administration" %}
                         </p>
                     </div>
                 </div>
@@ -21,13 +22,13 @@
                         <span class="icon">
                             <i class="mdi mdi-account-plus"></i>
                         </span>
-                        <span>Créer un utilisateur</span>
+                        <span>{% trans "create_user" %}</span>
                     </a>
                     <a href="{% url 'adminpanel:admin_panel' %}" class="button is-light">
                         <span class="icon">
                             <i class="mdi mdi-arrow-left"></i>
                         </span>
-                        <span>Retour au panel</span>
+                        <span>{% trans "back_to_panel" %}</span>
                     </a>
                 </div>
             </div>
@@ -40,7 +41,7 @@
                     <div class="level">
                         <div class="level-left">
                             <div>
-                                <p class="heading">Total utilisateurs</p>
+                                <p class="heading">{% trans "total_users" %}</p>
                                 <p class="title is-4 has-text-primary">{{ total_users }}</p>
                             </div>
                         </div>
@@ -57,7 +58,7 @@
                     <div class="level">
                         <div class="level-left">
                             <div>
-                                <p class="heading">Utilisateurs actifs</p>
+                                <p class="heading">{% trans "active_users" %}</p>
                                 <p class="title is-4 has-text-success">{{ active_users }}</p>
                             </div>
                         </div>
@@ -74,7 +75,7 @@
                     <div class="level">
                         <div class="level-left">
                             <div>
-                                <p class="heading">Administrateurs</p>
+                                <p class="heading">{% trans "administrators" %}</p>
                                 <p class="title is-4 has-text-warning">{{ admin_users }}</p>
                             </div>
                         </div>
@@ -95,14 +96,14 @@
                     <span class="icon mr-2">
                         <i class="mdi mdi-filter"></i>
                     </span>
-                    Filtres et recherche
+                    {% trans "filters_and_search" %}
                 </div>
                 <div class="card-header-icon">
                     <button class="button is-small is-light" id="reset-filters">
                         <span class="icon">
                             <i class="mdi mdi-refresh"></i>
                         </span>
-                        <span>Réinitialiser</span>
+                        <span>{% trans "reset" %}</span>
                     </button>
                 </div>
             </div>
@@ -112,10 +113,10 @@
                         <!-- Recherche -->
                         <div class="column">
                             <div class="field">
-                                <label class="label">Recherche</label>
+                                <label class="label">{% trans "search" %}</label>
                                 <div class="control has-icons-left">
                                     <input class="input" type="text" name="search" value="{{ current_search }}"
-                                           placeholder="Nom, prénom, email...">
+                                           placeholder="{% trans 'search_placeholder_users' %}">
                                     <span class="icon is-small is-left">
                                         <i class="mdi mdi-magnify"></i>
                                     </span>
@@ -126,16 +127,16 @@
                         <!-- Rôle -->
                         <div class="column">
                             <div class="field">
-                                <label class="label">Rôle</label>
+                                <label class="label">{% trans "role" %}</label>
                                 <div class="control">
                                     <div class="select is-fullwidth">
                                         <select name="role">
-                                            <option value="">Tous les rôles</option>
+                                            <option value="">{% trans "all_roles" %}</option>
                                             <option value="admin" {% if current_role == 'admin' %}selected{% endif %}>
-                                                Administrateur
+                                                {% trans "administrator" %}
                                             </option>
                                             <option value="user" {% if current_role == 'user' %}selected{% endif %}>
-                                                Utilisateur
+                                                {% trans "user" %}
                                             </option>
                                             {% for role in available_roles %}
                                                 <option value="{{ role }}" {% if current_role == role %}selected{% endif %}>
@@ -151,16 +152,16 @@
                         <!-- Statut -->
                         <div class="column">
                             <div class="field">
-                                <label class="label">Statut</label>
+                                <label class="label">{% trans "status" %}</label>
                                 <div class="control">
                                     <div class="select is-fullwidth">
                                         <select name="status">
-                                            <option value="">Tous les statuts</option>
+                                            <option value="">{% trans "all_statuses" %}</option>
                                             <option value="active" {% if current_status == 'active' %}selected{% endif %}>
-                                                Actif
+                                                {% trans "active" %}
                                             </option>
                                             <option value="inactive" {% if current_status == 'inactive' %}selected{% endif %}>
-                                                Inactif
+                                                {% trans "inactive" %}
                                             </option>
                                         </select>
                                     </div>
@@ -177,7 +178,7 @@
                                         <span class="icon">
                                             <i class="mdi mdi-filter-check"></i>
                                         </span>
-                                        <span>Filtrer</span>
+                                        <span>{% trans "filter" %}</span>
                                     </button>
                                 </div>
                             </div>
@@ -189,17 +190,17 @@
                 {% if current_search or current_role or current_status %}
                 <div class="notification is-light">
                     <button class="delete" id="clear-filters"></button>
-                    <strong>Filtres actifs :</strong>
+                    <strong>{% trans "active_filters" %}:</strong>
                     {% if current_search %}
-                        <span class="tag is-info ml-2">Recherche: "{{ current_search }}"</span>
+                        <span class="tag is-info ml-2">{% trans "search" %}: "{{ current_search }}"</span>
                     {% endif %}
                     {% if current_role %}
-                        <span class="tag is-success ml-2">Rôle: {{ current_role|capfirst }}</span>
+                        <span class="tag is-success ml-2">{% trans "role" %}: {{ current_role|capfirst }}</span>
                     {% endif %}
                     {% if current_status %}
-                        <span class="tag is-warning ml-2">Statut: {{ current_status|capfirst }}</span>
+                        <span class="tag is-warning ml-2">{% trans "status" %}: {{ current_status|capfirst }}</span>
                     {% endif %}
-                    <span class="ml-2">{{ filtered_count }} résultat{{ filtered_count|pluralize }}</span>
+                    <span class="ml-2">{{ filtered_count }} {% trans "result" %}{{ filtered_count|pluralize }}</span>
                 </div>
                 {% endif %}
             </div>
@@ -212,11 +213,11 @@
                     <span class="icon mr-2">
                         <i class="mdi mdi-account-group"></i>
                     </span>
-                    Utilisateurs ({{ filtered_count }})
+                    {% trans "users" %} ({{ filtered_count }})
                 </div>
                 <div class="card-header-icon">
                     {% if page_obj.has_other_pages %}
-                        <span class="tag is-light">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+                        <span class="tag is-light">{% trans "page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}</span>
                     {% endif %}
                 </div>
             </div>
@@ -227,12 +228,12 @@
                         <table class="table is-fullwidth is-hoverable ">
                             <thead>
                                 <tr>
-                                    <th>Utilisateur</th>
-                                    <th>Email</th>
-                                    <th>Rôle</th>
-                                    <th>Statut</th>
-                                    <th>Dernière activité</th>
-                                    <th class="has-text-centered">Actions</th>
+                                    <th>{% trans "user" %}</th>
+                                    <th>{% trans "email" %}</th>
+                                    <th>{% trans "role" %}</th>
+                                    <th>{% trans "status" %}</th>
+                                    <th>{% trans "last_activity" %}</th>
+                                    <th class="has-text-centered">{% trans "actions" %}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -250,7 +251,7 @@
                                                     {{ user_data.user.get_full_name }}
                                                 </p>
                                                 <p class="subtitle is-7 has-text-grey">
-                                                    Inscrit le {{ user_data.user.date_joined|date:"d/m/Y" }}
+                                                    {% trans "registered_on" %} {{ user_data.user.date_joined|date:"d/m/Y" }}
                                                 </p>
                                             </div>
                                         </div>
@@ -264,11 +265,11 @@
                                                 <span class="icon is-small">
                                                     <i class="mdi mdi-shield"></i>
                                                 </span>
-                                                <span>Admin</span>
+                                                <span>{% trans "admin" %}</span>
                                             </span>
                                         {% else %}
                                             <span class="tag is-light">
-                                                {{ user_data.user.role|default:"Utilisateur"|capfirst }}
+                                                {{ user_data.user.role|default:_("user")|capfirst }}
                                             </span>
                                         {% endif %}
                                     </td>
@@ -278,14 +279,14 @@
                                                 <span class="icon is-small">
                                                     <i class="mdi mdi-check"></i>
                                                 </span>
-                                                <span>Actif</span>
+                                                <span>{% trans "active" %}</span>
                                             </span>
                                         {% else %}
                                             <span class="tag is-danger">
                                                 <span class="icon is-small">
                                                     <i class="mdi mdi-close"></i>
                                                 </span>
-                                                <span>Inactif</span>
+                                                <span>{% trans "inactive" %}</span>
                                             </span>
                                         {% endif %}
                                     </td>
@@ -293,20 +294,20 @@
                                         {% if user_data.last_activity %}
                                             <span class="has-text-grey">{{ user_data.last_activity|date:"d/m/Y" }}</span>
                                         {% else %}
-                                            <span class="has-text-grey-light">Aucune</span>
+                                            <span class="has-text-grey-light">{% trans "none" %}</span>
                                         {% endif %}
                                     </td>
                                     <td class="has-text-centered">
                                         <div class="buttons is-centered">
                                             <a href="{% url 'adminpanel:edit_user' user_data.user.id %}"
-                                               class="button is-small is-info is-light" title="Modifier">
+                                               class="button is-small is-info is-light" title="{% trans 'edit' %}">
                                                 <span class="icon is-small">
                                                     <i class="mdi mdi-pencil"></i>
                                                 </span>
                                             </a>
                                             {% if user_data.user != user %}
                                                 <a href="{% url 'adminpanel:delete_user' user_data.user.id %}"
-                                                   class="button is-small is-danger is-light" title="Supprimer">
+                                                   class="button is-small is-danger is-light" title="{% trans 'delete' %}">
                                                     <span class="icon is-small">
                                                         <i class="mdi mdi-delete"></i>
                                                     </span>
@@ -324,23 +325,23 @@
                         <span class="icon is-large has-text-grey-light">
                             <i class="mdi mdi-48px mdi-account-group"></i>
                         </span>
-                        <p class="title is-5 has-text-grey">Aucun utilisateur trouvé</p>
+                        <p class="title is-5 has-text-grey">{% trans "no_users_found" %}</p>
                         {% if current_search or current_role or current_status %}
                             <p class="subtitle is-6 has-text-grey">
-                                Essayez de modifier vos filtres ou
+                                {% trans "try_modifying_filters_or" %}
                                 <button class="button is-text is-small" id="clear-all-filters">
-                                    réinitialisez la recherche
+                                    {% trans "reset_search" %}
                                 </button>
                             </p>
                         {% else %}
                             <p class="subtitle is-6 has-text-grey">
-                                Commencez par créer votre premier utilisateur
+                                {% trans "start_by_creating_first_user" %}
                             </p>
                             <a href="{% url 'adminpanel:create_user' %}" class="button is-primary mt-3">
                                 <span class="icon">
                                     <i class="mdi mdi-account-plus"></i>
                                 </span>
-                                <span>Créer un utilisateur</span>
+                                <span>{% trans "create_user" %}</span>
                             </a>
                         {% endif %}
                     </div>
@@ -353,16 +354,16 @@
         <nav class="pagination is-centered mt-5" role="navigation">
             {% if page_obj.has_previous %}
                 <a href="?page={{ page_obj.previous_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_role %}&role={{ current_role }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}"
-                   class="pagination-previous">Précédent</a>
+                   class="pagination-previous">{% trans "previous" %}</a>
             {% else %}
-                <a class="pagination-previous" disabled>Précédent</a>
+                <a class="pagination-previous" disabled>{% trans "previous" %}</a>
             {% endif %}
 
             {% if page_obj.has_next %}
                 <a href="?page={{ page_obj.next_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_role %}&role={{ current_role }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}"
-                   class="pagination-next">Suivant</a>
+                   class="pagination-next">{% trans "next" %}</a>
             {% else %}
-                <a class="pagination-next" disabled>Suivant</a>
+                <a class="pagination-next" disabled>{% trans "next" %}</a>
             {% endif %}
 
             <ul class="pagination-list">

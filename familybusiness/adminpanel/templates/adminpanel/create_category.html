@@ -1,12 +1,13 @@
 {% extends "master.html" %}
+{% load i18n %}
 
 {% block content %}
 <section class="section">
     <div class="container">
         <!-- En-tête -->
         <div class="mb-5">
-            <h1 class="title is-3 mb-1">Créer une catégorie</h1>
-            <p class="subtitle is-5 has-text-grey mt-1">Ajouter une nouvelle catégorie de transaction</p>
+            <h1 class="title is-3 mb-1">{% trans "create_category" %}</h1>
+            <p class="subtitle is-5 has-text-grey mt-1">{% trans "add_new_transaction_category" %}</p>
         </div>
 
         <div class="columns is-centered">
@@ -17,7 +18,7 @@
                             <span class="icon mr-2">
                                 <i class="mdi mdi-tag-plus"></i>
                             </span>
-                            Nouvelle catégorie
+                            {% trans "new_category" %}
                         </div>
                     </div>
 
@@ -51,7 +52,7 @@
                                         <span class="icon">
                                             <i class="mdi mdi-tag-plus"></i>
                                         </span>
-                                        <span>Créer la catégorie</span>
+                                        <span>{% trans "create_category_button" %}</span>
                                     </button>
                                 </div>
                             </div>

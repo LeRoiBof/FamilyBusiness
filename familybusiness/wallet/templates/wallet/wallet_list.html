@@ -1,4 +1,5 @@
 {% extends "master.html" %}
+{% load i18n %}
 
 {% block head %}
     <style>
@@ -19,7 +20,7 @@
                             <span class="icon has-text-primary">
                                 <i class="mdi mdi-wallet"></i>
                             </span>
-                            <span>Mes Wallets</span>
+                            <span>{% trans "my_wallets" %}</span>
                         </span>
                     </h1>
                 </div>
@@ -30,7 +31,7 @@
                         <span class="icon">
                             <i class="mdi mdi-plus-thick"></i>
                         </span>
-                        <span>Nouveau Wallet</span>
+                        <span>{% trans "new_wallet" %}</span>
                     </a>
                 </div>
             </div>
@@ -52,13 +53,13 @@
                                 </div>
                                 <div class="card-header-icon">
                                     <div class="buttons are-small">
-                                        <a href="{% url 'wallet:wallet_update' wallet.id %}" class="button is-warning is-light" title="Modifier">
+                                        <a href="{% url 'wallet:wallet_update' wallet.id %}" class="button is-warning is-light" title="{% trans 'edit' %}">
                                             <span class="icon">
                                                 <i class="mdi mdi-pencil"></i>
                                             </span>
                                         </a>
                                         <button class="button is-danger is-light js-modal-trigger"
-                                                title="Supprimer"
+                                                title="{% trans 'delete' %}"
                                                 data-target="modal-delete-{{ wallet.id }}">
                                             <span class="icon">
                                                 <i class="mdi mdi-delete"></i>
@@ -72,19 +73,19 @@
                                     <div class="level is-mobile mb-4">
                                         <div class="level-item has-text-centered">
                                             <div>
-                                                <p class="heading">Solde actuel</p>
+                                                <p class="heading">{% trans "current_balance" %}</p>
                                                 <p class="title is-5 has-text-success">{{ wallet.balance }} €</p>
                                             </div>
                                         </div>
                                         <div class="level-item has-text-centered">
                                             <div>
-                                                <p class="heading">Objectif</p>
+                                                <p class="heading">{% trans "objective" %}</p>
                                                 <p class="title is-5 has-text-info">{{ wallet.objective }} €</p>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="field mt-3">
-                                        <label class="label is-small">Propriétaire</label>
+                                        <label class="label is-small">{% trans "owner" %}</label>
                                         <p class="has-text-weight-semibold">
                                             <span class="icon-text">
                                                 <span class="icon has-text-grey-dark">
@@ -95,12 +96,12 @@
                                         </p>
                                     </div>
                                     <div class="field">
-                                        <label class="label is-small">Progression vers l'objectif</label>
+                                        <label class="label is-small">{% trans "progress_toward_objective" %}</label>
                                         <progress class="progress is-success" value="{% widthratio wallet.balance wallet.objective 100 %}" max="100">
                                             {% widthratio wallet.balance wallet.objective 100 %}%
                                         </progress>
                                         <p class="help has-text-centered">
-                                            <strong>{% widthratio wallet.balance wallet.objective 100 %}%</strong> de l'objectif atteint
+                                            <strong>{% widthratio wallet.balance wallet.objective 100 %}%</strong> {% trans "of_objective_reached" %}
                                         </p>
                                     </div>
                                 </div>
@@ -117,31 +118,31 @@
                                             <span class="icon has-text-danger">
                                                 <i class="mdi mdi-alert-circle"></i>
                                             </span>
-                                            <span>Confirmer la suppression</span>
+                                            <span>{% trans "confirm_deletion" %}</span>
                                         </span>
                                     </p>
                                     <button class="delete" aria-label="close"></button>
                                 </header>
                                 <section class="modal-card-body">
                                     <div class="has-text-centered mb-4">
-                                        <h3 class="title is-5">Supprimer le wallet "{{ wallet.name }}" ?</h3>
+                                        <h3 class="title is-5">{% trans "delete_wallet_question" %} "{{ wallet.name }}" ?</h3>
                                     </div>
 
                                     <article class="message is-warning">
                                         <div class="message-body">
                                             <div class="content">
-                                                <p><strong>⚠️ Cette action est irréversible.</strong></p>
-                                                <p>Toutes les données associées à ce wallet seront définitivement perdues.</p>
+                                                <p><strong><i class="mdi mdi-alert"></i> {% trans "action_is_irreversible" %}.</strong></p>
+                                                <p>{% trans "all_wallet_data_will_be_lost" %}</p>
                                             </div>
                                         </div>
                                     </article>
 
                                     <div class="box has-background-light">
-                                        <h4 class="subtitle is-6 mb-3">Informations du wallet :</h4>
+                                        <h4 class="subtitle is-6 mb-3">{% trans "wallet_information" %} :</h4>
                                         <div class="columns is-mobile">
                                             <div class="column">
                                                 <div class="field">
-                                                    <label class="label is-small">Nom</label>
+                                                    <label class="label is-small">{% trans "name" %}</label>
                                                     <div class="control">
                                                         <input class="input is-static" type="text" value="{{ wallet.name }}" readonly>
                                                     </div>
@@ -151,7 +152,7 @@
                                         <div class="columns is-mobile">
                                             <div class="column">
                                                 <div class="field">
-                                                    <label class="label is-small">Solde actuel</label>
+                                                    <label class="label is-small">{% trans "current_balance" %}</label>
                                                     <div class="control">
                                                         <input class="input is-static has-text-success has-text-weight-semibold"
                                                                type="text" value="{{ wallet.balance }} €" readonly>
@@ -160,7 +161,7 @@
                                             </div>
                                             <div class="column">
                                                 <div class="field">
-                                                    <label class="label is-small">Objectif</label>
+                                                    <label class="label is-small">{% trans "objective" %}</label>
                                                     <div class="control">
                                                         <input class="input is-static has-text-info has-text-weight-semibold"
                                                                type="text" value="{{ wallet.objective }} €" readonly>
@@ -175,7 +176,7 @@
                                         <span class="icon">
                                             <i class="mdi mdi-close"></i>
                                         </span>
-                                        <span>Annuler</span>
+                                        <span>{% trans "cancel" %}</span>
                                     </button>
                                     <form method="post" action="{% url 'wallet:wallet_delete' wallet.id %}" style="display: inline;">
                                         {% csrf_token %}
@@ -183,7 +184,7 @@
                                             <span class="icon">
                                                 <i class="mdi mdi-delete"></i>
                                             </span>
-                                            <span>Confirmer la suppression</span>
+                                            <span>{% trans "confirm_deletion" %}</span>
                                         </button>
                                     </form>
                                 </footer>
@@ -199,8 +200,8 @@
                         <span class="icon is-large has-text-grey-light mb-4">
                             <i class="mdi mdi-wallet-plus-outline mdi-48px"></i>
                         </span>
-                        <h3 class="title is-4 has-text-grey">Aucun wallet pour le moment</h3>
-                        <p class="subtitle has-text-grey-light">Créez votre premier wallet pour commencer à gérer vos finances</p>
+                        <h3 class="title is-4 has-text-grey">{% trans "no_wallet_yet" %}</h3>
+                        <p class="subtitle has-text-grey-light">{% trans "create_first_wallet_to_manage_finances" %}</p>
                     </div>
                 </div>
             </div>

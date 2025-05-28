@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.db.models import Count, Sum, Q
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from datetime import datetime, timedelta
 
 from django.utils.timezone import now
@@ -78,20 +79,20 @@ def history_list(request):
     page_obj = paginator.get_page(page_number)
 
     event_type_mapping = {
-        'LOGIN': {'icon': 'mdi-login', 'color': 'is-success', 'label': 'Connexion'},
-        'LOGOUT': {'icon': 'mdi-logout', 'color': 'is-info', 'label': 'Déconnexion'},
-        'WALLET_CREATE': {'icon': 'mdi-wallet-plus', 'color': 'is-primary', 'label': 'Création portefeuille'},
-        'WALLET_DELETE': {'icon': 'mdi-wallet-remove', 'color': 'is-danger', 'label': 'Suppression portefeuille'},
-        'WALLET_UPDATE': {'icon': 'mdi-wallet', 'color': 'is-warning', 'label': 'Modification portefeuille'},
-        'TRANSACTION_CREATE': {'icon': 'mdi-cash-plus', 'color': 'is-success', 'label': 'Ajout transaction'},
-        'TRANSACTION_DELETE': {'icon': 'mdi-cash-remove', 'color': 'is-warning', 'label': 'Suppression transaction'},
-        'TRANSACTION_UPDATE': {'icon': 'mdi-cash', 'color': 'is-info', 'label': 'Modification transaction'},
-        'OBJECTIVE_UPDATE': {'icon': 'mdi-target', 'color': 'is-info', 'label': 'Modification objectif'},
-        'USER_REGISTER': {'icon': 'mdi-account-plus', 'color': 'is-success', 'label': 'Inscription utilisateur'},
-        'PASSWORD_CHANGE': {'icon': 'mdi-key-change', 'color': 'is-warning', 'label': 'Changement mot de passe'},
-        'ERROR': {'icon': 'mdi-alert-circle', 'color': 'is-danger', 'label': 'Erreur'},
-        'ADMIN_ACTION': {'icon': 'mdi-shield-check', 'color': 'is-warning', 'label': 'Action admin'},
-        'OTHER': {'icon': 'mdi-help-circle', 'color': 'is-dark', 'label': 'Autre'},
+        'LOGIN': {'icon': 'mdi-login', 'color': 'is-success', 'label': _('event_type_login')},
+        'LOGOUT': {'icon': 'mdi-logout', 'color': 'is-info', 'label': _('event_type_logout')},
+        'WALLET_CREATE': {'icon': 'mdi-wallet-plus', 'color': 'is-primary', 'label': _('event_type_wallet_create')},
+        'WALLET_DELETE': {'icon': 'mdi-wallet-remove', 'color': 'is-danger', 'label': _('event_type_wallet_delete')},
+        'WALLET_UPDATE': {'icon': 'mdi-wallet', 'color': 'is-warning', 'label': _('event_type_wallet_update')},
+        'TRANSACTION_CREATE': {'icon': 'mdi-cash-plus', 'color': 'is-success', 'label': _('event_type_transaction_create')},
+        'TRANSACTION_DELETE': {'icon': 'mdi-cash-remove', 'color': 'is-warning', 'label': _('event_type_transaction_delete')},
+        'TRANSACTION_UPDATE': {'icon': 'mdi-cash', 'color': 'is-info', 'label': _('event_type_transaction_update')},
+        'OBJECTIVE_UPDATE': {'icon': 'mdi-target', 'color': 'is-info', 'label': _('event_type_objective_update')},
+        'USER_REGISTER': {'icon': 'mdi-account-plus', 'color': 'is-success', 'label': _('event_type_user_register')},
+        'PASSWORD_CHANGE': {'icon': 'mdi-key-change', 'color': 'is-warning', 'label': _('event_type_password_change')},
+        'ERROR': {'icon': 'mdi-alert-circle', 'color': 'is-danger', 'label': _('event_type_error')},
+        'ADMIN_ACTION': {'icon': 'mdi-shield-check', 'color': 'is-warning', 'label': _('event_type_admin_action')},
+        'OTHER': {'icon': 'mdi-help-circle', 'color': 'is-dark', 'label': _('event_type_other')},
     }
 
     context = {
@@ -193,10 +194,10 @@ def create_user(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, "Utilisateur créé avec succès.")
+            messages.success(request, _("user_created_successfully"))
             Event.objects.create(
                 date=now(),
-                content=f"Nouvel utilisateur créé : {form.cleaned_data['first_name']} {form.cleaned_data['last_name']}",
+                content=_("new_user_created") + f": {form.cleaned_data['first_name']} {form.cleaned_data['last_name']}",
                 user=request.user,
                 type='ADMIN_ACTION'
             )
@@ -206,7 +207,7 @@ def create_user(request):
 
     return render(request, 'adminpanel/create_user.html', {
         'form': form,
-        'title': "Créer un utilisateur",
+        'title': _("create_user"),
     })
 
 
@@ -215,17 +216,17 @@ def edit_user(request, user_id):
     user_to_edit = get_object_or_404(Account, id=user_id)
 
     if user_to_edit == request.user and user_to_edit.is_staff:
-        messages.warning(request, "Vous ne pouvez pas modifier votre propre compte administrateur.")
+        messages.warning(request, _("cannot_edit_own_admin_account"))
         return redirect('adminpanel:user_management')
 
     if request.method == 'POST':
         form = UserEditForm(request.POST, instance=user_to_edit, current_user_id=user_id)
         if form.is_valid():
             form.save()
-            messages.success(request, f'Utilisateur {user_to_edit.get_full_name()} modifié avec succès !')
+            messages.success(request, _("user_modified_successfully").format(user_name=user_to_edit.get_full_name()))
             Event.objects.create(
                 date=now(),
-                content=f"Utilisateur modifié : {user_to_edit.get_full_name()}",
+                content=_("user_modified") + f": {user_to_edit.get_full_name()}",
                 user=request.user,
                 type='ADMIN_ACTION'
             )
@@ -261,28 +262,28 @@ def delete_user(request, user_id):
 
     # Empêcher de supprimer son propre compte
     if user_to_delete == request.user:
-        messages.error(request, "Vous ne pouvez pas supprimer votre propre compte.")
+        messages.error(request, _("cannot_delete_own_account"))
         return redirect('adminpanel:user_management')
 
     # Empêcher de supprimer le dernier admin
     if user_to_delete.is_staff and Account.objects.filter(is_staff=True).count() <= 1:
-        messages.error(request, "Impossible de supprimer le dernier administrateur.")
+        messages.error(request, _("cannot_delete_last_admin"))
         return redirect('adminpanel:user_management')
 
     if request.method == 'POST':
         try:
             user_name = user_to_delete.get_full_name()
             user_to_delete.delete()
-            messages.success(request, f'Utilisateur {user_name} supprimé avec succès.')
+            messages.success(request, _("user_deleted_successfully").format(user_name=user_name))
             Event.objects.create(
                 date=now(),
-                content=f"Utilisateur supprimé : {user_name}",
+                content=_("user_deleted") + f": {user_name}",
                 user=request.user,
                 type='ADMIN_ACTION'
             )
             return redirect('adminpanel:user_management')
         except Exception as e:
-            messages.error(request, f'Erreur lors de la suppression : {str(e)}')
+            messages.error(request, _("error_during_deletion").format(error=str(e)))
 
     # Informations sur l'impact de la suppression
     user_wallets = Wallet.objects.filter(users=user_to_delete)
@@ -384,20 +385,22 @@ def delete_wallet(request, wallet_id):
             transaction_count = wallet.transactions.count()
             wallet.delete()
 
-            messages.success(request,
-                             f'Portefeuille "{wallet_name}" et ses {transaction_count} transaction(s) supprimé(s) avec succès.')
+            messages.success(request, _("wallet_and_transactions_deleted_successfully").format(
+                wallet_name=wallet_name,
+                transaction_count=transaction_count
+            ))
             Event.objects.create(
                 date=now(),
-                content=f"Portefeuille supprimé : {wallet_name}",
+                content=_("wallet_deleted") + f": {wallet_name}",
                 user=request.user,
                 type='ADMIN_ACTION'
             )
             return redirect('adminpanel:wallet_management')
         except Exception as e:
-            messages.error(request, f'Erreur lors de la suppression : {str(e)}')
+            messages.error(request, _("error_during_deletion").format(error=str(e)))
             Event.objects.create(
                 date=now(),
-                content=f"Erreur lors de la suppression du portefeuille {wallet.name}: {str(e)}",
+                content=_("error_deleting_wallet").format(wallet_name=wallet.name, error=str(e)),
                 user=request.user,
                 type='ERROR'
             )
@@ -424,10 +427,13 @@ def export_transactions_csv(request, wallet_id):
     wallet = get_object_or_404(Wallet, id=wallet_id)
 
     if request.user not in wallet.users.all() and not request.user.is_staff:
-        messages.error(request, "Vous n'avez pas la permission d'exporter les transactions de ce portefeuille.")
+        messages.error(request, _("no_permission_export_transactions"))
         Event.objects.create(
             date=now(),
-            content=f"Tentative d'export des transactions du portefeuille {wallet.name} par {request.user.get_full_name()} sans permission",
+            content=_("unauthorized_export_attempt").format(
+                wallet_name=wallet.name,
+                user_name=request.user.get_full_name()
+            ),
             user=request.user,
             type='ERROR'
         )
@@ -440,21 +446,31 @@ def export_transactions_csv(request, wallet_id):
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
     writer = csv.writer(response)
-    writer.writerow(['Date', 'Titre', 'Montant (€)', 'Type', 'Auteur'])
+    writer.writerow([
+        _("date"),
+        _("title"),
+        _("category"),
+        _("amount_euro"),
+        _("type"),
+        _("author")
+    ])
 
     for transaction in transactions:
         writer.writerow([
             transaction.date.strftime('%d/%m/%Y'),
             transaction.title,
-            transaction.category.name if transaction.category else 'Aucune catégorie',
+            transaction.category.name if transaction.category else _("no_category"),
             f"{transaction.amount:.2f}",
-            'Revenu' if transaction.is_income else 'Dépense',
-            transaction.user.get_full_name() if transaction.user else 'Inconnu'
+            _("income") if transaction.is_income else _("expense"),
+            transaction.user.get_full_name() if transaction.user else _("unknown")
         ])
 
     Event.objects.create(
         date=now(),
-        content=f"Export des transactions du portefeuille {wallet.name} par {request.user.get_full_name()}",
+        content=_("transactions_exported").format(
+            wallet_name=wallet.name,
+            user_name=request.user.get_full_name()
+        ),
         user=request.user,
         type='TRANSACTION_EXPORT'
     )
@@ -540,19 +556,19 @@ def create_category(request):
 
             # Vérifier si la catégorie existe déjà (insensible à la casse)
             if Category.objects.filter(name__iexact=category_name).exists():
-                messages.error(request, f'La catégorie "{category_name}" existe déjà.')
+                messages.error(request, _("category_already_exists").format(category_name=category_name))
             else:
                 category = form.save()
-                messages.success(request, f'Catégorie "{category.name}" créée avec succès !')
+                messages.success(request, _("category_created_successfully").format(category_name=category.name))
                 Event.objects.create(
                     date=now(),
-                    content=f"Nouvelle catégorie créée : {category.name}",
+                    content=_("new_category_created") + f": {category.name}",
                     user=request.user,
                     type='ADMIN_ACTION'
                 )
                 return redirect('adminpanel:category_management')
         else:
-            messages.error(request, 'Veuillez corriger les erreurs du formulaire.')
+            messages.error(request, _("please_correct_form_errors"))
     else:
         form = CategoryForm()
 
@@ -578,20 +594,23 @@ def edit_category(request, category_id):
             # Vérifier si une autre catégorie a déjà ce nom
             existing_category = Category.objects.filter(name__iexact=category_name).exclude(id=category.id).first()
             if existing_category:
-                messages.error(request, f'La catégorie "{category_name}" existe déjà.')
+                messages.error(request, _("category_already_exists").format(category_name=category_name))
             else:
                 old_name = category.name
                 category = form.save()
-                messages.success(request, f'Catégorie modifiée : "{old_name}" → "{category.name}"')
+                messages.success(request, _("category_renamed_successfully").format(
+                    old_name=old_name,
+                    new_name=category.name
+                ))
                 Event.objects.create(
                     date=now(),
-                    content=f"Catégorie modifiée : {old_name} → {category.name}",
+                    content=_("category_modified") + f": {old_name} → {category.name}",
                     user=request.user,
                     type='ADMIN_ACTION'
                 )
                 return redirect('adminpanel:category_management')
         else:
-            messages.error(request, 'Veuillez corriger les erreurs du formulaire.')
+            messages.error(request, _("please_correct_form_errors"))
     else:
         form = CategoryForm(instance=category)
 
@@ -619,17 +638,19 @@ def delete_category(request, category_id):
                 transaction_count = Transaction.objects.filter(category=category).count()
                 category.delete()
 
-                messages.success(request,
-                                 f'Catégorie "{category_name}" et ses {transaction_count} transaction(s) supprimée(s) avec succès.')
+                messages.success(request, _("category_and_transactions_deleted_successfully").format(
+                    category_name=category_name,
+                    transaction_count=transaction_count
+                ))
                 Event.objects.create(
                     date=now(),
-                    content=f"Catégorie supprimée : {category_name}",
+                    content=_("category_deleted") + f": {category_name}",
                     user=request.user,
                     type='ADMIN_ACTION'
                 )
                 return redirect('adminpanel:category_management')
             except Exception as e:
-                messages.error(request, f'Erreur lors de la suppression : {str(e)}')
+                messages.error(request, _("error_during_deletion").format(error=str(e)))
 
     # Informations sur l'impact de la suppression
     transactions = Transaction.objects.filter(category=category)

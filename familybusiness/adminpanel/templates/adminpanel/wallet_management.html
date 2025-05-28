@@ -1,4 +1,6 @@
 {% extends "master.html" %}
+{% load i18n %}
+{% load l10n %}
 
 {% block head %}
 <style>
@@ -17,8 +19,8 @@
             <div class="level-left">
                 <div class="level-item">
                     <div>
-                        <h1 class="title is-3 mb-1">Gestion des portefeuilles</h1>
-                        <p class="subtitle is-5 has-text-grey mt-1">Administration des portefeuilles et transactions</p>
+                        <h1 class="title is-3 mb-1">{% trans "wallet_management" %}</h1>
+                        <p class="subtitle is-5 has-text-grey mt-1">{% trans "wallet_and_transaction_administration" %}</p>
                     </div>
                 </div>
             </div>
@@ -28,7 +30,7 @@
                         <span class="icon">
                             <i class="mdi mdi-arrow-left"></i>
                         </span>
-                        <span>Retour au panel</span>
+                        <span>{% trans "back_to_panel" %}</span>
                     </a>
                 </div>
             </div>
@@ -41,14 +43,14 @@
                     <span class="icon mr-2">
                         <i class="mdi mdi-filter"></i>
                     </span>
-                    Filtres et recherche
+                    {% trans "filters_and_search" %}
                 </div>
                 <div class="card-header-icon">
                     <button class="button is-small is-light" id="resetFilters">
                         <span class="icon">
                             <i class="mdi mdi-refresh"></i>
                         </span>
-                        <span>Réinitialiser</span>
+                        <span>{% trans "reset" %}</span>
                     </button>
                 </div>
             </div>
@@ -58,10 +60,10 @@
                         <!-- Recherche -->
                         <div class="column">
                             <div class="field">
-                                <label class="label">Recherche</label>
+                                <label class="label">{% trans "search" %}</label>
                                 <div class="control has-icons-left">
                                     <input class="input" type="text" name="search" value="{{ current_search }}"
-                                           placeholder="Nom, propriétaire...">
+                                           placeholder="{% trans 'search_placeholder_wallets' %}">
                                     <span class="icon is-small is-left">
                                         <i class="mdi mdi-magnify"></i>
                                     </span>
@@ -72,11 +74,11 @@
                         <!-- Propriétaire -->
                         <div class="column">
                             <div class="field">
-                                <label class="label">Propriétaire</label>
+                                <label class="label">{% trans "owner" %}</label>
                                 <div class="control">
                                     <div class="select is-fullwidth">
                                         <select name="owner">
-                                            <option value="">Tous les propriétaires</option>
+                                            <option value="">{% trans "all_owners" %}</option>
                                             {% for owner in wallet_owners %}
                                                 <option value="{{ owner.id }}" {% if current_owner == owner.id|stringformat:"s" %}selected{% endif %}>
                                                     {{ owner.get_full_name }}
@@ -97,7 +99,7 @@
                                         <span class="icon">
                                             <i class="mdi mdi-filter-check"></i>
                                         </span>
-                                        <span>Filtrer</span>
+                                        <span>{% trans "filter" %}</span>
                                     </button>
                                 </div>
                             </div>
@@ -109,14 +111,14 @@
                 {% if current_search or current_owner or current_balance_range %}
                 <div class="notification is-light">
                     <button class="delete" id="clearFilters"></button>
-                    <strong>Filtres actifs :</strong>
+                    <strong>{% trans "active_filters" %}:</strong>
                     {% if current_search %}
-                        <span class="tag is-info ml-2">Recherche: "{{ current_search }}"</span>
+                        <span class="tag is-info ml-2">{% trans "search" %}: "{{ current_search }}"</span>
                     {% endif %}
                     {% if current_owner %}
-                        <span class="tag is-success ml-2">Propriétaire filtré</span>
+                        <span class="tag is-success ml-2">{% trans "owner_filtered" %}</span>
                     {% endif %}
-                    <span class="ml-2">{{ filtered_count }} résultat{{ filtered_count|pluralize }}</span>
+                    <span class="ml-2">{{ filtered_count }} {% trans "result" %}{{ filtered_count|pluralize }}</span>
                 </div>
                 {% endif %}
             </div>
@@ -129,11 +131,11 @@
                     <span class="icon mr-2">
                         <i class="mdi mdi-wallet"></i>
                     </span>
-                    Portefeuilles ({{ filtered_count }})
+                    {% trans "wallets" %} ({{ filtered_count }})
                 </div>
                 <div class="card-header-icon">
                     {% if page_obj.has_other_pages %}
-                        <span class="tag is-light">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+                        <span class="tag is-light">{% trans "page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}</span>
                     {% endif %}
                 </div>
             </div>
@@ -144,14 +146,14 @@
                         <table class="table is-fullwidth is-hoverable">
                             <thead>
                                 <tr>
-                                    <th>Portefeuille</th>
-                                    <th>Propriétaire</th>
-                                    <th>Solde</th>
-                                    <th>Objectif</th>
-                                    <th>Progression</th>
-                                    <th>Statistiques</th>
-                                    <th>Dernière activité</th>
-                                    <th class="has-text-centered">Actions</th>
+                                    <th>{% trans "wallet" %}</th>
+                                    <th>{% trans "owner" %}</th>
+                                    <th>{% trans "balance" %}</th>
+                                    <th>{% trans "objective" %}</th>
+                                    <th>{% trans "progress" %}</th>
+                                    <th>{% trans "statistics" %}</th>
+                                    <th>{% trans "last_activity" %}</th>
+                                    <th class="has-text-centered">{% trans "actions" %}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -174,11 +176,11 @@
                                                             <span class="icon is-small">
                                                                 <i class="mdi mdi-account-group"></i>
                                                             </span>
-                                                            <span>Partagé</span>
+                                                            <span>{% trans "shared" %}</span>
                                                         </span>
                                                     {% endif %}
                                                     {% if not wallet_data.is_active %}
-                                                        <span class="tag is-light is-small">Inactif</span>
+                                                        <span class="tag is-light is-small">{% trans "inactive" %}</span>
                                                     {% endif %}
                                                 </div>
                                             </div>
@@ -203,12 +205,12 @@
                                             <div class="mt-0 mb-0">
                                                 <p class="is-size-7 has-text-centered">{{ wallet_data.progress|floatformat:1 }}%</p>
                                                 <progress class="progress is-small {% if wallet_data.progress >= 100 %}is-success{% elif wallet_data.progress >= 50 %}is-warning{% else %}is-danger{% endif %}"
-                                                          value="{{ wallet_data.progress }}" max="100">
+                                                          value="{{ wallet_data.progress|unlocalize }}" max="100">
                                                     {{ wallet_data.progress|floatformat:1 }}%
                                                 </progress>
                                             </div>
                                         {% else %}
-                                            <span class="has-text-grey">Aucun objectif</span>
+                                            <span class="has-text-grey">{% trans "no_objective" %}</span>
                                         {% endif %}
                                     </td>
                                     <td>
@@ -217,13 +219,13 @@
                                                 <span class="icon is-small has-text-info">
                                                     <i class="mdi mdi-account-group"></i>
                                                 </span>
-                                                {{ wallet_data.user_count }} utilisateur{{ wallet_data.user_count|pluralize }}
+                                                {{ wallet_data.user_count }} {% trans "user" %}{{ wallet_data.user_count|pluralize }}
                                             </p>
                                             <p class="mb-0">
                                                 <span class="icon is-small has-text-success">
                                                     <i class="mdi mdi-cash"></i>
                                                 </span>
-                                                {{ wallet_data.transaction_count }} transaction{{ wallet_data.transaction_count|pluralize }}
+                                                {{ wallet_data.transaction_count }} {% trans "transaction" %}{{ wallet_data.transaction_count|pluralize }}
                                             </p>
                                         </div>
                                     </td>
@@ -234,13 +236,13 @@
                                                 <p class="is-size-7 has-text-grey">{{ wallet_data.last_transaction.title|truncatechars:20 }}</p>
                                             </div>
                                         {% else %}
-                                            <span class="has-text-grey-light">Aucune</span>
+                                            <span class="has-text-grey-light">{% trans "none" %}</span>
                                         {% endif %}
                                     </td>
                                     <td class="has-text-centered">
                                         <div class="buttons is-centered">
                                             <a href="{% url 'adminpanel:delete_wallet' wallet_data.wallet.id %}"
-                                               class="button is-small is-danger is-light" title="Supprimer">
+                                               class="button is-small is-danger is-light" title="{% trans 'delete' %}">
                                                 <span class="icon is-small">
                                                     <i class="mdi mdi-delete"></i>
                                                 </span>
@@ -248,7 +250,7 @@
 
                                             {% if wallet_data.transaction_count > 0 %}
                                             <a href="{% url 'adminpanel:export_transactions_csv' wallet_data.wallet.id %}"
-                                               class="button is-small is-info is-light" title="Exporter les transactions CSV">
+                                               class="button is-small is-info is-light" title="{% trans 'export_transactions_csv' %}">
                                                 <span class="icon is-small"><i class="mdi mdi-file-export"></i></span>
                                             </a>
                                             {% endif %}
@@ -264,10 +266,10 @@
                         <span class="icon is-large has-text-grey-light">
                             <i class="mdi mdi-48px mdi-wallet"></i>
                         </span>
-                        <p class="title is-5 has-text-grey">Aucun portefeuille trouvé</p>
+                        <p class="title is-5 has-text-grey">{% trans "no_wallets_found" %}</p>
                         {% if current_search or current_owner or current_balance_range %}
                             <p class="subtitle is-6 has-text-grey">
-                                Essayez de modifier vos filtres
+                                {% trans "try_modifying_filters" %}
                             </p>
                         {% endif %}
                     </div>
@@ -280,16 +282,16 @@
         <nav class="pagination is-centered mt-5" role="navigation">
             {% if page_obj.has_previous %}
                 <a href="?page={{ page_obj.previous_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_owner %}&owner={{ current_owner }}{% endif %}{% if current_balance_range %}&balance_range={{ current_balance_range }}{% endif %}"
-                   class="pagination-previous">Précédent</a>
+                   class="pagination-previous">{% trans "previous" %}</a>
             {% else %}
-                <a class="pagination-previous" disabled>Précédent</a>
+                <a class="pagination-previous" disabled>{% trans "previous" %}</a>
             {% endif %}
 
             {% if page_obj.has_next %}
                 <a href="?page={{ page_obj.next_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_owner %}&owner={{ current_owner }}{% endif %}{% if current_balance_range %}&balance_range={{ current_balance_range }}{% endif %}"
-                   class="pagination-next">Suivant</a>
+                   class="pagination-next">{% trans "next" %}</a>
             {% else %}
-                <a class="pagination-next" disabled>Suivant</a>
+                <a class="pagination-next" disabled>{% trans "next" %}</a>
             {% endif %}
 
             <ul class="pagination-list">

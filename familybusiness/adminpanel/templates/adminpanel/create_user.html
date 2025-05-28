@@ -1,12 +1,13 @@
 {% extends "master.html" %}
+{% load i18n %}
 
 {% block content %}
 <section class="section">
     <div class="container">
         <!-- En-tête -->
         <div class="mb-5">
-            <h1 class="title is-3 mb-1">Créer un utilisateur</h1>
-            <p class="subtitle is-6 has-text-grey mt-1">Ajouter un nouveau compte utilisateur</p>
+            <h1 class="title is-3 mb-1">{% trans "create_user" %}</h1>
+            <p class="subtitle is-6 has-text-grey mt-1">{% trans "add_new_user_account" %}</p>
         </div>
 
         <!-- Formulaire -->
@@ -18,7 +19,7 @@
                             <span class="icon mr-2">
                                 <i class="mdi mdi-account-plus"></i>
                             </span>
-                            Nouveau compte utilisateur
+                            {% trans "new_user_account" %}
                         </div>
                     </div>
 
@@ -47,12 +48,12 @@
                                         <span class="icon">
                                             <i class="mdi mdi-close"></i>
                                         </span>
-                                        <span>Annuler</span>
+                                        <span>{% trans "cancel" %}</span>
                                     </a>
                                 </div>
                                 <div class="control">
                                     <button type="submit" class="button is-success ml-2" id="submit-btn">
-                                        <i class="mdi mdi-account-plus mr-1"></i> Créer l'utilisateur
+                                        <i class="mdi mdi-account-plus mr-1"></i> {% trans "create_user_button" %}
                                     </button>
                                 </div>
                             </div>

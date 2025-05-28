@@ -1,4 +1,5 @@
 {% extends "master.html" %}
+{% load i18n %}
 
 {% block content %}
 <section class="section">
@@ -11,7 +12,7 @@
                             <span class="icon mr-2">
                                 <i class="mdi mdi-login"></i>
                             </span>
-                            Connexion
+                            {% trans "login" %}
                         </div>
                     </div>
 
@@ -21,7 +22,7 @@
                                 <i class="mdi mdi-48px mdi-account-circle"></i>
                             </span>
                             <p class="subtitle is-6 has-text-grey">
-                                Connectez-vous pour accéder à votre compte
+                                {% trans "login_to_access_account" %}
                             </p>
                         </div>
 
@@ -71,7 +72,7 @@
                                         <span class="icon">
                                             <i class="mdi mdi-login"></i>
                                         </span>
-                                        <span>Se connecter</span>
+                                        <span>{% trans "sign_in" %}</span>
                                     </button>
                                 </div>
                             </div>
@@ -86,13 +87,13 @@
                             <span class="icon is-small">
                                 <i class="mdi mdi-lock-reset"></i>
                             </span>
-                            Mot de passe oublié ?
+                            {% trans "forgot_password" %}
                         </a>
                     </p>
                     <p class="mt-3">
-                        <span class="has-text-grey">Vous n'avez pas de compte ? </span>
+                        <span class="has-text-grey">{% trans "no_account_yet" %} </span>
                         <a href="{% url 'account:register' %}" class="has-text-primary">
-                            <strong>Créer un compte</strong>
+                            <strong>{% trans "create_account" %}</strong>
                         </a>
                     </p>
                 </div>

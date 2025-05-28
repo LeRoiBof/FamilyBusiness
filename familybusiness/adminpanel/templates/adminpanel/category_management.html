@@ -1,4 +1,5 @@
 {% extends "master.html" %}
+{% load i18n %}
 
 {% block content %}
 <section class="section">
@@ -8,8 +9,8 @@
             <div class="level-left">
                 <div class="level-item">
                     <div>
-                        <h1 class="title is-3 mb-1">Gestion des catégories</h1>
-                        <p class="subtitle is-5 has-text-grey mt-0">Administration des catégories de transactions</p>
+                        <h1 class="title is-3 mb-1">{% trans "category_management" %}</h1>
+                        <p class="subtitle is-5 has-text-grey mt-0">{% trans "transaction_category_administration" %}</p>
                     </div>
                 </div>
             </div>
@@ -19,13 +20,13 @@
                         <span class="icon">
                             <i class="mdi mdi-tag-plus"></i>
                         </span>
-                        <span>Créer une catégorie</span>
+                        <span>{% trans "create_category" %}</span>
                     </a>
                     <a href="{% url 'adminpanel:admin_panel' %}" class="button is-light">
                         <span class="icon">
                             <i class="mdi mdi-arrow-left"></i>
                         </span>
-                        <span>Retour au panel</span>
+                        <span>{% trans "back_to_panel" %}</span>
                     </a>
                 </div>
             </div>
@@ -38,7 +39,7 @@
                     <div class="level">
                         <div class="level-left">
                             <div>
-                                <p class="heading">Total catégories</p>
+                                <p class="heading">{% trans "total_categories" %}</p>
                                 <p class="title is-4 has-text-primary">{{ total_categories }}</p>
                             </div>
                         </div>
@@ -55,7 +56,7 @@
                     <div class="level">
                         <div class="level-left">
                             <div>
-                                <p class="heading">Catégories utilisées</p>
+                                <p class="heading">{% trans "categories_used" %}</p>
                                 <p class="title is-4 has-text-success">{{ used_categories }}</p>
                             </div>
                         </div>
@@ -72,7 +73,7 @@
                     <div class="level">
                         <div class="level-left">
                             <div>
-                                <p class="heading">Catégories inutilisées</p>
+                                <p class="heading">{% trans "categories_unused" %}</p>
                                 <p class="title is-4 has-text-warning">{{ unused_categories }}</p>
                             </div>
                         </div>
@@ -93,14 +94,14 @@
                     <span class="icon mr-2">
                         <i class="mdi mdi-filter"></i>
                     </span>
-                    Filtres et recherche
+                    {% trans "filters_and_search" %}
                 </div>
                 <div class="card-header-icon">
                     <button class="button is-small is-light" id="resetFilters">
                         <span class="icon">
                             <i class="mdi mdi-refresh"></i>
                         </span>
-                        <span>Réinitialiser</span>
+                        <span>{% trans "reset" %}</span>
                     </button>
                 </div>
             </div>
@@ -110,37 +111,37 @@
                         <!-- Recherche -->
                         <div class="column">
                             <div class="field">
-                                <label class="label">Recherche</label>
+                                <label class="label">{% trans "search" %}</label>
                                 <div class="control has-icons-left">
-                                    <input class="input" type="text" name="search" value="{{ current_search }}" 
-                                           placeholder="Nom de la catégorie...">
+                                    <input class="input" type="text" name="search" value="{{ current_search }}"
+                                           placeholder="{% trans 'category_name_placeholder' %}">
                                     <span class="icon is-small is-left">
                                         <i class="mdi mdi-magnify"></i>
                                     </span>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Utilisation -->
                         <div class="column">
                             <div class="field">
-                                <label class="label">Statut d'utilisation</label>
+                                <label class="label">{% trans "usage_status" %}</label>
                                 <div class="control">
                                     <div class="select is-fullwidth">
                                         <select name="usage">
-                                            <option value="">Toutes les catégories</option>
+                                            <option value="">{% trans "all_categories" %}</option>
                                             <option value="used" {% if current_usage == 'used' %}selected{% endif %}>
-                                                Utilisées uniquement
+                                                {% trans "used_only" %}
                                             </option>
                                             <option value="unused" {% if current_usage == 'unused' %}selected{% endif %}>
-                                                Inutilisées uniquement
+                                                {% trans "unused_only" %}
                                             </option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Bouton de filtrage -->
                         <div class="column is-narrow">
                             <div class="field">
@@ -150,28 +151,28 @@
                                         <span class="icon">
                                             <i class="mdi mdi-filter-check"></i>
                                         </span>
-                                        <span>Filtrer</span>
+                                        <span>{% trans "filter" %}</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </form>
-                
+
                 <!-- Résumé des filtres actifs -->
                 {% if current_search or current_usage %}
                 <div class="notification is-light">
                     <button class="delete" id="clearFilters"></button>
-                    <strong>Filtres actifs :</strong>
+                    <strong>{% trans "active_filters" %}:</strong>
                     {% if current_search %}
-                        <span class="tag is-info ml-2">Recherche: "{{ current_search }}"</span>
+                        <span class="tag is-info ml-2">{% trans "search" %}: "{{ current_search }}"</span>
                     {% endif %}
                     {% if current_usage %}
                         <span class="tag is-success ml-2">
-                            {% if current_usage == 'used' %}Utilisées{% else %}Inutilisées{% endif %}
+                            {% if current_usage == 'used' %}{% trans "used" %}{% else %}{% trans "unused" %}{% endif %}
                         </span>
                     {% endif %}
-                    <span class="ml-2">{{ filtered_count }} résultat{{ filtered_count|pluralize }}</span>
+                    <span class="ml-2">{{ filtered_count }} {% trans "result" %}{{ filtered_count|pluralize }}</span>
                 </div>
                 {% endif %}
             </div>
@@ -184,27 +185,27 @@
                     <span class="icon mr-2">
                         <i class="mdi mdi-tag"></i>
                     </span>
-                    Catégories ({{ filtered_count }})
+                    {% trans "categories" %} ({{ filtered_count }})
                 </div>
                 <div class="card-header-icon">
                     {% if page_obj.has_other_pages %}
-                        <span class="tag is-light">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+                        <span class="tag is-light">{% trans "page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}</span>
                     {% endif %}
                 </div>
             </div>
-            
+
             <div class="card-content p-0">
                 {% if categories_with_stats %}
                     <div class="table-container">
                         <table class="table is-fullwidth is-hoverable">
                             <thead>
                                 <tr>
-                                    <th>Catégorie</th>
-                                    <th>Utilisation</th>
-                                    <th>Portefeuilles</th>
-                                    <th>Dernière utilisation</th>
-                                    <th>Transactions récentes</th>
-                                    <th class="has-text-centered">Actions</th>
+                                    <th>{% trans "category" %}</th>
+                                    <th>{% trans "usage" %}</th>
+                                    <th>{% trans "wallets" %}</th>
+                                    <th>{% trans "last_usage" %}</th>
+                                    <th>{% trans "recent_transactions" %}</th>
+                                    <th class="has-text-centered">{% trans "actions" %}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -225,14 +226,14 @@
                                                             <span class="icon is-small">
                                                                 <i class="mdi mdi-check"></i>
                                                             </span>
-                                                            <span>Utilisée</span>
+                                                            <span>{% trans "used" %}</span>
                                                         </span>
                                                     {% else %}
                                                         <span class="tag is-light is-small">
                                                             <span class="icon is-small">
                                                                 <i class="mdi mdi-minus"></i>
                                                             </span>
-                                                            <span>Inutilisée</span>
+                                                            <span>{% trans "unused" %}</span>
                                                         </span>
                                                     {% endif %}
                                                 </div>
@@ -241,23 +242,23 @@
                                     </td>
                                     <td>
                                         <p class="is-size-6 has-text-primary">
-                                            {{ category_data.transaction_count }} <span class="has-text-grey is-size-7">transaction{{ category_data.transaction_count|pluralize }}</span>
+                                            {{ category_data.transaction_count }} <span class="has-text-grey is-size-7">{% trans "transaction" %}{{ category_data.transaction_count|pluralize }}</span>
                                         </p>
                                     </td>
                                     <td>
                                         <p class="is-size-6 has-text-info">
-                                            {{ category_data.used_by_wallets }} <span class="has-text-grey is-size-7">portefeuille{{ category_data.used_by_wallets|pluralize }}</span>
+                                            {{ category_data.used_by_wallets }} <span class="has-text-grey is-size-7">{% trans "wallet" %}{{ category_data.used_by_wallets|pluralize }}</span>
                                         </p>
                                     </td>
                                     <td>
                                         {% if category_data.last_used %}
                                             <div class="content">
                                                 <p class="is-size-7">
-                                                    {{ category_data.last_used|date:"d/m/Y" }} <span class="has-text-grey ml-2">({{ category_data.last_used|timesince }} ago)</span>
+                                                    {{ category_data.last_used|date:"d/m/Y" }} <span class="has-text-grey ml-2">({{ category_data.last_used|timesince }} {% trans "ago" %})</span>
                                                 </p>
                                             </div>
                                         {% else %}
-                                            <span class="has-text-grey-light">Jamais utilisée</span>
+                                            <span class="has-text-grey-light">{% trans "never_used" %}</span>
                                         {% endif %}
                                     </td>
                                     <td>
@@ -273,18 +274,18 @@
                                                 {% endfor %}
                                             </div>
                                         {% else %}
-                                            <span class="has-text-grey-light">Aucune</span>
+                                            <span class="has-text-grey-light">{% trans "none" %}</span>
                                         {% endif %}
                                     </td>
                                     <td class="has-text-centered">
                                         <div class="buttons is-centered">
-                                            <a href="{% url 'adminpanel:edit_category' category_data.category.id %}" 
-                                               class="button is-small is-info is-light" title="Modifier">
+                                            <a href="{% url 'adminpanel:edit_category' category_data.category.id %}"
+                                               class="button is-small is-info is-light" title="{% trans 'edit' %}">
                                                 <span class="icon is-small">
                                                     <i class="mdi mdi-pencil"></i>
                                                 </span>
                                             </a>
-                                            <a href="{% url 'adminpanel:delete_category' category_data.category.id %}" 
+                                            <a href="{% url 'adminpanel:delete_category' category_data.category.id %}"
                                                class="button is-small is-danger is-light">
                                                 <span class="icon is-small">
                                                     <i class="mdi mdi-delete"></i>
@@ -302,21 +303,21 @@
                         <span class="icon is-large has-text-grey-light">
                             <i class="mdi mdi-48px mdi-tag"></i>
                         </span>
-                        <p class="title is-5 has-text-grey">Aucune catégorie trouvée</p>
+                        <p class="title is-5 has-text-grey">{% trans "no_categories_found" %}</p>
                         {% if current_search or current_usage %}
                             <p class="subtitle is-6 has-text-grey">
-                                Essayez de modifier vos filtres
+                                {% trans "try_modifying_filters" %}
                             </p>
                         {% else %}
                             <p class="subtitle is-6 has-text-grey">
-                                Commencez par créer votre première catégorie
+                                {% trans "start_by_creating_first_category" %}
                             </p>
                             <div class="buttons is-centered mt-3">
                                 <a href="{% url 'adminpanel:create_category' %}" class="button is-primary">
                                     <span class="icon">
                                         <i class="mdi mdi-tag-plus"></i>
                                     </span>
-                                    <span>Créer une catégorie</span>
+                                    <span>{% trans "create_category" %}</span>
                                 </a>
                             </div>
                         {% endif %}
@@ -329,17 +330,17 @@
         {% if page_obj.has_other_pages %}
         <nav class="pagination is-centered mt-5" role="navigation">
             {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_usage %}&usage={{ current_usage }}{% endif %}" 
-                   class="pagination-previous">Précédent</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_usage %}&usage={{ current_usage }}{% endif %}"
+                   class="pagination-previous">{% trans "previous" %}</a>
             {% else %}
-                <a class="pagination-previous" disabled>Précédent</a>
+                <a class="pagination-previous" disabled>{% trans "previous" %}</a>
             {% endif %}
-            
+
             {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_usage %}&usage={{ current_usage }}{% endif %}" 
-                   class="pagination-next">Suivant</a>
+                <a href="?page={{ page_obj.next_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_usage %}&usage={{ current_usage }}{% endif %}"
+                   class="pagination-next">{% trans "next" %}</a>
             {% else %}
-                <a class="pagination-next" disabled>Suivant</a>
+                <a class="pagination-next" disabled>{% trans "next" %}</a>
             {% endif %}
             
             <ul class="pagination-list">

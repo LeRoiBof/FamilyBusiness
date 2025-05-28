@@ -1,4 +1,5 @@
 {% extends "master.html" %}
+{% load i18n %}
 
 {% block content %}
     <section class="section">
@@ -6,9 +7,9 @@
             <!-- En-tête -->
             <div class="columns is-vcentered mb-6">
                 <div class="column">
-                    <h1 class="title is-2 has-text-primary">Panel Administrateur</h1>
+                    <h1 class="title is-2 has-text-primary">{% trans "admin_panel" %}</h1>
                     <p class="subtitle is-5 has-text-grey">
-                        Gestion et supervision de l'application
+                        {% trans "application_management_and_supervision" %}
                     </p>
                 </div>
                 <div class="column is-narrow has-text-right">
@@ -16,7 +17,7 @@
                     <span class="icon">
                         <i class="mdi mdi-shield-check"></i>
                     </span>
-                    <span>Administrateur</span>
+                    <span>{% trans "administrator" %}</span>
                 </span>
                 </div>
             </div>
@@ -30,9 +31,9 @@
                         <span class="icon is-size-1 has-text-info mb-4">
                             <i class="mdi mdi-history mdi-48px"></i>
                         </span>
-                            <p class="title is-4 has-text-dark">Historique</p>
+                            <p class="title is-4 has-text-dark">{% trans "history" %}</p>
                             <p class="subtitle is-6 has-text-grey">
-                                Consulter les logs et l'historique des actions
+                                {% trans "view_logs_and_action_history" %}
                             </p>
                         </div>
                     </a>
@@ -45,9 +46,9 @@
                         <span class="icon is-size-1 has-text-success mb-4">
                             <i class="mdi mdi-account-group mdi-48px"></i>
                         </span>
-                            <p class="title is-4 has-text-dark">Gestion Utilisateurs</p>
+                            <p class="title is-4 has-text-dark">{% trans "user_management" %}</p>
                             <p class="subtitle is-6 has-text-grey">
-                                Gérer les comptes et permissions
+                                {% trans "manage_accounts_and_permissions" %}
                             </p>
                         </div>
                     </a>
@@ -60,9 +61,9 @@
                         <span class="icon is-size-1 has-text-warning mb-4">
                             <i class="mdi mdi-wallet mdi-48px"></i>
                         </span>
-                            <p class="title is-4 has-text-dark">Gestion Portefeuilles</p>
+                            <p class="title is-4 has-text-dark">{% trans "wallet_management" %}</p>
                             <p class="subtitle is-6 has-text-grey">
-                                Superviser les portefeuilles existants
+                                {% trans "supervise_existing_wallets" %}
                             </p>
                         </div>
                     </a>
@@ -75,9 +76,9 @@
                         <span class="icon is-size-1 has-text-danger mb-4">
                             <i class="mdi mdi-tag mdi-48px"></i>
                         </span>
-                            <p class="title is-4 has-text-dark">Gestion Catégories</p>
+                            <p class="title is-4 has-text-dark">{% trans "category_management" %}</p>
                             <p class="subtitle is-6 has-text-grey">
-                                Créer et modifier les catégories
+                                {% trans "create_and_modify_categories" %}
                             </p>
                         </div>
                     </a>

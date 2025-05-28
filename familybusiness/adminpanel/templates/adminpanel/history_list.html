@@ -1,6 +1,7 @@
 {% extends "master.html" %}
 {% load custom_filters %}
 {% load days_since %}
+{% load i18n %}
 
 {% block content %}
     <section class="section">
@@ -10,8 +11,8 @@
                 <div class="level-left">
                     <div class="level-item">
                         <div>
-                            <h1 class="title is-3 mb-1">Historique des événements</h1>
-                            <p class="subtitle is-5 has-text-grey mt-0">Suivi complet de l'activité système</p>
+                            <h1 class="title is-3 mb-1">{% trans "event_history" %}</h1>
+                            <p class="subtitle is-5 has-text-grey mt-0">{% trans "complete_system_activity_tracking" %}</p>
                         </div>
                     </div>
                 </div>
@@ -21,7 +22,7 @@
                             <span class="icon">
                                 <i class="mdi mdi-arrow-left"></i>
                             </span>
-                            <span>Retour au panel</span>
+                            <span>{% trans "back_to_panel" %}</span>
                         </a>
                     </div>
                 </div>
@@ -32,12 +33,12 @@
                 <div class="card-header">
                     <div class="card-header-title">
                         <span class="icon mr-2"><i class="mdi mdi-filter"></i></span>
-                        Filtres et recherche
+                        {% trans "filters_and_search" %}
                     </div>
                     <div class="card-header-icon">
                         <button class="button is-small is-light" id="reset-filters">
                             <span class="icon"><i class="mdi mdi-refresh"></i></span>
-                            <span>Réinitialiser</span>
+                            <span>{% trans "reset" %}</span>
                         </button>
                     </div>
                 </div>
@@ -46,10 +47,10 @@
                         <div class="columns is-multiline">
                             <div class="column is-one-third">
                                 <div class="field">
-                                    <label class="label">Recherche</label>
+                                    <label class="label">{% trans "search" %}</label>
                                     <div class="control has-icons-left">
                                         <input class="input" type="text" name="search" value="{{ current_search }}"
-                                               placeholder="Contenu, type, utilisateur...">
+                                               placeholder="{% trans 'search_placeholder_history' %}">
                                         <span class="icon is-small is-left"><i class="mdi mdi-magnify"></i></span>
                                     </div>
                                 </div>
@@ -57,11 +58,11 @@
 
                             <div class="column is-one-third">
                                 <div class="field">
-                                    <label class="label">Type d'événement</label>
+                                    <label class="label">{% trans "event_type" %}</label>
                                     <div class="control">
                                         <div class="select is-fullwidth">
                                             <select name="type">
-                                                <option value="">Tous les types</option>
+                                                <option value="">{% trans "all_types" %}</option>
                                                 {% for type in available_types %}
                                                     <option value="{{ type }}"
                                                             {% if current_type == type %}selected{% endif %}>
@@ -78,11 +79,11 @@
 
                             <div class="column is-one-third">
                                 <div class="field">
-                                    <label class="label">Utilisateur</label>
+                                    <label class="label">{% trans "user" %}</label>
                                     <div class="control">
                                         <div class="select is-fullwidth">
                                             <select name="user">
-                                                <option value="">Tous les utilisateurs</option>
+                                                <option value="">{% trans "all_users" %}</option>
                                                 {% for user in users_with_events %}
                                                     <option value="{{ user.id }}"
                                                             {% if current_user == user.id|stringformat:"s" %}selected{% endif %}>
@@ -97,17 +98,17 @@
 
                             <div class="column is-one-third">
                                 <div class="field">
-                                    <label class="label">Date de début</label>
+                                    <label class="label">{% trans "start_date" %}</label>
                                     <input class="input flatpickr" type="text" name="date_from"
-                                           value="{{ current_date_from }}" placeholder="jj/mm/aaaa">
+                                           value="{{ current_date_from }}" placeholder="{% trans 'date_format_placeholder' %}">
                                 </div>
                             </div>
 
                             <div class="column is-one-third">
                                 <div class="field">
-                                    <label class="label">Date de fin</label>
+                                    <label class="label">{% trans "end_date" %}</label>
                                     <input class="input flatpickr" type="text" name="date_to"
-                                           value="{{ current_date_to }}" placeholder="jj/mm/aaaa">
+                                           value="{{ current_date_to }}" placeholder="{% trans 'date_format_placeholder' %}">
                                 </div>
                             </div>
 
@@ -116,7 +117,7 @@
                                     <label class="label">&nbsp;</label>
                                     <button type="submit" class="button is-primary">
                                         <span class="icon"><i class="mdi mdi-filter-check"></i></span>
-                                        <span>Filtrer</span>
+                                        <span>{% trans "filter" %}</span>
                                     </button>
                                 </div>
                             </div>
@@ -130,10 +131,10 @@
                 <div class="card-header">
                     <div class="card-header-title">
                         <span class="icon mr-2"><i class="mdi mdi-history"></i></span>
-                        Événements ({{ filtered_events }})
+                        {% trans "events" %} ({{ filtered_events }})
                     </div>
                     <div class="card-header-icon">
-                        <span class="tag is-light">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+                        <span class="tag is-light">{% trans "page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}</span>
                     </div>
                 </div>
 
@@ -163,10 +164,10 @@
                                         {% if event.user %}
                                             {{ event.user.get_full_name|default:event.user.username }}
                                         {% else %}
-                                            <span class="has-text-grey">[Utilisateur supprimé]</span>
+                                            <span class="has-text-grey">[{% trans "deleted_user" %}]</span>
                                         {% endif %}
                                         <span class="has-text-grey ml-2 is-size-7">
-                                            ({{ event.date|days_since }} jours)
+                                            ({{ event.date|days_since }} {% trans "days" %})
                                         </span>
                                     </p>
                                     <p class="has-text-dark">{{ event.content }}</p>
@@ -180,7 +181,7 @@
                         <span class="icon is-large has-text-grey-light">
                             <i class="mdi mdi-48px mdi-history"></i>
                         </span>
-                        <p class="title is-5 has-text-grey">Aucun événement trouvé</p>
+                        <p class="title is-5 has-text-grey">{% trans "no_events_found" %}</p>
                     </div>
                     {% endif %}
                 </div>
@@ -191,15 +192,15 @@
                 <nav class="pagination is-centered mt-5" role="navigation">
                     {% if page_obj.has_previous %}
                         <a href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}"
-                           class="pagination-previous">Précédent</a>
+                           class="pagination-previous">{% trans "previous" %}</a>
                     {% else %}
-                        <a class="pagination-previous" disabled>Précédent</a>
+                        <a class="pagination-previous" disabled>{% trans "previous" %}</a>
                     {% endif %}
                     {% if page_obj.has_next %}
                         <a href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}"
-                           class="pagination-next">Suivant</a>
+                           class="pagination-next">{% trans "next" %}</a>
                     {% else %}
-                        <a class="pagination-next" disabled>Suivant</a>
+                        <a class="pagination-next" disabled>{% trans "next" %}</a>
                     {% endif %}
                 </nav>
             {% endif %}
@@ -237,7 +238,7 @@
             if (dateFromInput) {
                 const dateFromPicker = flatpickr(dateFromInput, {
                     ...flatpickrConfig,
-                    placeholder: "Date de début",
+                    placeholder: "{% trans 'start_date' %}",
                     maxDate: new Date(), // Ne peut pas sélectionner une date future
                     onChange: function (selectedDates, dateStr, instance) {
                         // Mettre à jour la date minimale du champ "Date de fin"
@@ -269,7 +270,7 @@
             if (dateToInput) {
                 dateToPickerInstance = flatpickr(dateToInput, {
                     ...flatpickrConfig,
-                    placeholder: "Date de fin",
+                    placeholder: "{% trans 'end_date' %}",
                     maxDate: new Date(), // Ne peut pas sélectionner une date future
                     onChange: function (selectedDates, dateStr, instance) {
                         // Mettre à jour la date maximale du champ "Date de début"
@@ -309,7 +310,7 @@
                     if (fromDate > toDate) {
                         dateToInput.classList.add('is-danger');
                         dateToInput.classList.remove('is-success');
-                        showNotification('La date de fin doit être postérieure à la date de début', 'is-warning');
+                        showNotification('{% trans "end_date_must_be_after_start_date" %}', 'is-warning');
                         return false;
                     } else {
                         dateToInput.classList.remove('is-danger');

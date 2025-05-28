@@ -1,4 +1,5 @@
 {% extends "master.html" %}
+{% load i18n %}
 
 {% block content %}
 <section class="section">
@@ -13,34 +14,34 @@
                             <span class="icon mr-2">
                                 <i class="mdi mdi-chart-line"></i>
                             </span>
-                            Situation actuelle
+                            {% trans "current_situation" %}
                         </div>
                     </div>
                     <div class="card-content">
                         <div class="columns">
                             <div class="column has-text-centered">
-                                <p class="heading">Solde actuel</p>
+                                <p class="heading">{% trans "current_balance" %}</p>
                                 <p class="title is-4 has-text-success">{{ wallet.balance|floatformat:2 }} €</p>
                             </div>
                             <div class="column has-text-centered">
-                                <p class="heading">Objectif actuel</p>
+                                <p class="heading">{% trans "current_objective" %}</p>
                                 <p class="title is-4 has-text-info">{{ wallet.objective|floatformat:2 }} €</p>
                             </div>
                         </div>
 
                         {% if wallet.objective > 0 %}
                         <div class="field mt-4">
-                            <label class="label">Progression actuelle</label>
+                            <label class="label">{% trans "current_progress" %}</label>
                             <progress class="progress is-primary"
                                       value="{{ current_progress }}"
                                       max="100">{{ current_progress|floatformat:1 }}%</progress>
                             <p class="help has-text-centered">
-                                <strong>{{ current_progress|floatformat:1 }}%</strong> de votre objectif atteint
+                                <strong>{{ current_progress|floatformat:1 }}%</strong> {% trans "of_your_objective_reached" %}
                                 {% if current_progress >= 100 %}
-                                    <span class="has-text-success">🎉 Objectif atteint !</span>
+                                    <span class="has-text-success">🎉 {% trans "objective_reached" %} !</span>
                                 {% else %}
                                     <span class="has-text-grey">
-                                        ({{ wallet.objective|add:wallet.balance|floatformat:"-2" }} € restants)
+                                        ({{ wallet.objective|add:wallet.balance|floatformat:"-2" }} € {% trans "remaining" %})
                                     </span>
                                 {% endif %}
                             </p>
@@ -57,11 +58,11 @@
                             <span class="icon mr-2">
                                 <i class="mdi mdi-lightbulb-outline"></i>
                             </span>
-                            Suggestions d'objectifs
+                            {% trans "objective_suggestions" %}
                         </div>
                     </div>
                     <div class="card-content">
-                        <p class="subtitle is-6 mb-4">Basées sur votre solde actuel :</p>
+                        <p class="subtitle is-6 mb-4">{% trans "based_on_your_current_balance" %} :</p>
                         <div class="buttons is-flex-wrap-wrap">
                             {% for suggestion in suggested_objectives %}
                             <button class="button is-info is-light suggestion-btn"
@@ -73,7 +74,7 @@
                             </button>
                             {% endfor %}
                         </div>
-                        <p class="help">Cliquez sur une suggestion pour l'utiliser comme objectif</p>
+                        <p class="help">{% trans "click_suggestion_to_use_as_objective" %}</p>
                     </div>
                 </div>
                 {% endif %}
@@ -87,7 +88,7 @@
                             <span class="icon mr-2">
                                 <i class="mdi mdi-target"></i>
                             </span>
-                            Nouvel objectif
+                            {% trans "new_objective" %}
                         </div>
                     </div>
                     <div class="card-content">
@@ -95,7 +96,7 @@
                             {% csrf_token %}
 
                             <div class="field">
-                                <label class="label">Montant de l'objectif</label>
+                                <label class="label">{% trans "objective_amount" %}</label>
                                 <div class="control has-icons-left">
                                     <input class="input is-large"
                                            type="number"
@@ -105,21 +106,21 @@
                                            step="0.01"
                                            min="0"
                                            max="1000000"
-                                           placeholder="Entrez votre objectif en €"
+                                           placeholder="{% trans 'enter_your_objective_in_euros' %}"
                                            required>
                                     <span class="icon is-large is-left">
                                         <i class="mdi mdi-currency-eur mdi-24px"></i>
                                     </span>
                                 </div>
                                 <p class="help">
-                                    Définissez un montant que vous souhaitez atteindre avec ce portefeuille
+                                    {% trans "define_amount_you_wish_to_reach" %}
                                 </p>
                             </div>
 
                             <!-- Aperçu de la progression -->
                             <div class="notification is-light" id="progress-preview" style="display: none;">
                                 <div class="content">
-                                    <p class="title is-6">Aperçu de la progression</p>
+                                    <p class="title is-6">{% trans "progress_preview" %}</p>
                                     <progress class="progress is-info" id="preview-progress" value="0" max="100"></progress>
                                     <p class="help" id="preview-text"></p>
                                 </div>
@@ -128,7 +129,7 @@
                             <div class="field is-grouped is-grouped-right mt-5">
                                 <div class="control">
                                     <a href="{% url 'wallet:wallet_detail' wallet.id %}" class="button is-light is-medium">
-                                        Annuler
+                                        {% trans "cancel" %}
                                     </a>
                                 </div>
                                 <div class="control">
@@ -136,7 +137,7 @@
                                         <span class="icon">
                                             <i class="mdi mdi-content-save"></i>
                                         </span>
-                                        <span>Enregistrer l'objectif</span>
+                                        <span>{% trans "save_objective" %}</span>
                                     </button>
                                 </div>
                             </div>
@@ -158,6 +159,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const currentBalance = {{ wallet.balance }};
     const currentObjective = {{ wallet.objective }};
 
+    // Traductions pour JavaScript
+    const translations = {
+        'progress_with_new_objective': "{% trans 'progress_with_new_objective' %}",
+        'remaining_to_save': "{% trans 'remaining_to_save' %}",
+        'objective_already_reached': "{% trans 'objective_already_reached' %}",
+        'no_change': "{% trans 'no_change' %}",
+        'objective_achievable': "{% trans 'objective_achievable' %}",
+        'save_objective': "{% trans 'save_objective' %}"
+    };
+
     function updatePreview() {
         const value = parseFloat(objectiveInput.value);
         if (value && value > 0) {
@@ -166,25 +177,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
             previewProgress.value = progress;
             previewText.innerHTML = `
-                <strong>${progress.toFixed(1)}%</strong> de progression avec ce nouvel objectif
-                ${remaining > 0 ? `<br>Il vous reste <strong>${remaining.toFixed(2)} €</strong> à épargner` : '<br><span class="has-text-success">🎉 Objectif déjà atteint !</span>'}
+                <strong>${progress.toFixed(1)}%</strong> ${translations.progress_with_new_objective}
+                ${remaining > 0 ? `<br>${translations.remaining_to_save} <strong>${remaining.toFixed(2)} €</strong>` : '<br><span class="has-text-success">🎉 ' + translations.objective_already_reached + '</span>'}
             `;
             progressPreview.style.display = 'block';
 
             if (value === currentObjective) {
                 submitBtn.className = 'button is-light is-medium';
-                submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-information"></i></span><span>Aucun changement</span>';
+                submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-information"></i></span><span>' + translations.no_change + '</span>';
             } else if (progress >= 100) {
                 submitBtn.className = 'button is-success is-medium';
-                submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-check"></i></span><span>Objectif atteignable !</span>';
+                submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-check"></i></span><span>' + translations.objective_achievable + '</span>';
             } else {
                 submitBtn.className = 'button is-primary is-medium';
-                submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-content-save"></i></span><span>Enregistrer l\'objectif</span>';
+                submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-content-save"></i></span><span>' + translations.save_objective + '</span>';
             }
         } else {
             progressPreview.style.display = 'none';
             submitBtn.className = 'button is-primary is-medium';
-            submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-content-save"></i></span><span>Enregistrer l\'objectif</span>';
+            submitBtn.innerHTML = '<span class="icon"><i class="mdi mdi-content-save"></i></span><span>' + translations.save_objective + '</span>';
         }
     }
 
@@ -192,8 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.querySelectorAll('.suggestion-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            const amount = this.dataset.amount;
-            objectiveInput.value = amount;
+            objectiveInput.value = this.dataset.amount;
             updatePreview();
             this.classList.add('is-success');
             setTimeout(() => this.classList.remove('is-success'), 1000);

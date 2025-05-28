@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 from .models import Wallet, Category, Transaction
 
 class WalletForm(forms.ModelForm):
@@ -8,7 +9,7 @@ class WalletForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'input',
-                'placeholder': 'Nom du portefeuille'
+                'placeholder': _('wallet_name_placeholder')
             }),
             'users': forms.CheckboxSelectMultiple(attrs={
                 'class': 'checkbox-group'
@@ -21,9 +22,9 @@ class WalletForm(forms.ModelForm):
             }),
         }
         labels = {
-            'name': 'Nom du portefeuille',
-            'users': 'Utilisateurs autorisés',
-            'balance': 'Solde initial',
+            'name': _('wallet_name'),
+            'users': _('authorized_users'),
+            'balance': _('initial_balance'),
         }
 
 class CategoryForm(forms.ModelForm):
@@ -33,11 +34,11 @@ class CategoryForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'input is-primary',
-                'placeholder': 'Nom de la catégorie'
+                'placeholder': _('category_name_placeholder')
             }),
         }
         labels = {
-            'name': 'Nom de la catégorie',
+            'name': _('category_name'),
         }
 
 class TransactionForm(forms.ModelForm):
@@ -47,7 +48,7 @@ class TransactionForm(forms.ModelForm):
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'input is-rounded',
-                'placeholder': 'Titre de la transaction'
+                'placeholder': _('transaction_title_placeholder')
             }),
             'category': forms.Select(attrs={
                 'class': 'select is-fullwidth'
@@ -59,7 +60,7 @@ class TransactionForm(forms.ModelForm):
             }),
             'description': forms.Textarea(attrs={
                 'class': 'textarea is-rounded',
-                'placeholder': 'Description (optionnel)',
+                'placeholder': _('description_optional_placeholder'),
                 'rows': 3
             }),
             'is_income': forms.CheckboxInput(attrs={
@@ -67,9 +68,9 @@ class TransactionForm(forms.ModelForm):
             }),
         }
         labels = {
-            'title': 'Titre de la transaction',
-            'category': 'Catégorie',
-            'amount': 'Montant',
-            'description': 'Description',
-            'is_income': 'Revenus ?',
+            'title': _('transaction_title'),
+            'category': _('category'),
+            'amount': _('amount'),
+            'description': _('description'),
+            'is_income': _('is_income_question'),
         }

@@ -1,4 +1,7 @@
 {% extends "master.html" %}
+{% load i18n %}
+{% load l10n %}
+
 {% block content %}
     <section class="section">
         <div class="container">
@@ -11,7 +14,7 @@
                                 <span class="icon mr-2">
                                     <i class="mdi mdi-account-multiple-outline"></i>
                                 </span>
-                                Membres
+                                {% trans "members" %}
                             </div>
                         </div>
                         <div class="card-content">
@@ -25,7 +28,7 @@
                                             </span>
                                             <span>{{ user.get_full_name }}</span>
                                         </span>
-                                        <button class="delete is-small js-modal-trigger" data-target="modal-remove-user-{{ user.id }}" title="Retirer"></button>
+                                        <button class="delete is-small js-modal-trigger" data-target="modal-remove-user-{{ user.id }}" title="{% trans 'remove' %}"></button>
                                     </li>
                                         <!-- Modal de confirmation pour ce user -->
                                         <div id="modal-remove-user-{{ user.id }}" class="modal">
@@ -33,16 +36,16 @@
                                           <div class="modal-content">
                                             <div class="box has-text-centered">
                                               <p class="mb-4">
-                                                Voulez-vous vraiment retirer <strong>{{ user.get_full_name }}</strong> de ce portefeuille ?
+                                                {% trans "do_you_really_want_to_remove" %} <strong>{{ user.get_full_name }}</strong> {% trans "from_this_wallet" %} ?
                                               </p>
                                               <form method="post" action="{% url 'wallet:remove_member' wallet.id user.id %}">
                                                 {% csrf_token %}
                                                 <div class="buttons is-justify-content-center">
                                                   <button type="submit" class="button is-danger">
                                                     <span class="icon"><i class="mdi mdi-trash-can-outline"></i></span>
-                                                    <span>Retirer</span>
+                                                    <span>{% trans "remove" %}</span>
                                                   </button>
-                                                  <button type="button" class="button is-light modal-close-button">Annuler</button>
+                                                  <button type="button" class="button is-light modal-close-button">{% trans "cancel" %}</button>
                                                 </div>
                                               </form>
                                             </div>
@@ -52,7 +55,7 @@
                                     {% endfor %}
                                 </ul>
                             {% else %}
-                                <p class="has-text-grey">Aucun membre</p>
+                                <p class="has-text-grey">{% trans "no_members" %}</p>
                             {% endif %}
 
                             {% if non_members %}
@@ -62,7 +65,7 @@
                                     <div class="control is-expanded">
                                         <div class="select is-fullwidth">
                                             <select name="user_id" required>
-                                                <option value="" disabled selected>Ajouter un utilisateur</option>
+                                                <option value="" disabled selected>{% trans "add_user" %}</option>
                                                 {% for user in non_members %}
                                                     <option value="{{ user.id }}">{{ user.get_full_name }}</option>
                                                 {% endfor %}
@@ -70,7 +73,7 @@
                                         </div>
                                     </div>
                                     <div class="control">
-                                        <button type="submit" class="button is-success" title="Ajouter">
+                                        <button type="submit" class="button is-success" title="{% trans 'add' %}">
                                             <span class="icon"><i class="mdi mdi-plus"></i></span>
                                         </button>
                                     </div>
@@ -99,18 +102,18 @@
                                         <span class="icon">
                                             <i class="mdi mdi-plus"></i>
                                         </span>
-                                            <span>Ajouter transaction</span>
+                                            <span>{% trans "add_transaction" %}</span>
                                         </a>
                                         <a href="{% url 'wallet:transaction_list' wallet.id %}"
                                            class="button is-primary is-light">
                                         <span class="icon">
                                             <i class="mdi mdi-format-list-bulleted"></i>
                                         </span>
-                                            <span>Transactions</span>
+                                            <span>{% trans "transactions" %}</span>
                                         </a>
                                         <a href="{% url 'wallet:export_transactions_csv' wallet.id %}" class="button is-link is-light">
                                             <span class="icon"><i class="mdi mdi-file-download-outline"></i></span>
-                                            <span>Exporter CSV</span>
+                                            <span>{% trans "export_csv" %}</span>
                                         </a>
                                     </div>
                                 </div>
@@ -123,7 +126,7 @@
                                         <div class="level">
                                             <div class="level-left">
                                                 <div>
-                                                    <p class="heading">Solde actuel</p>
+                                                    <p class="heading">{% trans "current_balance" %}</p>
                                                     <p class="title is-4 has-text-success">{{ wallet.balance|floatformat:2 }}
                                                         €</p>
                                                 </div>
@@ -143,8 +146,8 @@
                                             <div class="level-left">
                                                 <div>
                                                     <p class="heading">
-                                                        Objectif
-                                                        <a class="icon is-small ml-2" title="Modifier l'objectif"
+                                                        {% trans "objective" %}
+                                                        <a class="icon is-small ml-2" title="{% trans 'edit_objective' %}"
                                                            href="{% url 'wallet:edit_objective' wallet.id %}">
                                                             <i class="mdi mdi-pencil has-text-grey"></i>
                                                         </a>
@@ -167,7 +170,7 @@
                                         <div class="level">
                                             <div class="level-left">
                                                 <div>
-                                                    <p class="heading">Revenus du mois</p>
+                                                    <p class="heading">{% trans "monthly_income" %}</p>
                                                     <p class="title is-4 has-text-success">{{ monthly_income|floatformat:2 }}
                                                         €</p>
                                                 </div>
@@ -186,7 +189,7 @@
                                         <div class="level">
                                             <div class="level-left">
                                                 <div>
-                                                    <p class="heading">Dépenses du mois</p>
+                                                    <p class="heading">{% trans "monthly_expenses" %}</p>
                                                     <p class="title is-4 has-text-danger">{{ monthly_expenses|floatformat:2 }}
                                                         €</p>
                                                 </div>
@@ -204,13 +207,13 @@
                             <!-- Barre de progression vers l'objectif -->
                             {% if wallet.objective > 0 %}
                                 <div class="field">
-                                    <label class="label">Progression vers l'objectif</label>
-                                    <progress class="progress is-primary" value="{{ wallet.balance }}"
-                                              max="{{ wallet.objective }}">
+                                    <label class="label">{% trans "progress_toward_objective" %}</label>
+                                    <progress class="progress is-primary" value="{{ wallet.balance|unlocalize }}"
+                                              max="{{ wallet.objective|unlocalize }}">
                                         {{ wallet.balance|floatformat:0 }}/{{ wallet.objective|floatformat:0 }}
                                     </progress>
                                     <p class="help">
-                                        {% widthratio wallet.balance wallet.objective 100 %}% de votre objectif atteint
+                                        {% widthratio wallet.balance wallet.objective 100 %}% {% trans "of_your_objective_reached" %}
                                     </p>
                                 </div>
                             {% endif %}
@@ -228,7 +231,7 @@
                             <span class="icon mr-2">
                                 <i class="mdi mdi-chart-line"></i>
                             </span>
-                                Évolution des finances (mois en cours)
+                                {% trans "financial_evolution_current_month" %}
                             </div>
                         </div>
                         <div class="card-content">
@@ -237,11 +240,11 @@
                             {% else %}
                                 <div class="has-text-centered has-text-grey is-size-6 py-6">
                                     <i class="mdi mdi-chart-line-variant mdi-48px"></i><br><br>
-                                    <p><strong>Aucune donnée disponible</strong></p>
-                                    <p>Ajoutez des transactions pour voir l'évolution de vos finances.</p>
+                                    <p><strong>{% trans "no_data_available" %}</strong></p>
+                                    <p>{% trans "add_transactions_to_see_financial_evolution" %}</p>
                                     <a href="{% url 'wallet:add_transaction' wallet.id %}" class="button is-primary is-light mt-3">
                                         <span class="icon"><i class="mdi mdi-plus"></i></span>
-                                        <span>Ajouter une transaction</span>
+                                        <span>{% trans "add_transaction" %}</span>
                                     </a>
                                 </div>
                             {% endif %}
@@ -256,7 +259,7 @@
                             <span class="icon mr-2">
                                 <i class="mdi mdi-chart-donut"></i>
                             </span>
-                                Dépenses par catégorie
+                                {% trans "expenses_by_category" %}
                             </div>
                         </div>
                         <div class="card-content">
@@ -265,11 +268,11 @@
                             {% else %}
                                 <div class="has-text-centered has-text-grey is-size-6 py-6">
                                     <i class="mdi mdi-chart-donut mdi-48px"></i><br><br>
-                                    <p><strong>Aucune dépense enregistrée</strong></p>
-                                    <p>Ajoutez des transactions de dépenses pour voir la répartition par catégorie.</p>
+                                    <p><strong>{% trans "no_expenses_recorded" %}</strong></p>
+                                    <p>{% trans "add_expense_transactions_to_see_category_breakdown" %}</p>
                                     <a href="{% url 'wallet:add_transaction' wallet.id %}" class="button is-primary is-light mt-3">
                                         <span class="icon"><i class="mdi mdi-plus"></i></span>
-                                        <span>Ajouter une transaction</span>
+                                        <span>{% trans "add_transaction" %}</span>
                                     </a>
                                 </div>
                             {% endif %}
@@ -285,12 +288,12 @@
                     <span class="icon mr-2">
                         <i class="mdi mdi-clock-outline"></i>
                     </span>
-                        Transactions récentes
+                        {% trans "recent_transactions" %}
                     </div>
                     <div class="card-header-icon">
                         <a href="{% url 'wallet:transaction_list' wallet.id %}"
                            class="button is-small is-primary is-light">
-                            Voir tout
+                            {% trans "see_all" %}
                         </a>
                     </div>
                 </div>
@@ -300,10 +303,10 @@
                             <table class="table is-fullwidth is-hoverable">
                                 <thead>
                                 <tr>
-                                    <th>Date</th>
-                                    <th>Description</th>
-                                    <th>Catégorie</th>
-                                    <th class="has-text-right">Montant</th>
+                                    <th>{% trans "date" %}</th>
+                                    <th>{% trans "description" %}</th>
+                                    <th>{% trans "category" %}</th>
+                                    <th class="has-text-right">{% trans "amount" %}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -314,11 +317,11 @@
                                             {% if transaction.description %}
                                                 <strong>{{ transaction.description|linebreaks }}</strong>
                                             {% else %}
-                                                <strong>Sans description</strong>
+                                                <strong>{% trans "no_description" %}</strong>
                                             {% endif %}
                                             {% if transaction.user %}
                                                 <br>
-                                                <small class="has-text-grey">par {{ transaction.user.get_full_name }}</small>
+                                                <small class="has-text-grey">{% trans "by" %} {{ transaction.user.get_full_name }}</small>
                                             {% endif %}
                                         </td>
                                         <td>
@@ -339,11 +342,11 @@
                     {% else %}
                         <div class="has-text-centered has-text-grey py-6">
                             <i class="mdi mdi-receipt-text-outline mdi-48px"></i><br><br>
-                            <p><strong>Aucune transaction enregistrée</strong></p>
-                            <p>Commencez par ajouter votre première transaction pour suivre vos finances.</p>
+                            <p><strong>{% trans "no_transaction_recorded" %}</strong></p>
+                            <p>{% trans "start_by_adding_first_transaction_to_track_finances" %}</p>
                             <a href="{% url 'wallet:add_transaction' wallet.id %}" class="button is-success mt-3">
                                 <span class="icon"><i class="mdi mdi-plus"></i></span>
-                                <span>Ajouter une transaction</span>
+                                <span>{% trans "add_transaction" %}</span>
                             </a>
                         </div>
                     {% endif %}
@@ -397,7 +400,7 @@
             data: {
                 labels: {{ chart_dates|safe }},
                 datasets: [{
-                    label: 'Revenus',
+                    label: "{% trans 'income' %}",
                     data: {{ chart_incomes|safe }},
                     borderColor: '#48c78e',
                     backgroundColor: 'rgba(72, 199, 142, 0.1)',
@@ -405,7 +408,7 @@
                     fill: true,
                     tension: 0.4
                 }, {
-                    label: 'Dépenses',
+                    label: "{% trans 'expenses' %}",
                     data: {{ chart_expenses|safe }},
                     borderColor: '#f14668',
                     backgroundColor: 'rgba(241, 70, 104, 0.1)',

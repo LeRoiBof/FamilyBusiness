@@ -1,4 +1,5 @@
 {% extends 'master.html' %}
+{% load i18n %}
 
 {% block content %}
 <section class="section">
@@ -11,7 +12,7 @@
                             <span class="icon mr-2">
                                 <i class="mdi mdi-check-circle"></i>
                             </span>
-                            Lien de réinitialisation généré
+                            {% trans "reset_link_generated" %}
                         </div>
                     </div>
 
@@ -20,9 +21,9 @@
                             <span class="icon is-large has-text-success">
                                 <i class="mdi mdi-48px mdi-email-check"></i>
                             </span>
-                            <p class="title is-5 mt-3">Lien de réinitialisation créé !</p>
+                            <p class="title is-5 mt-3">{% trans "reset_link_created" %}</p>
                             <p class="subtitle is-6 has-text-grey">
-                                Utilisez ce lien sécurisé pour définir votre nouveau mot de passe
+                                {% trans "use_secure_link_to_set_new_password" %}
                             </p>
                         </div>
 
@@ -35,8 +36,8 @@
                                     </span>
                                 </div>
                                 <div class="media-content">
-                                    <p><strong>Attention :</strong> Ce lien expire dans <strong>15 minutes</strong> pour votre sécurité.</p>
-                                    <p class="mt-2">Expiration : <span id="expirationTime" class="has-text-weight-bold"></span></p>
+                                    <p><strong>{% trans "warning" %}:</strong> {% trans "link_expires_in_15_minutes" %}</p>
+                                    <p class="mt-2">{% trans "expiration" %}: <span id="expirationTime" class="has-text-weight-bold"></span></p>
                                 </div>
                             </div>
                         </div>
@@ -44,7 +45,7 @@
                         <!-- Lien de réinitialisation -->
                         {% url 'account:reset_password' token=token as reset_url %}
                         <div class="field">
-                            <label class="label">Lien de réinitialisation</label>
+                            <label class="label">{% trans "reset_link" %}</label>
                             <div class="field has-addons">
                                 <div class="control is-expanded">
                                     <input class="input" type="text" id="resetLink" readonly
@@ -55,11 +56,11 @@
                                         <span class="icon is-small">
                                             <i class="mdi mdi-content-copy"></i>
                                         </span>
-                                        <span>Copier</span>
+                                        <span>{% trans "copy" %}</span>
                                     </button>
                                 </div>
                             </div>
-                            <p class="help">Copiez ce lien et collez-le dans votre navigateur</p>
+                            <p class="help">{% trans "copy_link_and_paste_in_browser" %}</p>
                         </div>
 
                         <!-- Bouton d'accès direct -->
@@ -69,7 +70,7 @@
                                     <span class="icon">
                                         <i class="mdi mdi-open-in-new"></i>
                                     </span>
-                                    <span>Accéder directement au formulaire</span>
+                                    <span>{% trans "access_form_directly" %}</span>
                                 </a>
                             </div>
                         </div>
@@ -77,7 +78,7 @@
                         <!-- Compte à rebours -->
                         <div class="has-text-centered mt-4">
                             <p class="is-size-7 has-text-grey">
-                                Temps restant : <span id="countdown" class="has-text-weight-bold has-text-danger">15:00</span>
+                                {% trans "time_remaining" %}: <span id="countdown" class="has-text-weight-bold has-text-danger">15:00</span>
                             </p>
                         </div>
                     </div>
@@ -90,7 +91,7 @@
                             <span class="icon is-small">
                                 <i class="mdi mdi-refresh"></i>
                             </span>
-                            Générer un nouveau lien
+                            {% trans "generate_new_link" %}
                         </a>
                     </p>
                     <p class="mt-2">
@@ -98,7 +99,7 @@
                             <span class="icon is-small">
                                 <i class="mdi mdi-arrow-left"></i>
                             </span>
-                            Retour à la connexion
+                            {% trans "back_to_login" %}
                         </a>
                     </p>
                 </div>
@@ -124,6 +125,16 @@ document.addEventListener('DOMContentLoaded', function() {
         minute: '2-digit'
     });
 
+    // Messages traduits pour JavaScript
+    const messages = {
+        copied: "{% trans 'copied' %}",
+        copy: "{% trans 'copy' %}",
+        linkCopiedToClipboard: "{% trans 'link_copied_to_clipboard' %}",
+        copyError: "{% trans 'copy_error_manual' %}",
+        linkExpired: "{% trans 'link_expired_generate_new' %}",
+        linkGeneratedSuccess: "{% trans 'reset_link_generated_success_15_minutes' %}"
+    };
+
     // Fonction de copie du lien
     copyBtn.addEventListener('click', function() {
         resetLink.select();
@@ -133,24 +144,24 @@ document.addEventListener('DOMContentLoaded', function() {
             // Feedback visuel de succès
             copyBtn.classList.remove('is-primary');
             copyBtn.classList.add('is-success');
-            copyBtn.innerHTML = '<span class="icon is-small"><i class="mdi mdi-check"></i></span><span>Copié !</span>';
+            copyBtn.innerHTML = '<span class="icon is-small"><i class="mdi mdi-check"></i></span><span>' + messages.copied + '</span>';
 
             // Notification de succès
-            showNotification('Lien copié dans le presse-papiers !', 'is-success');
+            showNotification(messages.linkCopiedToClipboard, 'is-success');
 
             // Restaurer le bouton après 3 secondes
             setTimeout(() => {
                 copyBtn.classList.remove('is-success');
                 copyBtn.classList.add('is-primary');
-                copyBtn.innerHTML = '<span class="icon is-small"><i class="mdi mdi-content-copy"></i></span><span>Copier</span>';
+                copyBtn.innerHTML = '<span class="icon is-small"><i class="mdi mdi-content-copy"></i></span><span>' + messages.copy + '</span>';
             }, 3000);
         }, function() {
             // Fallback pour les navigateurs plus anciens
             try {
                 document.execCommand('copy');
-                showNotification('Lien copié dans le presse-papiers !', 'is-success');
+                showNotification(messages.linkCopiedToClipboard, 'is-success');
             } catch (err) {
-                showNotification('Erreur lors de la copie. Veuillez copier manuellement.', 'is-danger');
+                showNotification(messages.copyError, 'is-danger');
             }
         });
     });
@@ -165,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
             countdownEl.classList.add('has-text-danger');
 
             // Afficher une notification d'expiration
-            showNotification('Le lien de réinitialisation a expiré. Veuillez en générer un nouveau.', 'is-danger');
+            showNotification(messages.linkExpired, 'is-danger');
 
             // Désactiver le bouton de copie et le lien
             copyBtn.disabled = true;
@@ -260,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Notification d'accueil
     setTimeout(() => {
-        showNotification('Lien de réinitialisation généré avec succès ! Vous avez 15 minutes pour l\'utiliser.', 'is-success');
+        showNotification(messages.linkGeneratedSuccess, 'is-success');
     }, 500);
 });
 </script>

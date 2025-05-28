@@ -1,4 +1,5 @@
 {% extends "master.html" %}
+{% load i18n %}
 
 {% block content %}
 <section class="section">
@@ -8,7 +9,7 @@
             <div class="level-left">
                 <div class="level-item">
                     <div>
-                        <h1 class="title is-3 has-text-danger mb-1">Supprimer l'utilisateur</h1>
+                        <h1 class="title is-3 has-text-danger mb-1">{% trans "delete_user" %}</h1>
                     </div>
                 </div>
             </div>
@@ -20,7 +21,7 @@
                     <div class="card-header">
                         <div class="card-header-title has-text-danger">
                             <span class="icon mr-2"><i class="mdi mdi-alert-circle"></i></span>
-                            Confirmation de suppression
+                            {% trans "deletion_confirmation" %}
                         </div>
                     </div>
 
@@ -38,20 +39,20 @@
                                     <p class="subtitle is-6 has-text-grey mb-2">{{ user_to_delete.email }}</p>
                                     <div class="tags">
                                         {% if user_to_delete.is_staff %}
-                                            <span class="tag is-warning"><i class="mdi mdi-shield mr-1"></i> Admin</span>
+                                            <span class="tag is-warning"><i class="mdi mdi-shield mr-1"></i> {% trans "admin" %}</span>
                                         {% else %}
-                                            <span class="tag is-light">{{ user_to_delete.role|default:"Utilisateur"|capfirst }}</span>
+                                            <span class="tag is-light">{{ user_to_delete.role|default:_("user")|capfirst }}</span>
                                         {% endif %}
                                         {% if user_to_delete.is_active %}
-                                            <span class="tag is-success">Actif</span>
+                                            <span class="tag is-success">{% trans "active" %}</span>
                                         {% else %}
-                                            <span class="tag is-danger">Inactif</span>
+                                            <span class="tag is-danger">{% trans "inactive" %}</span>
                                         {% endif %}
-                                        <span class="tag is-info">Inscrit le {{ user_to_delete.date_joined|date:"d/m/Y" }}</span>
+                                        <span class="tag is-info">{% trans "registered_on" %} {{ user_to_delete.date_joined|date:"d/m/Y" }}</span>
                                     </div>
                                     {% if user_to_delete.last_login %}
                                         <p class="has-text-grey mt-2">
-                                            <i class="mdi mdi-clock mr-1"></i> Dernière connexion : {{ user_to_delete.last_login|date:"d/m/Y à H:i" }}
+                                            <i class="mdi mdi-clock mr-1"></i> {% trans "last_login" %}: {{ user_to_delete.last_login|date:"d/m/Y à H:i" }}
                                         </p>
                                     {% endif %}
                                 </div>
@@ -60,13 +61,13 @@
 
                         <!-- Impact -->
                         <div class="notification is-warning no-dismiss">
-                            <p><strong><i class="mdi mdi-alert"></i> Impact de la suppression :</strong></p>
+                            <p><strong><i class="mdi mdi-alert"></i> {% trans "deletion_impact" %}:</strong></p>
                             <ul class="mt-3">
-                                <li><strong>{{ impact_info.wallet_count }}</strong> portefeuille{{ impact_info.wallet_count|pluralize }} associé{{ impact_info.wallet_count|pluralize }}</li>
-                                <li><strong>{{ impact_info.transaction_count }}</strong> transaction{{ impact_info.transaction_count|pluralize }} enregistrée{{ impact_info.transaction_count|pluralize }}</li>
+                                <li><strong>{{ impact_info.wallet_count }}</strong> {% trans "wallet" %}{{ impact_info.wallet_count|pluralize }} {% trans "associated_plural" %}{{ impact_info.wallet_count|pluralize }}</li>
+                                <li><strong>{{ impact_info.transaction_count }}</strong> {% trans "transaction" %}{{ impact_info.transaction_count|pluralize }} {% trans "recorded_plural" %}{{ impact_info.transaction_count|pluralize }}</li>
                                 {% if impact_info.shared_wallets.exists %}
                                     <li class="has-text-danger">
-                                        <strong>Attention :</strong> L'utilisateur partage des portefeuilles avec d'autres membres
+                                        <strong>{% trans "warning" %}:</strong> {% trans "user_shares_wallets_with_others" %}
                                     </li>
                                 {% endif %}
                             </ul>
@@ -77,21 +78,21 @@
                             <div class="card-header">
                                 <div class="card-header-title">
                                     <span class="icon mr-2"><i class="mdi mdi-wallet"></i></span>
-                                    Portefeuilles affectés
+                                    {% trans "affected_wallets" %}
                                 </div>
                             </div>
                             <div class="card-content">
                                 {% if impact_info.shared_wallets.exists %}
                                     <div class="notification is-danger is-light mb-4 no-dismiss">
-                                        <p><strong>Portefeuilles partagés :</strong></p>
-                                        <p>Ces portefeuilles ne seront pas supprimés, mais l'utilisateur y perdra l'accès.</p>
+                                        <p><strong>{% trans "shared_wallets" %}:</strong></p>
+                                        <p>{% trans "shared_wallets_not_deleted_explanation" %}</p>
                                     </div>
                                 {% endif %}
                                 <div class="content is-small">
                                     <ul>
-                                        <li>Les transactions resteront dans l'historique</li>
-                                        <li>Les partages seront révoqués</li>
-                                        <li>L'utilisateur sera définitivement supprimé</li>
+                                        <li>{% trans "transactions_remain_in_history" %}</li>
+                                        <li>{% trans "shares_will_be_revoked" %}</li>
+                                        <li>{% trans "user_permanently_deleted" %}</li>
                                     </ul>
                                 </div>
                             </div>
@@ -100,12 +101,12 @@
 
                         <!-- Avertissements -->
                         <div class="notification is-danger mt-5 no-dismiss">
-                            <p><strong><i class="mdi mdi-shield-alert"></i> Mesures de sécurité :</strong></p>
+                            <p><strong><i class="mdi mdi-shield-alert"></i> {% trans "security_measures" %}:</strong></p>
                             <ul class="mt-3">
-                                <li>Suppression <strong>définitive et irréversible</strong></li>
-                                <li>Toutes les sessions actives seront révoquées</li>
-                                <li>L'adresse email pourra être réutilisée</li>
-                                <li>Un événement sera enregistré dans l'historique</li>
+                                <li>{% trans "permanent_irreversible_deletion" %}</li>
+                                <li>{% trans "all_active_sessions_revoked" %}</li>
+                                <li>{% trans "email_can_be_reused" %}</li>
+                                <li>{% trans "event_logged_in_history" %}</li>
                             </ul>
                         </div>
 
@@ -115,12 +116,12 @@
                             <div class="field is-grouped is-grouped-right">
                                 <div class="control">
                                     <a href="{% url 'adminpanel:user_management' %}" class="button is-light is-medium">
-                                        <i class="mdi mdi-close mr-1"></i> Annuler
+                                        <i class="mdi mdi-close mr-1"></i> {% trans "cancel" %}
                                     </a>
                                 </div>
                                 <div class="control">
                                     <button type="submit" class="button is-danger is-medium" id="delete-btn">
-                                        <i class="mdi mdi-account-remove mr-1"></i> Supprimer définitivement
+                                        <i class="mdi mdi-account-remove mr-1"></i> {% trans "delete_permanently" %}
                                     </button>
                                 </div>
                             </div>
