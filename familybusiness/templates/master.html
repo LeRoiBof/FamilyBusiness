@@ -210,7 +210,6 @@
                             </div>
                         </div>
                     {% else %}
-                        <!-- Code pour utilisateur non connecté reste identique -->
                         <form action="{% url 'set_language' %}" method="post" class="navbar-item p-0 m-0"
                               id="language-form">
                             {% csrf_token %}
