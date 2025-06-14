@@ -697,16 +697,16 @@ def remove_member(request, wallet_id, user_id):
 @login_required
 def generate_monthly_report(request, wallet_id):
     """
-    Génère un rapport mensuel au format PDF
+    Generate a monthly PDF report
     """
     wallet = get_object_or_404(Wallet, id=wallet_id)
 
-    # Vérifier que l'utilisateur a accès au portefeuille
+    # Check if user has access to the wallet
     if request.user not in wallet.users.all():
         messages.error(request, _("no_access_to_wallet"))
         return redirect('wallet:wallet_list')
 
-    # Calculer les dates pour le mois en cours
+    # Calculate dates for current month
     now = timezone.now()
     start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
@@ -716,16 +716,16 @@ def generate_monthly_report(request, wallet_id):
 @login_required
 def generate_quarterly_report(request, wallet_id):
     """
-    Génère un rapport trimestriel au format PDF
+    Generate a quarterly PDF report
     """
     wallet = get_object_or_404(Wallet, id=wallet_id)
 
-    # Vérifier que l'utilisateur a accès au portefeuille
+    # Check if user has access to the wallet
     if request.user not in wallet.users.all():
         messages.error(request, _("no_access_to_wallet"))
         return redirect('wallet:wallet_list')
 
-    # Calculer les dates pour le trimestre en cours
+    # Calculate dates for current quarter
     now = timezone.now()
     current_quarter = (now.month - 1) // 3 + 1
     start_of_quarter = now.replace(month=(current_quarter - 1) * 3 + 1, day=1, hour=0, minute=0, second=0,
@@ -737,16 +737,16 @@ def generate_quarterly_report(request, wallet_id):
 @login_required
 def generate_annual_report(request, wallet_id):
     """
-    Génère un rapport annuel au format PDF
+    Generate an annual PDF report
     """
     wallet = get_object_or_404(Wallet, id=wallet_id)
 
-    # Vérifier que l'utilisateur a accès au portefeuille
+    # Check if user has access to the wallet
     if request.user not in wallet.users.all():
         messages.error(request, _("no_access_to_wallet"))
         return redirect('wallet:wallet_list')
 
-    # Calculer les dates pour l'année en cours
+    # Calculate dates for current year
     now = timezone.now()
     start_of_year = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
 
@@ -755,16 +755,16 @@ def generate_annual_report(request, wallet_id):
 
 def _generate_report(request, wallet, start_date, end_date, period_type):
     """
-    Fonction privée pour générer les rapports PDF
+    Private function to generate PDF reports
     """
-    # Récupérer les transactions pour la période
+    # Get transactions for the period
     transactions = Transaction.objects.filter(
         wallet=wallet,
         date__gte=start_date,
         date__lte=end_date
     ).order_by('-date')
 
-    # Calculer les statistiques
+    # Calculate statistics
     period_income = transactions.filter(is_income=True).aggregate(
         total=Sum('amount'))['total'] or 0
     period_expenses = transactions.filter(is_income=False).aggregate(
@@ -772,7 +772,7 @@ def _generate_report(request, wallet, start_date, end_date, period_type):
 
     net_result = period_income - period_expenses
 
-    # Statistiques par catégorie (dépenses uniquement)
+    # Statistics by category (expenses only)
     category_stats = (
         transactions.filter(is_income=False)
         .values('category__name')
@@ -783,7 +783,7 @@ def _generate_report(request, wallet, start_date, end_date, period_type):
         .order_by('-total')
     )
 
-    # Statistiques par utilisateur
+    # Statistics by user
     user_stats = []
     for user in wallet.users.all():
         user_transactions = transactions.filter(user=user)
@@ -793,7 +793,7 @@ def _generate_report(request, wallet, start_date, end_date, period_type):
             total=Sum('amount'))['total'] or 0
         transaction_count = user_transactions.count()
 
-        if transaction_count > 0:  # N'inclure que les utilisateurs avec des transactions
+        if transaction_count > 0:  # Only include users with transactions
             user_stats.append({
                 'user_name': user.get_full_name(),
                 'income_total': income_total,
@@ -801,10 +801,10 @@ def _generate_report(request, wallet, start_date, end_date, period_type):
                 'transaction_count': transaction_count
             })
 
-    # Trier par nombre de transactions (décroissant)
+    # Sort by transaction count (descending)
     user_stats.sort(key=lambda x: x['transaction_count'], reverse=True)
 
-    # Préparer le contexte pour le template
+    # Prepare context for template
     context = {
         'wallet': wallet,
         'period_type': period_type,
@@ -821,19 +821,19 @@ def _generate_report(request, wallet, start_date, end_date, period_type):
         'generated_by': request.user,
     }
 
-    # Générer le PDF
+    # Generate PDF
     template = get_template('wallet/report_pdf.html')
     html = template.render(context)
 
-    # Créer la réponse PDF
+    # Create PDF response
     result = io.BytesIO()
     pdf = pisa.pisaDocument(io.BytesIO(html.encode("UTF-8")), result)
 
     if not pdf.err:
-        # Créer le nom du fichier
+        # Create filename
         filename = f"{_('report')}_{period_type}_{wallet.name}_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.pdf"
 
-        # Log de l'événement
+        # Log event
         Event.objects.create(
             date=timezone.now(),
             content=_("report_generated") + f" ({period_type}): {wallet.name}",
