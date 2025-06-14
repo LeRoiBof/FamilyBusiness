@@ -109,13 +109,13 @@
     </style>
 </head>
 <body>
-    <!-- En-tête condensé -->
+    <!-- Header -->
     <div class="header">
         <h1>{% trans "report" %} {{ period_type|title }} - {{ wallet.name }}</h1>
         <p>{{ start_date|date:"d/m/Y" }} - {{ end_date|date:"d/m/Y" }} | {% trans "generated_on" %} {{ generated_at|date:"d/m/Y" }} {% trans "by" %} {{ generated_by.get_full_name }}</p>
     </div>
 
-    <!-- Résumé en tableau -->
+    <!-- Summary -->
     <div class="section">
         <h2>{% trans "summary" %} ({% trans "current_balance" %} : {{ wallet.balance|floatformat:2 }} €)</h2>
         <table class="stats-table">
@@ -132,7 +132,7 @@
         </table>
     </div>
 
-    <!-- Catégories compactes -->
+    <!-- Categories -->
     {% if category_stats %}
     <div class="section">
         <h2>{% trans "expenses_by_category" %}</h2>
@@ -153,7 +153,7 @@
     </div>
     {% endif %}
 
-    <!-- Membres compacts -->
+    <!-- Members -->
     {% if user_stats %}
     <div class="section">
         <h2>{% trans "member_activity" %}</h2>
@@ -176,7 +176,7 @@
     </div>
     {% endif %}
 
-    <!-- Transactions très compactes -->
+    <!-- Transactions -->
     {% if transactions %}
     <div class="section">
         <h2>{% trans "transaction_details" %}</h2>
