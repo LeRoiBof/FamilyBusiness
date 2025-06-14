@@ -18,7 +18,8 @@ class Event(models.Model):
         ('PASSWORD_CHANGE', _('event_type_password_change')),
         ('ERROR', _('event_type_error')),
         ('ADMIN_ACTION', _('event_type_admin_action')),
-        ('OTHER', _('event_type_other'))
+        ('OTHER', _('event_type_other')),
+        ('REPORT_GENERATE', _('event_type_report_generate')),
     )
 
     date = models.DateField(verbose_name=_("date"))

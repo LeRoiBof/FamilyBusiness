@@ -391,6 +391,9 @@ msgstr "Admin Action"
 msgid "event_type_other"
 msgstr "Other"
 
+msgid "event_type_report_generate"
+msgstr "Report Generation"
+
 #: adminpanel/models.py:26 adminpanel/views.py:450 wallet/models.py:64
 #: wallet/templates/wallet/wallet_detail.html:334
 msgid "date"
@@ -2014,3 +2017,51 @@ msgstr "Member removed from wallet log"
 #: wallet/views.py:696
 msgid "cannot_remove_yourself_from_wallet"
 msgstr "Cannot remove yourself from wallet"
+
+msgid "reports"
+msgstr "Reports"
+
+msgid "monthly_report"
+msgstr "Monthly Report"
+
+msgid "quarterly_report"
+msgstr "Quarterly Report"
+
+msgid "annual_report"
+msgstr "Annual Report"
+
+msgid "report_generated"
+msgstr "Report generated"
+
+msgid "error_generating_report"
+msgstr "Error while generating report"
+
+msgid "monthly"
+msgstr "monthly"
+
+msgid "quarterly"
+msgstr "quarterly"
+
+msgid "annual"
+msgstr "annual"
+
+msgid "report"
+msgstr "Report"
+
+msgid "generated_on"
+msgstr "Generated on"
+
+msgid "net_result"
+msgstr "Net Result"
+
+msgid "count_short"
+msgstr "Nb"
+
+msgid "member_activity"
+msgstr "Member Activity"
+
+msgid "member"
+msgstr "Member"
+
+msgid "transaction_details"
+msgstr "Transaction Details"

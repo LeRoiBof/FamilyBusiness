@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+{% load i18n %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% trans "report" %} {{ period_type|title }} - {{ wallet.name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            line-height: 1.3;
+            color: #333;
+            margin: 0;
+            padding: 15px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .header p {
+            margin: 3px 0;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            font-size: 13px;
+            color: #333;
+            margin: 0 0 8px 0;
+            padding-bottom: 2px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .info-line strong {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .stats-table th,
+        .stats-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .stats-table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .stats-table .stats-value {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .income { color: #28a745; }
+        .expense { color: #dc3545; }
+        .net { color: #007bff; }
+
+        .simple-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .simple-table th,
+        .simple-table td {
+            padding: 4px 6px;
+            border: 1px solid #ddd;
+            text-align: left;
+            font-size: 10px;
+        }
+
+        .simple-table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+
+        .transactions-table th,
+        .transactions-table td {
+            padding: 2px 4px;
+            line-height: 1.1;
+        }
+    </style>
+</head>
+<body>
+    <!-- En-tête condensé -->
+    <div class="header">
+        <h1>{% trans "report" %} {{ period_type|title }} - {{ wallet.name }}</h1>
+        <p>{{ start_date|date:"d/m/Y" }} - {{ end_date|date:"d/m/Y" }} | {% trans "generated_on" %} {{ generated_at|date:"d/m/Y" }} {% trans "by" %} {{ generated_by.get_full_name }}</p>
+    </div>
+
+    <!-- Résumé en tableau -->
+    <div class="section">
+        <h2>{% trans "summary" %} ({% trans "current_balance" %} : {{ wallet.balance|floatformat:2 }} €)</h2>
+        <table class="stats-table">
+            <tr>
+                <th>{% trans "income" %}</th>
+                <th>{% trans "expenses" %}</th>
+                <th>{% trans "net_result" %}</th>
+            </tr>
+            <tr>
+                <td class="income stats-value">+{{ period_income|floatformat:2 }} €</td>
+                <td class="expense stats-value">-{{ period_expenses|floatformat:2 }} €</td>
+                <td class="net stats-value">{{ net_result|floatformat:2 }} €</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Catégories compactes -->
+    {% if category_stats %}
+    <div class="section">
+        <h2>{% trans "expenses_by_category" %}</h2>
+        <table class="simple-table">
+            <tr>
+                <th>{% trans "category" %}</th>
+                <th class="text-center">{% trans "count_short" %}</th>
+                <th class="text-right">{% trans "amount" %}</th>
+            </tr>
+            {% for category in category_stats %}
+            <tr>
+                <td>{{ category.category__name }}</td>
+                <td class="text-center">{{ category.count }}</td>
+                <td class="text-right expense">{{ category.total|floatformat:2 }} €</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- Membres compacts -->
+    {% if user_stats %}
+    <div class="section">
+        <h2>{% trans "member_activity" %}</h2>
+        <table class="simple-table">
+            <tr>
+                <th>{% trans "member" %}</th>
+                <th class="text-center">{% trans "count_short" %}</th>
+                <th class="text-right">{% trans "income" %}</th>
+                <th class="text-right">{% trans "expenses" %}</th>
+            </tr>
+            {% for user in user_stats %}
+            <tr>
+                <td>{{ user.user_name }}</td>
+                <td class="text-center">{{ user.transaction_count }}</td>
+                <td class="text-right income">{{ user.income_total|floatformat:2 }} €</td>
+                <td class="text-right expense">{{ user.expense_total|floatformat:2 }} €</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- Transactions très compactes -->
+    {% if transactions %}
+    <div class="section">
+        <h2>{% trans "transaction_details" %}</h2>
+        <table class="simple-table">
+            <tr>
+                <th>{% trans "date" %}</th>
+                <th>{% trans "title" %}</th>
+                <th>{% trans "category" %}</th>
+                <th>{% trans "member" %}</th>
+                <th class="text-right">{% trans "amount" %}</th>
+            </tr>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.date|date:"d/m" }}</td>
+                <td>{{ transaction.title|truncatechars:25 }}</td>
+                <td>{{ transaction.category.name|truncatechars:15 }}</td>
+                <td>{{ transaction.user.first_name }}</td>
+                <td class="text-right {% if transaction.is_income %}income{% else %}expense{% endif %}">
+                    {% if transaction.is_income %}+{% else %}-{% endif %}{{ transaction.amount|floatformat:2 }} €
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endif %}
+</body>
+</html>

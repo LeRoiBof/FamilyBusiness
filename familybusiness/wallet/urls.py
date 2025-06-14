@@ -24,4 +24,8 @@ urlpatterns = [
     path('invitation/<uuid:token>/', views.accept_invitation, name='accept_invitation'),
     path('<int:wallet_id>/invitation/<int:invitation_id>/cancel/', views.cancel_invitation, name='cancel_invitation'),
 
+    # Rapports
+    path('<int:wallet_id>/rapport/mensuel/', views.generate_monthly_report, name='generate_monthly_report'),
+    path('<int:wallet_id>/rapport/trimestriel/', views.generate_quarterly_report, name='generate_quarterly_report'),
+    path('<int:wallet_id>/rapport/annuel/', views.generate_annual_report, name='generate_annual_report'),
 ]

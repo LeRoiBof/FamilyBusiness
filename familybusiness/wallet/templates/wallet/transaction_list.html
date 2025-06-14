@@ -256,6 +256,45 @@
             </div>
         </div>
 
+        <!-- Rapports -->
+        <div class="card mb-5">
+            <div class="card-header">
+                <div class="card-header-title">
+                    <span class="icon mr-2">
+                        <i class="mdi mdi-file-chart"></i>
+                    </span>
+                    {% trans "reports" %}
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="content">
+                    <div class="buttons">
+                        <a href="{% url 'wallet:generate_monthly_report' wallet.id %}"
+                           class="button is-info">
+                            <span class="icon">
+                                <i class="mdi mdi-calendar-month"></i>
+                            </span>
+                            <span>{% trans "monthly_report" %}</span>
+                        </a>
+                        <a href="{% url 'wallet:generate_quarterly_report' wallet.id %}"
+                           class="button is-warning">
+                            <span class="icon">
+                                <i class="mdi mdi-calendar-range"></i>
+                            </span>
+                            <span>{% trans "quarterly_report" %}</span>
+                        </a>
+                        <a href="{% url 'wallet:generate_annual_report' wallet.id %}"
+                           class="button is-success">
+                            <span class="icon">
+                                <i class="mdi mdi-calendar"></i>
+                            </span>
+                            <span>{% trans "annual_report" %}</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Trx list -->
         <div class="card">
             <div class="card-header">

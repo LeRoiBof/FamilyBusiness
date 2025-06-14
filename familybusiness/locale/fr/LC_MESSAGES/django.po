@@ -278,6 +278,9 @@ msgstr "Action administrateur"
 msgid "event_type_other"
 msgstr "Autre"
 
+msgid "event_type_report_generate"
+msgstr "Génération de rapport"
+
 msgid "date"
 msgstr "Date"
 
@@ -1364,3 +1367,51 @@ msgstr "Membre retiré du journal du portefeuille"
 
 msgid "cannot_remove_yourself_from_wallet"
 msgstr "Vous ne pouvez pas vous retirer du portefeuille"
+
+msgid "reports"
+msgstr "Rapports"
+
+msgid "monthly_report"
+msgstr "Rapport mensuel"
+
+msgid "quarterly_report"
+msgstr "Rapport trimestriel"
+
+msgid "annual_report"
+msgstr "Rapport annuel"
+
+msgid "report_generated"
+msgstr "Rapport généré"
+
+msgid "error_generating_report"
+msgstr "Erreur lors de la génération du rapport"
+
+msgid "monthly"
+msgstr "mensuel"
+
+msgid "quarterly"
+msgstr "trimestriel"
+
+msgid "annual"
+msgstr "annuel"
+
+msgid "report"
+msgstr "Rapport"
+
+msgid "generated_on"
+msgstr "Généré le"
+
+msgid "net_result"
+msgstr "Résultat net"
+
+msgid "count_short"
+msgstr "Nb"
+
+msgid "member_activity"
+msgstr "Activité des membres"
+
+msgid "member"
+msgstr "Membre"
+
+msgid "transaction_details"
+msgstr "Détail des transactions"
