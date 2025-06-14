@@ -1415,3 +1415,33 @@ msgstr "Membre"
 
 msgid "transaction_details"
 msgstr "Détail des transactions"
+
+msgid "manage_account"
+msgstr "Gérer mon compte"
+
+msgid "personal_information"
+msgstr "Informations personnelles"
+
+msgid "change_password"
+msgstr "Changer le mot de passe"
+
+msgid "current_password"
+msgstr "Mot de passe actuel"
+
+msgid "confirm_new_password"
+msgstr "Confirmer le nouveau mot de passe"
+
+msgid "email_already_taken"
+msgstr "Cette adresse email est déjà utilisée par un autre compte"
+
+msgid "profile_updated_for"
+msgstr "Profil mis à jour pour"
+
+msgid "profile_updated_successfully"
+msgstr "Votre profil a été mis à jour avec succès"
+
+msgid "password_changed_for"
+msgstr "Mot de passe modifié pour"
+
+msgid "password_changed_successfully"
+msgstr "Votre mot de passe a été modifié avec succès"

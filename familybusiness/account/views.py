@@ -2,9 +2,9 @@ from datetime import date
 
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.utils.translation import gettext as _
-from .forms import RegistrationForm, LoginForm, ResetPasswordForm
+from .forms import RegistrationForm, LoginForm, ResetPasswordForm, CustomPasswordChangeForm, ProfileUpdateForm
 from django.contrib.auth.decorators import login_required
 from adminpanel.models import Event
 from .models import Account, PasswordResetToken
@@ -98,3 +98,55 @@ def generate_new_token(request, token):
     new_token = PasswordResetToken.objects.create(user=token_obj.user)
     token_obj.delete()
     return render(request, 'account/token_display.html', {'token': new_token.token})
+
+
+@login_required
+def profile_view(request):
+    """
+    View for managing user profile
+    """
+    profile_form = ProfileUpdateForm(instance=request.user)
+    password_form = CustomPasswordChangeForm(request.user)
+
+    if request.method == 'POST':
+        if 'update_profile' in request.POST:
+            profile_form = ProfileUpdateForm(request.POST, instance=request.user)
+            if profile_form.is_valid():
+                old_email = request.user.email
+                profile_form.save()
+
+                # Log the profile update event
+                Event.objects.create(
+                    date=date.today(),
+                    content=_("profile_updated_for") + f" {request.user.get_full_name()}",
+                    user=request.user,
+                    type='PROFILE_UPDATE'
+                )
+
+                messages.success(request, _("profile_updated_successfully"))
+                return redirect('account:profile')
+
+        elif 'change_password' in request.POST:
+            password_form = CustomPasswordChangeForm(request.user, request.POST)
+            if password_form.is_valid():
+                user = password_form.save()
+                # Keep user logged in after password change
+                update_session_auth_hash(request, user)
+
+                # Log the password change event
+                Event.objects.create(
+                    date=date.today(),
+                    content=_("password_changed_for") + f" {request.user.get_full_name()}",
+                    user=request.user,
+                    type='PASSWORD_CHANGE'
+                )
+
+                messages.success(request, _("password_changed_successfully"))
+                return redirect('account:profile')
+
+    context = {
+        'profile_form': profile_form,
+        'password_form': password_form,
+    }
+
+    return render(request, 'account/profile.html', context)

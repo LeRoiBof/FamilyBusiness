@@ -56,9 +56,11 @@
                                                     {% endif %}
                                                 </div>
                                                 {% if field.errors %}
-                                                    {% for error in field.errors %}
-                                                        <p class="help is-danger">{{ error }}</p>
-                                                    {% endfor %}
+                                                    <div class="field-error">
+                                                        {% for error in field.errors %}
+                                                            {{ error }}{% if not forloop.last %}<br>{% endif %}
+                                                        {% endfor %}
+                                                    </div>
                                                 {% endif %}
                                             </div>
                                         </div>
@@ -88,9 +90,11 @@
                                             {% endif %}
                                         </div>
                                         {% if field.errors %}
-                                            {% for error in field.errors %}
-                                                <p class="help is-danger">{{ error }}</p>
-                                            {% endfor %}
+                                            <div class="field-error">
+                                                {% for error in field.errors %}
+                                                    {{ error }}{% if not forloop.last %}<br>{% endif %}
+                                                {% endfor %}
+                                            </div>
                                         {% endif %}
 
                                         {% if field.name == 'password1' %}

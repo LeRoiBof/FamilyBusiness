@@ -121,6 +121,16 @@
             transform: translateY(-20px);
         }
 
+        .field-error {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            background-color: #feecf0;
+            color: #cc0f35;
+            font-size: 0.9rem;
+            border-left: 4px solid #f14668;
+        }
+
 
     </style>
 
@@ -176,10 +186,31 @@
                             {% endif %}
                         </form>
 
-                        <span class="has-text-black"><strong>{{ user.get_full_name }}</strong></span>
-                        <a href="{% url 'account:logout' %}?next={{ request.path }}"
-                           class="button ml-2">{% trans "Logout" %}</a>
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link has-text-black">
+                                <span class="icon mr-2">
+                                    <i class="mdi mdi-account-circle"></i>
+                                </span>
+                                <strong>{{ user.get_full_name }}</strong>
+                            </a>
+                            <div class="navbar-dropdown">
+                                <a href="{% url 'account:profile' %}" class="navbar-item">
+                                    <span class="icon mr-2">
+                                        <i class="mdi mdi-account-edit"></i>
+                                    </span>
+                                    {% trans "manage_account" %}
+                                </a>
+                                <hr class="navbar-divider">
+                                <a href="{% url 'account:logout' %}?next={{ request.path }}" class="navbar-item">
+                                    <span class="icon mr-2">
+                                        <i class="mdi mdi-logout"></i>
+                                    </span>
+                                    {% trans "Logout" %}
+                                </a>
+                            </div>
+                        </div>
                     {% else %}
+                        <!-- Code pour utilisateur non connecté reste identique -->
                         <form action="{% url 'set_language' %}" method="post" class="navbar-item p-0 m-0"
                               id="language-form">
                             {% csrf_token %}

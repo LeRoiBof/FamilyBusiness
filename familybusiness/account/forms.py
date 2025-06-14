@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth import authenticate
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
@@ -80,3 +80,69 @@ class ResetPasswordForm(forms.Form):
             raise forms.ValidationError(_("passwords_do_not_match"))
 
         return cleaned_data
+
+
+class ProfileUpdateForm(forms.ModelForm):
+    """
+    Form for updating user profile information
+    """
+
+    class Meta:
+        model = Account
+        fields = ['first_name', 'last_name', 'email']
+        widgets = {
+            'first_name': forms.TextInput(attrs={
+                'class': 'input',
+                'placeholder': _('first_name')
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'input',
+                'placeholder': _('last_name')
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'input',
+                'placeholder': _('email_address')
+            }),
+        }
+        labels = {
+            'first_name': _('first_name'),
+            'last_name': _('last_name'),
+            'email': _('email_address'),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.required = True
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email and Account.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError(_('email_already_taken'))
+        return email
+
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    """
+    Custom password change form with Bulma styling
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['old_password'].widget = forms.PasswordInput(attrs={
+            'class': 'input',
+            'placeholder': _('current_password')
+        })
+        self.fields['new_password1'].widget = forms.PasswordInput(attrs={
+            'class': 'input',
+            'placeholder': _('new_password')
+        })
+        self.fields['new_password2'].widget = forms.PasswordInput(attrs={
+            'class': 'input',
+            'placeholder': _('confirm_new_password')
+        })
+
+        self.fields['old_password'].label = _('current_password')
+        self.fields['new_password1'].label = _('new_password')
+        self.fields['new_password2'].label = _('confirm_new_password')

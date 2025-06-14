@@ -1,0 +1,230 @@
+{% extends "master.html" %}
+{% load i18n %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="level mb-5">
+            <div class="level-left">
+                <div class="level-item">
+                    <h1 class="title is-4">
+                        <span class="icon-text">
+                            <span class="icon has-text-primary">
+                                <i class="mdi mdi-account-circle"></i>
+                            </span>
+                            <span>{% trans "manage_account" %}</span>
+                        </span>
+                    </h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="columns is-centered">
+            <div class="column is-6">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <span class="icon mr-2">
+                                <i class="mdi mdi-account-edit"></i>
+                            </span>
+                            {% trans "personal_information" %}
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <div class="columns">
+                                <div class="column">
+                                    <div class="field">
+                                        <label class="label">{{ profile_form.first_name.label }}</label>
+                                        <div class="control has-icons-left {% if profile_form.first_name.errors %}has-icons-right{% endif %}">
+                                            {{ profile_form.first_name }}
+                                            <span class="icon is-small is-left">
+                                                <i class="mdi mdi-account"></i>
+                                            </span>
+                                            {% if profile_form.first_name.errors %}
+                                                <span class="icon is-small is-right has-text-danger">
+                                                    <i class="mdi mdi-alert-circle"></i>
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        {% if profile_form.first_name.errors %}
+                                            <div class="field-error">
+                                                {% for error in profile_form.first_name.errors %}
+                                                    {{ error }}{% if not forloop.last %}<br>{% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="column">
+                                    <div class="field">
+                                        <label class="label">{{ profile_form.last_name.label }}</label>
+                                        <div class="control has-icons-left {% if profile_form.last_name.errors %}has-icons-right{% endif %}">
+                                            {{ profile_form.last_name }}
+                                            <span class="icon is-small is-left">
+                                                <i class="mdi mdi-account"></i>
+                                            </span>
+                                            {% if profile_form.last_name.errors %}
+                                                <span class="icon is-small is-right has-text-danger">
+                                                    <i class="mdi mdi-alert-circle"></i>
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        {% if profile_form.last_name.errors %}
+                                            <div class="field-error">
+                                                {% for error in profile_form.last_name.errors %}
+                                                    {{ error }}{% if not forloop.last %}<br>{% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label class="label">{{ profile_form.email.label }}</label>
+                                <div class="control has-icons-left {% if profile_form.email.errors %}has-icons-right{% endif %}">
+                                    {{ profile_form.email }}
+                                    <span class="icon is-small is-left">
+                                        <i class="mdi mdi-email"></i>
+                                    </span>
+                                    {% if profile_form.email.errors %}
+                                        <span class="icon is-small is-right has-text-danger">
+                                            <i class="mdi mdi-alert-circle"></i>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                {% if profile_form.email.errors %}
+                                    <div class="field-error">
+                                        {% for error in profile_form.email.errors %}
+                                            {{ error }}{% if not forloop.last %}<br>{% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="field mt-4">
+                                <div class="control">
+                                    <button type="submit" name="update_profile" class="button is-primary is-fullwidth">
+                                        <span class="icon">
+                                            <i class="mdi mdi-content-save"></i>
+                                        </span>
+                                        <span>{% trans "save_changes" %}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column is-6">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <span class="icon mr-2">
+                                <i class="mdi mdi-lock-reset"></i>
+                            </span>
+                            {% trans "change_password" %}
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <div class="field">
+                                <label class="label">{{ password_form.old_password.label }}</label>
+                                <div class="control has-icons-left {% if password_form.old_password.errors %}has-icons-right{% endif %}">
+                                    {{ password_form.old_password }}
+                                    <span class="icon is-small is-left">
+                                        <i class="mdi mdi-lock"></i>
+                                    </span>
+                                    {% if password_form.old_password.errors %}
+                                        <span class="icon is-small is-right has-text-danger">
+                                            <i class="mdi mdi-alert-circle"></i>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                {% if password_form.old_password.errors %}
+                                    {% for error in password_form.old_password.errors %}
+                                        <p class="help is-danger">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <div class="field">
+                                <label class="label">{{ password_form.new_password1.label }}</label>
+                                <div class="control has-icons-left {% if password_form.new_password1.errors %}has-icons-right{% endif %}">
+                                    {{ password_form.new_password1 }}
+                                    <span class="icon is-small is-left">
+                                        <i class="mdi mdi-lock-plus"></i>
+                                    </span>
+                                    {% if password_form.new_password1.errors %}
+                                        <span class="icon is-small is-right has-text-danger">
+                                            <i class="mdi mdi-alert-circle"></i>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                {% if password_form.new_password1.errors %}
+                                    {% for error in password_form.new_password1.errors %}
+                                        <p class="help is-danger">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <div class="field">
+                                <label class="label">{{ password_form.new_password2.label }}</label>
+                                <div class="control has-icons-left {% if password_form.new_password2.errors %}has-icons-right{% endif %}">
+                                    {{ password_form.new_password2 }}
+                                    <span class="icon is-small is-left">
+                                        <i class="mdi mdi-lock-check"></i>
+                                    </span>
+                                    {% if password_form.new_password2.errors %}
+                                        <span class="icon is-small is-right has-text-danger">
+                                            <i class="mdi mdi-alert-circle"></i>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                {% if password_form.new_password2.errors %}
+                                    {% for error in password_form.new_password2.errors %}
+                                        <p class="help is-danger">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <div class="field mt-4">
+                                <div class="control">
+                                    <button type="submit" name="change_password" class="button is-warning is-fullwidth">
+                                        <span class="icon">
+                                            <i class="mdi mdi-lock-reset"></i>
+                                        </span>
+                                        <span>{% trans "change_password" %}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-hide notifications after 5 seconds
+    const notifications = document.querySelectorAll('.notification:not(.is-light)');
+    notifications.forEach(notification => {
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}

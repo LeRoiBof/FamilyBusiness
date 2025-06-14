@@ -2065,3 +2065,33 @@ msgstr "Member"
 
 msgid "transaction_details"
 msgstr "Transaction Details"
+
+msgid "manage_account"
+msgstr "Manage Account"
+
+msgid "personal_information"
+msgstr "Personal Information"
+
+msgid "change_password"
+msgstr "Change Password"
+
+msgid "current_password"
+msgstr "Current Password"
+
+msgid "confirm_new_password"
+msgstr "Confirm New Password"
+
+msgid "email_already_taken"
+msgstr "This email address is already used by another account"
+
+msgid "profile_updated_for"
+msgstr "Profile updated for"
+
+msgid "profile_updated_successfully"
+msgstr "Your profile has been updated successfully"
+
+msgid "password_changed_for"
+msgstr "Password changed for"
+
+msgid "password_changed_successfully"
+msgstr "Your password has been changed successfully"
