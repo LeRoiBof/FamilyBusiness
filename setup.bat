@@ -144,8 +144,6 @@ echo    venv\Scripts\activate
 echo    python familybusiness\manage.py runserver
 echo.
 echo 🌐 L'application sera accessible sur : http://127.0.0.1:8000
-echo 👨‍💼 Interface d'administration : http://127.0.0.1:8000/admin
-echo.
-echo ✨ Bon développement avec Family Business ! ✨
+echo    Interface d'administration : http://127.0.0.1:8000/admin
 echo.
 pause
