@@ -1,106 +1,106 @@
 #!/bin/bash
 
-# setup.sh - Script d'initialisation pour Linux/macOS
-# À placer à la racine du projet (même niveau que le dossier familybusiness/)
+# setup.sh - Initialization script for Linux/macOS
+# Place at project root (same level as familybusiness/ folder)
 
-set -e  # Arrêter le script en cas d'erreur
+set -e  # Stop script on error
 
-echo "🚀 Family Business - Script d'initialisation"
-echo "=============================================="
+echo "🚀 Family Business - Initialization Script"
+echo "==========================================="
 
-# Vérifications préliminaires
-echo "🔍 Vérification des prérequis..."
+# Preliminary checks
+echo "🔍 Checking prerequisites..."
 
-# Vérifier Python 3
+# Check Python 3
 if ! command -v python3 &> /dev/null; then
-    echo "❌ Python 3 n'est pas installé ou n'est pas dans le PATH"
-    echo "   Veuillez installer Python 3.8+ avant de continuer"
+    echo "❌ Python 3 is not installed or not in PATH"
+    echo "   Please install Python 3.8+ before continuing"
     exit 1
 fi
 
 PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
-echo "✅ Python $PYTHON_VERSION détecté"
+echo "✅ Python $PYTHON_VERSION detected"
 
-# Vérifier que nous sommes dans le bon répertoire
+# Check that we are in the correct directory
 if [ ! -d "familybusiness" ] || [ ! -f "familybusiness/manage.py" ]; then
-    echo "❌ Le script doit être exécuté depuis la racine du projet"
-    echo "   Structure attendue : ./familybusiness/manage.py"
+    echo "❌ Script must be run from project root"
+    echo "   Expected structure: ./familybusiness/manage.py"
     exit 1
 fi
 
-echo "✅ Structure du projet validée"
+echo "✅ Project structure validated"
 
-# Créer et activer l'environnement virtuel
+# Create and activate virtual environment
 echo ""
-echo "📦 Configuration de l'environnement virtuel..."
+echo "📦 Configuring virtual environment..."
 
 if [ -d "venv" ]; then
-    echo "⚠️  Un environnement virtuel existe déjà"
-    read -p "Voulez-vous le supprimer et le recréer ? (y/N): " recreate_venv
+    echo "⚠️  A virtual environment already exists"
+    read -p "Do you want to delete and recreate it? (y/N): " recreate_venv
     if [[ $recreate_venv =~ ^[Yy]$ ]]; then
-        echo "🗑️  Suppression de l'ancien environnement..."
+        echo "🗑️  Removing old environment..."
         rm -rf venv
     else
-        echo "📂 Utilisation de l'environnement existant"
+        echo "📂 Using existing environment"
     fi
 fi
 
 if [ ! -d "venv" ]; then
-    echo "🔨 Création de l'environnement virtuel..."
+    echo "🔨 Creating virtual environment..."
     python3 -m venv venv
 fi
 
-echo "🔗 Activation de l'environnement virtuel..."
+echo "🔗 Activating virtual environment..."
 source venv/bin/activate
 
-# Vérifier que l'activation a fonctionné
+# Check that activation worked
 if [[ "$VIRTUAL_ENV" == "" ]]; then
-    echo "❌ Échec de l'activation de l'environnement virtuel"
+    echo "❌ Failed to activate virtual environment"
     exit 1
 fi
 
-echo "✅ Environnement virtuel activé : $VIRTUAL_ENV"
+echo "✅ Virtual environment activated: $VIRTUAL_ENV"
 
-# Installer les dépendances
+# Install dependencies
 echo ""
-echo "📋 Installation des dépendances..."
+echo "📋 Installing dependencies..."
 
 if [ ! -f "requirements.txt" ]; then
-    echo "❌ Fichier requirements.txt introuvable"
+    echo "❌ requirements.txt file not found"
     exit 1
 fi
 
 pip install --upgrade pip
 pip install -r requirements.txt
 
-echo "✅ Dépendances installées avec succès"
+echo "✅ Dependencies installed successfully"
 
-# Aller dans le répertoire du projet Django
+# Go to Django project directory
 cd familybusiness
 
-# Appliquer les migrations
+# Apply migrations
 echo ""
-echo "🗄️  Application des migrations de base de données..."
+echo "🗄️  Applying database migrations..."
 python manage.py migrate
 
-echo "✅ Migrations appliquées avec succès"
+echo "✅ Migrations applied successfully"
 
-# Compiler les messages de traduction
+# Compile translation messages
 echo ""
-echo "🌍 Compilation des messages de traduction..."
+echo "🌍 Compiling translation messages..."
 django-admin compilemessages
 
-echo "✅ Traductions compilées avec succès"
+echo "✅ Translations compiled successfully"
 
-# Créer le superutilisateur
+# Create superuser
 echo ""
-echo "👤 Création du superutilisateur..."
+echo "👤 Creating superuser..."
 echo "   Email: admin@admin.be"
-echo "   Nom: Admin"
-echo "   Prénom: Admin"
-echo "   Mot de passe: admin"
+echo "   First Name: Admin"
+echo "   Last Name: Admin"
+echo "   Password: admin"
 
-# Utiliser expect si disponible, sinon interaction manuelle
+# Use expect if available, otherwise manual interaction
 if command -v expect &> /dev/null; then
     expect << EOF
 spawn python manage.py createsuperuser
@@ -114,8 +114,8 @@ expect eof
 EOF
 else
     echo ""
-    echo "⚠️  'expect' n'est pas installé. Création manuelle du superutilisateur..."
-    echo "   Veuillez entrer les informations suivantes :"
+    echo "⚠️  'expect' is not installed. Manual superuser creation..."
+    echo "   Please enter the following information:"
     echo "   - Email: admin@admin.be"
     echo "   - First Name: Admin"
     echo "   - Last Name: Admin"
@@ -126,24 +126,24 @@ else
     python manage.py createsuperuser
 fi
 
-echo "✅ Superutilisateur créé avec succès"
+echo "✅ Superuser created successfully"
 
-# Retour au répertoire racine
+# Return to root directory
 cd ..
 
-# Message final
+# Final message
 echo ""
-echo "🎉 Initialisation terminée avec succès !"
+echo "🎉 Initialization completed successfully!"
 echo "========================================"
 echo ""
-echo "📋 Informations de connexion :"
+echo "📋 Login credentials:"
 echo "   Email    : admin@admin.be"
 echo "   Password : admin"
 echo ""
-echo "🚀 Pour démarrer le serveur :"
+echo "🚀 To start the server:"
 echo "   source venv/bin/activate"
 echo "   python3 familybusiness/manage.py runserver"
 echo ""
-echo "🌐 L'application sera accessible sur : http://127.0.0.1:8000"
-echo "   Interface d'administration : http://127.0.0.1:8000/admin"
+echo "🌐 Application will be accessible at: http://127.0.0.1:8000"
+echo "   Admin interface: http://127.0.0.1:8000/admin"
 echo ""

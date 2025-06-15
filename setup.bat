@@ -1,73 +1,73 @@
 @echo off
 setlocal enabledelayedexpansion
 
-REM setup.bat - Script d'initialisation pour Windows
-REM À placer à la racine du projet (même niveau que le dossier familybusiness/)
+REM setup.bat - Initialization script for Windows
+REM Place at project root (same level as familybusiness/ folder)
 
-echo 🚀 Family Business - Script d'initialisation
-echo ==============================================
+echo 🚀 Family Business - Initialization Script
+echo ===========================================
 
-REM Vérifications préliminaires
-echo 🔍 Vérification des prérequis...
+REM Preliminary checks
+echo 🔍 Checking prerequisites...
 
-REM Vérifier Python 3
+REM Check Python 3
 python --version >nul 2>&1
 if errorlevel 1 (
-    echo ❌ Python n'est pas installé ou n'est pas dans le PATH
-    echo    Veuillez installer Python 3.8+ avant de continuer
+    echo ❌ Python is not installed or not in PATH
+    echo    Please install Python 3.8+ before continuing
     pause
     exit /b 1
 )
 
 for /f "tokens=2" %%i in ('python --version 2^>^&1') do set PYTHON_VERSION=%%i
-echo ✅ Python %PYTHON_VERSION% détecté
+echo ✅ Python %PYTHON_VERSION% detected
 
-REM Vérifier que nous sommes dans le bon répertoire
+REM Check that we are in the correct directory
 if not exist "familybusiness" (
-    echo ❌ Le script doit être exécuté depuis la racine du projet
-    echo    Structure attendue : .\familybusiness\manage.py
+    echo ❌ Script must be run from project root
+    echo    Expected structure: .\familybusiness\manage.py
     pause
     exit /b 1
 )
 
 if not exist "familybusiness\manage.py" (
-    echo ❌ Le script doit être exécuté depuis la racine du projet
-    echo    Structure attendue : .\familybusiness\manage.py
+    echo ❌ Script must be run from project root
+    echo    Expected structure: .\familybusiness\manage.py
     pause
     exit /b 1
 )
 
-echo ✅ Structure du projet validée
+echo ✅ Project structure validated
 
-REM Créer et activer l'environnement virtuel
+REM Create and activate virtual environment
 echo.
-echo 📦 Configuration de l'environnement virtuel...
+echo 📦 Configuring virtual environment...
 
 if exist "venv" (
-    echo ⚠️  Un environnement virtuel existe déjà
-    set /p recreate_venv="Voulez-vous le supprimer et le recréer ? (y/N): "
+    echo ⚠️  A virtual environment already exists
+    set /p recreate_venv="Do you want to delete and recreate it? (y/N): "
     if /i "!recreate_venv!"=="y" (
-        echo 🗑️  Suppression de l'ancien environnement...
+        echo 🗑️  Removing old environment...
         rmdir /s /q venv
     ) else (
-        echo 📂 Utilisation de l'environnement existant
+        echo 📂 Using existing environment
     )
 )
 
 if not exist "venv" (
-    echo 🔨 Création de l'environnement virtuel...
+    echo 🔨 Creating virtual environment...
     python -m venv venv
 )
 
-echo 🔗 Activation de l'environnement virtuel...
+echo 🔗 Activating virtual environment...
 call venv\Scripts\activate.bat
 
-REM Installer les dépendances
+REM Install dependencies
 echo.
-echo 📋 Installation des dépendances...
+echo 📋 Installing dependencies...
 
 if not exist "requirements.txt" (
-    echo ❌ Fichier requirements.txt introuvable
+    echo ❌ requirements.txt file not found
     pause
     exit /b 1
 )
@@ -75,35 +75,35 @@ if not exist "requirements.txt" (
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 
-echo ✅ Dépendances installées avec succès
+echo ✅ Dependencies installed successfully
 
-REM Aller dans le répertoire du projet Django
+REM Go to Django project directory
 cd familybusiness
 
-REM Appliquer les migrations
+REM Apply migrations
 echo.
-echo 🗄️  Application des migrations de base de données...
+echo 🗄️  Applying database migrations...
 python manage.py migrate
 
-echo ✅ Migrations appliquées avec succès
+echo ✅ Migrations applied successfully
 
-REM Compiler les messages de traduction
+REM Compile translation messages
 echo.
-echo 🌍 Compilation des messages de traduction...
+echo 🌍 Compiling translation messages...
 django-admin compilemessages
 
-echo ✅ Traductions compilées avec succès
+echo ✅ Translations compiled successfully
 
-REM Créer le superutilisateur
+REM Create superuser
 echo.
-echo 👤 Création du superutilisateur...
+echo 👤 Creating superuser...
 echo    Email: admin@admin.be
-echo    Nom: Admin
-echo    Prénom: Admin
-echo    Mot de passe: admin
+echo    First Name: Admin
+echo    Last Name: Admin
+echo    Password: admin
 
 echo.
-echo ⚠️  Veuillez entrer les informations suivantes :
+echo ⚠️  Please enter the following information:
 echo    - Email: admin@admin.be
 echo    - First Name: Admin
 echo    - Last Name: Admin
@@ -112,7 +112,7 @@ echo    - Password (again): admin
 echo    - Bypass validation: y
 echo.
 
-REM Créer un fichier temporaire avec les réponses
+REM Create temporary file with answers
 echo admin@admin.be> temp_input.txt
 echo Admin>> temp_input.txt
 echo Admin>> temp_input.txt
@@ -122,28 +122,28 @@ echo y>> temp_input.txt
 
 python manage.py createsuperuser < temp_input.txt
 
-REM Nettoyer le fichier temporaire
+REM Clean up temporary file
 del temp_input.txt
 
-echo ✅ Superutilisateur créé avec succès
+echo ✅ Superuser created successfully
 
-REM Retour au répertoire racine
+REM Return to root directory
 cd ..
 
-REM Message final
+REM Final message
 echo.
-echo 🎉 Initialisation terminée avec succès !
-echo ========================================
+echo 🎉 Initialization completed successfully!
+echo =========================================
 echo.
-echo 📋 Informations de connexion :
+echo 📋 Login credentials:
 echo    Email    : admin@admin.be
 echo    Password : admin
 echo.
-echo 🚀 Pour démarrer le serveur :
+echo 🚀 To start the server:
 echo    venv\Scripts\activate
 echo    python familybusiness\manage.py runserver
 echo.
-echo 🌐 L'application sera accessible sur : http://127.0.0.1:8000
-echo    Interface d'administration : http://127.0.0.1:8000/admin
+echo 🌐 Application will be accessible at: http://127.0.0.1:8000
+echo    Admin interface: http://127.0.0.1:8000/admin
 echo.
 pause
