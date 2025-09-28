@@ -43,7 +43,7 @@ class CategoryForm(forms.ModelForm):
 class TransactionForm(forms.ModelForm):
     class Meta:
         model = Transaction
-        fields = ['title', 'category', 'amount', 'description', 'is_income']
+        fields = ['title', 'category', 'amount', 'date', 'description', 'is_income']
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'input is-rounded',
@@ -57,6 +57,10 @@ class TransactionForm(forms.ModelForm):
                 'placeholder': '0.00',
                 'step': '0.01'
             }),
+            'date': forms.DateTimeInput(attrs={
+                'type': 'datetime-local',
+                'class': 'input is-rounded'
+            }),
             'description': forms.Textarea(attrs={
                 'class': 'textarea is-rounded',
                 'placeholder': _('description_optional_placeholder'),
@@ -64,15 +68,17 @@ class TransactionForm(forms.ModelForm):
             }),
             'is_income': forms.CheckboxInput(attrs={
                 'class': 'switch is-rounded is-success'
-            }),
+            })
         }
         labels = {
             'title': _('transaction_title'),
             'category': _('category'),
             'amount': _('amount'),
+            'date': _('date'),
             'description': _('description'),
             'is_income': _('is_income_question'),
         }
+
 
 class FutureTransactionForm(forms.ModelForm):
     class Meta:

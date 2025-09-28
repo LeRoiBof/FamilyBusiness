@@ -133,6 +133,20 @@
                                 {% endfor %}
                             </div>
 
+                            <!-- Datetime -->
+                            <div class="field">
+                                <label class="label">{{ form.date.label }}</label>
+                                <div class="control has-icons-left">
+                                    {{ form.date }}
+                                    <span class="icon is-small is-left">
+                                        <i class="mdi mdi-calendar"></i>
+                                    </span>
+                                </div>
+                                {% for error in form.date.errors %}
+                                    <p class="help is-danger">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+
                             <!-- Category -->
                             <div class="field">
                                 <label class="label">{{ form.category.label }}</label>

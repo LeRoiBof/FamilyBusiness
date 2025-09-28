@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # setup.sh - Initialization script for Linux/macOS
 # Place at project root (same level as familybusiness/ folder)
 
