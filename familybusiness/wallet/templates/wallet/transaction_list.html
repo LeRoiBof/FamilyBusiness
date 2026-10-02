@@ -371,7 +371,7 @@
                                                     </div>
                                                     <div class="is-flex is-flex-wrap-wrap is-align-items-center is-size-7 has-text-grey mb-2">
                                                         <span class="tag is-light is-small mr-2 mb-1">{{ transaction.category.name }}</span>
-                                                        <span class="mr-2 mb-1"><i class="mdi mdi-calendar-clock mr-1"></i>{{ transaction.date|date:"d/m/Y à H:i" }}</span>
+                                                        <span class="mr-2 mb-1"><i class="mdi mdi-calendar mr-1"></i>{{ transaction.date|date:"d/m/Y" }}</span>
                                                         {% if transaction.user %}
                                                             <span class="mb-1"><i class="mdi mdi-account mr-1"></i>{{ transaction.user.get_full_name }}</span>
                                                         {% endif %}

@@ -1,13 +1,27 @@
 from datetime import date
 
 from django.contrib import messages
+from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from .forms import RegistrationForm, LoginForm, ResetPasswordForm, CustomPasswordChangeForm, ProfileUpdateForm
 from django.contrib.auth.decorators import login_required
 from adminpanel.models import Event
 from .models import Account, PasswordResetToken
+
+
+def _send_password_reset_email(request, token):
+    reset_url = request.build_absolute_uri(
+        reverse('account:reset_password', kwargs={'token': token.token})
+    )
+    send_mail(
+        subject=_("reset_password"),
+        message=_("use_secure_link_to_set_new_password") + f"\n\n{reset_url}",
+        from_email=None,
+        recipient_list=[token.user.email],
+    )
 
 def register_view(request):
     if request.method == 'POST':
@@ -65,8 +79,9 @@ def request_password_reset(request):
         user = Account.objects.filter(email=email).first()
         if user:
             token = PasswordResetToken.objects.create(user=user)
-            return render(request, 'account/token_display.html', {'token': token.token})
-        messages.error(request, _("no_account_with_this_email"))
+            _send_password_reset_email(request, token)
+        messages.success(request, _("reset_email_sent_if_account_exists"))
+        return redirect('account:login')
     return render(request, 'account/request_password_reset.html')
 
 
@@ -88,17 +103,6 @@ def reset_password(request, token):
         form = ResetPasswordForm()
 
     return render(request, 'account/reset_password.html', {'form': form})
-
-def generate_new_token(request, token):
-    token_obj = get_object_or_404(PasswordResetToken, token=token)
-    if not token_obj.is_valid():
-        messages.error(request, _("token_expired"))
-        return redirect('account:request_password_reset')
-
-    new_token = PasswordResetToken.objects.create(user=token_obj.user)
-    token_obj.delete()
-    return render(request, 'account/token_display.html', {'token': new_token.token})
-
 
 @login_required
 def profile_view(request):

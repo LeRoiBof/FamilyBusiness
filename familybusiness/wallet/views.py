@@ -1,3 +1,4 @@
+import copy
 import io
 import json
 from collections import defaultdict
@@ -6,7 +7,7 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
@@ -103,6 +104,36 @@ def wallet_delete(request, wallet_id):
     return redirect('wallet:wallet_list')
 
 
+def _project_balance_changes(future_transactions, now):
+    thresholds = [30, 60, 90]
+    end_dates = {days: now + timedelta(days=days) for days in thresholds}
+    totals = {days: Decimal('0') for days in thresholds}
+
+    for trx in future_transactions:
+        clone = copy.copy(trx)
+        occurrence = clone.execution_date
+        iterations = 0
+        while occurrence and occurrence <= end_dates[90] and iterations < 1000:
+            if occurrence >= now:
+                signed_amount = clone.amount if clone.is_income else -clone.amount
+                for days in thresholds:
+                    if occurrence <= end_dates[days]:
+                        totals[days] += signed_amount
+            if clone.frequency == FutureTransaction.Frequency.ONCE:
+                break
+            clone.execution_date = occurrence
+            occurrence = clone.get_next_execution_date()
+            iterations += 1
+
+    return totals
+
+
+def _percent_change(current, previous):
+    if not previous:
+        return None
+    return float((current - previous) / previous * 100)
+
+
 @login_required(login_url='account:login')
 def wallet_detail(request, wallet_id):
     wallet = get_object_or_404(Wallet, id=wallet_id)
@@ -128,22 +159,44 @@ def wallet_detail(request, wallet_id):
     # Compute monthly indicators
     now = timezone.now()
     start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    start_of_month_date = start_of_month.date()
 
-    monthly_transactions = transactions.filter(date__gte=start_of_month)
+    monthly_transactions = transactions.filter(date__gte=start_of_month_date)
     monthly_income = monthly_transactions.filter(is_income=True).aggregate(
         total=Sum('amount'))['total'] or 0
     monthly_expenses = monthly_transactions.filter(is_income=False).aggregate(
         total=Sum('amount'))['total'] or 0
 
+    # Comparaison avec le mois précédent
+    start_of_last_month_date = (start_of_month_date - timedelta(days=1)).replace(day=1)
+    last_month_transactions = transactions.filter(date__gte=start_of_last_month_date, date__lt=start_of_month_date)
+    last_month_income = last_month_transactions.filter(is_income=True).aggregate(
+        total=Sum('amount'))['total'] or 0
+    last_month_expenses = last_month_transactions.filter(is_income=False).aggregate(
+        total=Sum('amount'))['total'] or 0
+    income_change_percent = _percent_change(monthly_income, last_month_income)
+    expenses_change_percent = _percent_change(monthly_expenses, last_month_expenses)
+
+    # Prévisionnel de solde à J+30/60/90
+    future_transactions = FutureTransaction.objects.filter(wallet=wallet, active=True)
+    projected_changes = _project_balance_changes(future_transactions, now)
+    projected_balance_30 = wallet.balance + projected_changes[30]
+    projected_balance_60 = wallet.balance + projected_changes[60]
+    projected_balance_90 = wallet.balance + projected_changes[90]
+
+    # Échéances dans les prochaines 24h
+    upcoming_transactions = future_transactions.filter(
+        execution_date__gte=now, execution_date__lte=now + timedelta(hours=24)
+    ).order_by('execution_date')
+
     # data for evolution plot (from 1st of the month to today)
-    start_of_month_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).date()
     today = now.date()
     days_in_current_month = (today - start_of_month_date).days + 1
 
     daily_data = defaultdict(lambda: {'income': 0, 'expense': 0})
 
-    for transaction in transactions.filter(date__gte=start_of_month):
-        key = transaction.date.date()
+    for transaction in transactions.filter(date__gte=start_of_month_date):
+        key = transaction.date
         if transaction.is_income:
             daily_data[key]['income'] += float(transaction.amount)
         else:
@@ -168,17 +221,19 @@ def wallet_detail(request, wallet_id):
         .order_by('category')
     )
     categories = {
-        c.id: c.name for c in Category.objects.filter(
+        c.id: c for c in Category.objects.filter(
             id__in=[entry['category'] for entry in cat_data]
         )
     }
-    category_labels = [categories[entry['category']] for entry in cat_data]
+    category_labels = [categories[entry['category']].name for entry in cat_data]
     category_values = [float(entry['total']) for entry in cat_data]
+    category_colors = [categories[entry['category']].get_color_hex() for entry in cat_data]
 
     # if not data on categories, empty lists
     if not category_labels:
         category_labels = []
         category_values = []
+        category_colors = []
 
     # Get all active invites for the wallet
     active_invitations = WalletInvitation.objects.filter(
@@ -192,6 +247,13 @@ def wallet_detail(request, wallet_id):
         'recent_transactions': recent_transactions,
         'monthly_income': monthly_income,
         'monthly_expenses': monthly_expenses,
+        'income_change_percent': income_change_percent,
+        'expenses_change_percent': expenses_change_percent,
+
+        'projected_balance_30': projected_balance_30,
+        'projected_balance_60': projected_balance_60,
+        'projected_balance_90': projected_balance_90,
+        'upcoming_transactions': upcoming_transactions,
 
         # plot data (JSON format for JavaScript)
         'chart_dates': json.dumps(dates),
@@ -199,6 +261,7 @@ def wallet_detail(request, wallet_id):
         'chart_expenses': json.dumps(expenses),
         'category_labels': json.dumps(category_labels),
         'category_values': json.dumps(category_values),
+        'category_colors': json.dumps(category_colors),
 
         'members': members,
         'active_invitations': active_invitations,
@@ -535,9 +598,9 @@ def transaction_list(request, wallet_id):
 
     # Compute wallet's indicators
     now = timezone.now()
-    start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    start_of_month_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).date()
 
-    monthly_transactions = transactions.filter(date__gte=start_of_month)
+    monthly_transactions = transactions.filter(date__gte=start_of_month_date)
     monthly_income = monthly_transactions.filter(is_income=True).aggregate(
         total=Sum('amount'))['total'] or 0
     monthly_expenses = monthly_transactions.filter(is_income=False).aggregate(
@@ -557,6 +620,13 @@ def transaction_list(request, wallet_id):
     elif type_filter == 'expense':
         transactions = transactions.filter(is_income=False)
 
+    # Filter on title/description if required
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        transactions = transactions.filter(
+            Q(title__icontains=search_query) | Q(description__icontains=search_query)
+        )
+
     categories = Category.objects.all()
 
     context = {
@@ -566,6 +636,7 @@ def transaction_list(request, wallet_id):
         'current_category': category_filter,
         'selected_category': selected_category,
         'current_type': type_filter,
+        'current_search': search_query,
         'monthly_income': monthly_income,
         'monthly_expenses': monthly_expenses,
     }
@@ -839,8 +910,8 @@ def _generate_report(request, wallet, start_date, end_date, period_type):
     # Get transactions for the period
     transactions = Transaction.objects.filter(
         wallet=wallet,
-        date__gte=start_date,
-        date__lte=end_date
+        date__gte=start_date.date(),
+        date__lte=end_date.date()
     ).order_by('-date')
 
     # Calculate statistics

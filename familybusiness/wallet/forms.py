@@ -29,15 +29,19 @@ class WalletForm(forms.ModelForm):
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
-        fields = ['name']
+        fields = ['name', 'color', 'icon']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'input is-primary',
                 'placeholder': _('category_name_placeholder')
             }),
+            'color': forms.Select(attrs={'class': 'select is-fullwidth'}),
+            'icon': forms.Select(attrs={'class': 'select is-fullwidth'}),
         }
         labels = {
             'name': _('category_name'),
+            'color': _('color'),
+            'icon': _('icon'),
         }
 
 class TransactionForm(forms.ModelForm):
@@ -57,8 +61,8 @@ class TransactionForm(forms.ModelForm):
                 'placeholder': '0.00',
                 'step': '0.01'
             }),
-            'date': forms.DateTimeInput(attrs={
-                'type': 'datetime-local',
+            'date': forms.DateInput(attrs={
+                'type': 'date',
                 'class': 'input is-rounded'
             }),
             'description': forms.Textarea(attrs={

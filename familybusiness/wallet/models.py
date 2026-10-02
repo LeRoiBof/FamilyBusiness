@@ -46,7 +46,46 @@ class WalletInvitation(models.Model):
         return f"Invitation to {self.wallet.name} - {self.token}"
 
 class Category(models.Model):
+    COLOR_CHOICES = [
+        ('primary', _('color_primary')),
+        ('success', _('color_success')),
+        ('warning', _('color_warning')),
+        ('danger', _('color_danger')),
+        ('info', _('color_info')),
+        ('light', _('color_light')),
+    ]
+
+    COLOR_HEX = {
+        'primary': '#00d1b2',
+        'success': '#48c78e',
+        'warning': '#ffdd57',
+        'danger': '#f14668',
+        'info': '#3273dc',
+        'light': '#f5f5f5',
+    }
+
+    ICON_CHOICES = [
+        ('mdi-tag', _('icon_other')),
+        ('mdi-cart', _('icon_shopping')),
+        ('mdi-home', _('icon_housing')),
+        ('mdi-car', _('icon_transport')),
+        ('mdi-medical-bag', _('icon_health')),
+        ('mdi-silverware-fork-knife', _('icon_food')),
+        ('mdi-gift-outline', _('icon_gift')),
+        ('mdi-cash', _('icon_salary')),
+        ('mdi-piggy-bank-outline', _('icon_savings')),
+        ('mdi-dumbbell', _('icon_leisure')),
+        ('mdi-school-outline', _('icon_education')),
+        ('mdi-toolbox-outline', _('icon_services')),
+        ('mdi-shield-check-outline', _('icon_insurance')),
+        ('mdi-receipt-text-outline', _('icon_taxes')),
+        ('mdi-airplane', _('icon_travel')),
+        ('mdi-hanger', _('icon_clothing')),
+    ]
+
     name = models.CharField(max_length=100, verbose_name=_("name"))
+    color = models.CharField(max_length=20, choices=COLOR_CHOICES, default='primary', verbose_name=_("color"))
+    icon = models.CharField(max_length=50, choices=ICON_CHOICES, default='mdi-tag', verbose_name=_("icon"))
 
     class Meta:
         verbose_name = _("category")
@@ -55,12 +94,15 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+    def get_color_hex(self):
+        return self.COLOR_HEX.get(self.color, self.COLOR_HEX['primary'])
+
 class Transaction(models.Model):
     title = models.CharField(max_length=100, verbose_name=_("title"))
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name=_("category"))
     user = models.ForeignKey('account.Account', on_delete=models.CASCADE, verbose_name=_("user"))
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_("amount"))
-    date = models.DateTimeField(default=timezone.now, verbose_name=_("date"))
+    date = models.DateField(default=timezone.localdate, verbose_name=_("date"))
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='transactions', verbose_name=_("wallet"))
     description = models.TextField(blank=True, verbose_name=_("description"))
     is_income = models.BooleanField(default=False, verbose_name=_("is_income"))
@@ -70,7 +112,7 @@ class Transaction(models.Model):
         verbose_name_plural = _("transactions")
 
     def __str__(self):
-        return f"{self.title} - {self.amount}€ - {self.date.strftime('%Y-%m-%d %H:%M:%S')}"
+        return f"{self.title} - {self.amount}€ - {self.date}"
 
 
 class FutureTransaction(models.Model):

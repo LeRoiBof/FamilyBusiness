@@ -2131,3 +2131,87 @@ msgstr "Your password has been changed successfully"
 
 msgid "admin_access_required"
 msgstr "Admin access required"
+
+msgid "reset_email_sent_if_account_exists"
+msgstr "If an account exists with this email, a reset link has just been sent"
+
+msgid "color"
+msgstr "Color"
+
+msgid "icon"
+msgstr "Icon"
+
+msgid "color_primary"
+msgstr "Turquoise"
+
+msgid "color_success"
+msgstr "Green"
+
+msgid "color_warning"
+msgstr "Yellow"
+
+msgid "color_danger"
+msgstr "Red"
+
+msgid "color_info"
+msgstr "Blue"
+
+msgid "color_light"
+msgstr "Light grey"
+
+msgid "icon_other"
+msgstr "Other"
+
+msgid "icon_shopping"
+msgstr "Shopping"
+
+msgid "icon_housing"
+msgstr "Housing"
+
+msgid "icon_transport"
+msgstr "Transport"
+
+msgid "icon_health"
+msgstr "Health"
+
+msgid "icon_food"
+msgstr "Food"
+
+msgid "icon_gift"
+msgstr "Gifts"
+
+msgid "icon_salary"
+msgstr "Salary"
+
+msgid "icon_savings"
+msgstr "Savings"
+
+msgid "icon_leisure"
+msgstr "Leisure"
+
+msgid "icon_education"
+msgstr "Education"
+
+msgid "icon_services"
+msgstr "Services"
+
+msgid "icon_insurance"
+msgstr "Insurance"
+
+msgid "icon_taxes"
+msgstr "Taxes"
+
+msgid "icon_travel"
+msgstr "Travel"
+
+msgid "icon_clothing"
+msgstr "Clothing"
+
+msgid "vs_last_month"
+msgstr "vs last month"
+
+msgid "upcoming_in_24h"
+msgstr "Upcoming in the next 24h"
+
+msgid "projected_balance"
+msgstr "Projected balance"

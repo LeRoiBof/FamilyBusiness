@@ -214,8 +214,8 @@
                                     <td>
                                         <div class="media">
                                             <div class="media-left">
-                                                <span class="icon is-large {% if category_data.transaction_count > 0 %}has-text-success{% else %}has-text-grey-light{% endif %}">
-                                                    <i class="mdi mdi-36px {% if category_data.transaction_count > 0 %}mdi-tag{% else %}mdi-tag-outline{% endif %}"></i>
+                                                <span class="icon is-large has-text-{{ category_data.category.color }}">
+                                                    <i class="mdi mdi-36px {{ category_data.category.icon }}"></i>
                                                 </span>
                                             </div>
                                             <div class="media-content">

@@ -1481,3 +1481,87 @@ msgstr "Votre mot de passe a été modifié avec succès"
 
 msgid "admin_access_required"
 msgstr "Accès administrateur requis"
+
+msgid "reset_email_sent_if_account_exists"
+msgstr "Si un compte existe avec cet email, un lien de réinitialisation vient d'être envoyé"
+
+msgid "color"
+msgstr "Couleur"
+
+msgid "icon"
+msgstr "Icône"
+
+msgid "color_primary"
+msgstr "Turquoise"
+
+msgid "color_success"
+msgstr "Vert"
+
+msgid "color_warning"
+msgstr "Jaune"
+
+msgid "color_danger"
+msgstr "Rouge"
+
+msgid "color_info"
+msgstr "Bleu"
+
+msgid "color_light"
+msgstr "Gris clair"
+
+msgid "icon_other"
+msgstr "Autre"
+
+msgid "icon_shopping"
+msgstr "Courses"
+
+msgid "icon_housing"
+msgstr "Logement"
+
+msgid "icon_transport"
+msgstr "Transport"
+
+msgid "icon_health"
+msgstr "Santé"
+
+msgid "icon_food"
+msgstr "Restauration"
+
+msgid "icon_gift"
+msgstr "Cadeaux"
+
+msgid "icon_salary"
+msgstr "Salaire"
+
+msgid "icon_savings"
+msgstr "Épargne"
+
+msgid "icon_leisure"
+msgstr "Loisirs"
+
+msgid "icon_education"
+msgstr "Éducation"
+
+msgid "icon_services"
+msgstr "Services"
+
+msgid "icon_insurance"
+msgstr "Assurances"
+
+msgid "icon_taxes"
+msgstr "Taxes"
+
+msgid "icon_travel"
+msgstr "Voyages"
+
+msgid "icon_clothing"
+msgstr "Vêtements"
+
+msgid "vs_last_month"
+msgstr "vs mois dernier"
+
+msgid "upcoming_in_24h"
+msgstr "Échéances dans les prochaines 24h"
+
+msgid "projected_balance"
+msgstr "Solde prévisionnel"

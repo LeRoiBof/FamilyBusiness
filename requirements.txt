@@ -4,3 +4,6 @@ django-apscheduler
 xhtml2pdf
 reportlab
 python-dateutil
+python-decouple
+psycopg2-binary
+gunicorn

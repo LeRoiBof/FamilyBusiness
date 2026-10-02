@@ -243,6 +243,11 @@
                                                     <p class="heading">{% trans "monthly_income" %}</p>
                                                     <p class="title is-4 has-text-success">{{ monthly_income|floatformat:2 }}
                                                         €</p>
+                                                    {% if income_change_percent is not None %}
+                                                        <span class="tag is-light is-small {% if income_change_percent >= 0 %}is-success{% else %}is-danger{% endif %}">
+                                                            {% if income_change_percent >= 0 %}+{% endif %}{{ income_change_percent|floatformat:0 }}% {% trans "vs_last_month" %}
+                                                        </span>
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                             <div class="level-right">
@@ -262,6 +267,11 @@
                                                     <p class="heading">{% trans "monthly_expenses" %}</p>
                                                     <p class="title is-4 has-text-danger">{{ monthly_expenses|floatformat:2 }}
                                                         €</p>
+                                                    {% if expenses_change_percent is not None %}
+                                                        <span class="tag is-light is-small {% if expenses_change_percent <= 0 %}is-success{% else %}is-danger{% endif %}">
+                                                            {% if expenses_change_percent >= 0 %}+{% endif %}{{ expenses_change_percent|floatformat:0 }}% {% trans "vs_last_month" %}
+                                                        </span>
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                             <div class="level-right">
@@ -273,6 +283,23 @@
                                     </div>
                                 </div>
                             </div>
+
+                            {% if upcoming_transactions %}
+                                <div class="notification is-warning is-light mt-4">
+                                    <p class="heading mb-2">
+                                        <i class="mdi mdi-clock-alert"></i> {% trans "upcoming_in_24h" %}
+                                    </p>
+                                    {% for trx in upcoming_transactions %}
+                                        <p>
+                                            {{ trx.title }} —
+                                            <span class="{% if trx.is_income %}has-text-success{% else %}has-text-danger{% endif %}">
+                                                {% if trx.is_income %}+{% else %}-{% endif %}{{ trx.amount|floatformat:2 }} €
+                                            </span>
+                                            ({{ trx.execution_date|date:"d/m/Y H:i" }})
+                                        </p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
 
                             <!-- Status bar -->
                             {% if wallet.objective > 0 %}
@@ -287,6 +314,34 @@
                                     </p>
                                 </div>
                             {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prévisionnel -->
+            <div class="card mb-5">
+                <div class="card-header">
+                    <div class="card-header-title">
+                        <span class="icon mr-2">
+                            <i class="mdi mdi-crystal-ball"></i>
+                        </span>
+                        {% trans "projected_balance" %}
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="columns is-multiline">
+                        <div class="column is-one-third">
+                            <p class="heading">J+30</p>
+                            <p class="title is-5">{{ projected_balance_30|floatformat:2 }} €</p>
+                        </div>
+                        <div class="column is-one-third">
+                            <p class="heading">J+60</p>
+                            <p class="title is-5">{{ projected_balance_60|floatformat:2 }} €</p>
+                        </div>
+                        <div class="column is-one-third">
+                            <p class="heading">J+90</p>
+                            <p class="title is-5">{{ projected_balance_90|floatformat:2 }} €</p>
                         </div>
                     </div>
                 </div>
@@ -548,16 +603,7 @@
                 labels: {{ category_labels|safe }},
                 datasets: [{
                     data: {{ category_values|safe }},
-                    backgroundColor: [
-                        '#3273dc',
-                        '#48c78e',
-                        '#f14668',
-                        '#ffdd57',
-                        '#00d1b2',
-                        '#ff6b7a',
-                        '#b86bff',
-                        '#ffa726'
-                    ],
+                    backgroundColor: {{ category_colors|safe }},
                     borderWidth: 2,
                     borderColor: '#fff'
                 }]

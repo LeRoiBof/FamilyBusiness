@@ -16,7 +16,7 @@
         <div class="columns is-centered">
             <!-- Always on wallet preview card -->
             <div class="column is-4">
-                <div class="box has-text-centered">
+                <div class="box has-text-centered home-card">
                     <span class="icon is-large has-text-success">
                         <i class="mdi mdi-wallet mdi-36px"></i>
                     </span>
@@ -31,7 +31,7 @@
             <!-- Display only if admin -->
             {% if user.is_authenticated and user.is_staff %}
             <div class="column is-4">
-                <div class="box has-text-centered">
+                <div class="box has-text-centered home-card">
                     <span class="icon is-large has-text-link">
                         <i class="mdi mdi-shield-account mdi-36px"></i>
                     </span>
@@ -44,6 +44,15 @@
             </div>
             {% endif %}
         </div>
+
+        <style>
+            .home-card {
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+        </style>
     </div>
 </section>
 {% endblock %}

@@ -45,6 +45,25 @@
                                 {% endif %}
                             </div>
 
+                            <div class="field">
+                                <label class="label">{{ form.color.label }}</label>
+                                <div class="control">
+                                    {{ form.color }}
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label class="label">{{ form.icon.label }}</label>
+                                <div class="is-flex is-align-items-center">
+                                    <div class="control is-expanded">
+                                        {{ form.icon }}
+                                    </div>
+                                    <span class="icon is-medium ml-2" id="iconPreview">
+                                        <i class="mdi mdi-24px"></i>
+                                    </span>
+                                </div>
+                            </div>
+
                             <!-- Buttons -->
                             <div class="field is-grouped is-grouped-right mt-5">
                                 <div class="control">
@@ -63,4 +82,21 @@
         </div>
     </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const colorSelect = document.querySelector('[name="color"]');
+    const iconSelect = document.querySelector('[name="icon"]');
+    const previewIcon = document.querySelector('#iconPreview i');
+
+    function updateIconPreview() {
+        previewIcon.className = 'mdi mdi-24px ' + iconSelect.value;
+        previewIcon.parentElement.className = 'icon is-medium ml-2 has-text-' + colorSelect.value;
+    }
+
+    colorSelect.addEventListener('change', updateIconPreview);
+    iconSelect.addEventListener('change', updateIconPreview);
+    updateIconPreview();
+});
+</script>
 {% endblock %}
