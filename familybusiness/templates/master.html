@@ -1,9 +1,9 @@
+{% load static %}
+{% load i18n %}
+{% load tz %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" {% if user.is_authenticated and user.theme_preference == 'dark' %}data-theme="dark"{% endif %}>
 <head>
-    {% load static %}
-    {% load i18n %}
-    {% load tz %}
     <meta charset="utf-8"/>
     <title>Family Business</title>
     <link rel="icon" href="{% static 'logo/business.png' %}">
@@ -13,13 +13,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
     <style>
         :root {
             --danger: #d60044;
         }
 
         html, body {
-            height: 100%;
+            min-height: 100%;
             margin: 0;
             padding: 0;
         }
@@ -28,10 +29,6 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-        }
-
-        .layout-wrapper .footer {
-            margin-top: auto;
         }
 
 
@@ -90,6 +87,52 @@
             opacity: 1;
         }
 
+        /* Toggle switch (used for the dark mode switch in the profile dropdown) */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .switch .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #dbdbdb;
+            transition: .3s;
+            border-radius: 24px;
+        }
+
+        .switch .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        .switch input:checked + .slider {
+            background-color: #3273dc;
+        }
+
+        .switch input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
         .language-switch-btn {
             transition: all 0.2s ease;
         }
@@ -131,6 +174,209 @@
             border-left: 4px solid #f14668;
         }
 
+        /*
+         * Dark mode.
+         * Method: for every semantic color used in the app (same hue/saturation as the light
+         * version), the "-light" background tints go from ~96% lightness down to ~16-20%,
+         * and the matching text colors go from ~30% lightness up to ~65-75%, so each color
+         * keeps its identity (hue/sat) and only flips which end of the lightness scale it sits on.
+         * Neutral surfaces (cards, inputs, navbar...) get a single dark grey scale instead.
+         */
+        :root[data-theme="dark"] {
+            --danger: #ff4d6d;
+        }
+
+        :root[data-theme="dark"],
+        [data-theme="dark"] body {
+            background-color: #121212;
+            color: #e8e8e8;
+        }
+
+        /* Same color as the body so the navbar's margin doesn't read as a floating bar */
+        [data-theme="dark"] .navbar {
+            background-color: #121212;
+        }
+
+        [data-theme="dark"] .card,
+        [data-theme="dark"] .box,
+        [data-theme="dark"] .dropdown-menu,
+        [data-theme="dark"] .dropdown-content,
+        [data-theme="dark"] .navbar-dropdown,
+        [data-theme="dark"] .modal-card-body,
+        [data-theme="dark"] .modal-card-head,
+        [data-theme="dark"] .modal-card-foot,
+        [data-theme="dark"] .table,
+        [data-theme="dark"] .pagination-list {
+            background-color: #1e1e1e;
+            color: #e8e8e8;
+        }
+
+        /* Bulma hardcodes dark grey on these instead of inheriting from body/card */
+        [data-theme="dark"] strong,
+        [data-theme="dark"] b,
+        [data-theme="dark"] .title,
+        [data-theme="dark"] .subtitle,
+        [data-theme="dark"] .label,
+        [data-theme="dark"] .card-header-title,
+        [data-theme="dark"] .navbar-item,
+        [data-theme="dark"] .navbar-link,
+        [data-theme="dark"] h1,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h3,
+        [data-theme="dark"] h4,
+        [data-theme="dark"] h5,
+        [data-theme="dark"] h6 {
+            color: #e8e8e8;
+        }
+
+        [data-theme="dark"] .navbar-item:hover,
+        [data-theme="dark"] .navbar-link:hover,
+        [data-theme="dark"] .navbar-item.has-dropdown:hover .navbar-link {
+            background-color: #262626;
+            color: #e8e8e8;
+        }
+
+        [data-theme="dark"] .table td,
+        [data-theme="dark"] .table th {
+            color: #e8e8e8;
+            border-color: #363636;
+        }
+
+        [data-theme="dark"] .table.is-hoverable tbody tr:hover {
+            background-color: #262626;
+        }
+
+        [data-theme="dark"] .card-header,
+        [data-theme="dark"] .modal-card-head,
+        [data-theme="dark"] .modal-card-foot {
+            border-color: #363636;
+        }
+
+        [data-theme="dark"] .navbar-divider,
+        [data-theme="dark"] hr {
+            background-color: #363636;
+        }
+
+        [data-theme="dark"] .border-bottom {
+            border-bottom-color: #363636 !important;
+        }
+
+        [data-theme="dark"] .input,
+        [data-theme="dark"] .textarea,
+        [data-theme="dark"] .select select {
+            background-color: #242424;
+            border-color: #4a4a4a;
+            color: #e8e8e8;
+        }
+
+        [data-theme="dark"] .input::placeholder,
+        [data-theme="dark"] .textarea::placeholder {
+            color: #888;
+        }
+
+        [data-theme="dark"] .button.is-light,
+        [data-theme="dark"] .button.is-white {
+            background-color: #2a2a2a;
+            color: #e8e8e8;
+            border-color: #4a4a4a;
+        }
+
+        /* Sits directly on the navbar: keep it blended in like in light mode instead of boxed.
+           Needs the extra .button.is-white to outweigh the rule above on specificity. */
+        [data-theme="dark"] .button.is-white.language-switch-btn {
+            background-color: transparent;
+            border-color: transparent;
+            color: #e8e8e8;
+        }
+
+        [data-theme="dark"] .button.is-white.language-switch-btn:hover {
+            background-color: #262626;
+        }
+
+        [data-theme="dark"] .button.is-light:hover,
+        [data-theme="dark"] .button.is-white:hover {
+            background-color: #333;
+        }
+
+        [data-theme="dark"] .has-background-light {
+            background-color: #242424 !important;
+        }
+
+        [data-theme="dark"] .notification.is-light {
+            background-color: #242424;
+            color: #e8e8e8;
+        }
+
+        [data-theme="dark"] .tag.is-light {
+            background-color: #2a2a2a;
+            color: #e8e8e8;
+        }
+
+        [data-theme="dark"] .has-text-black,
+        [data-theme="dark"] .has-text-dark {
+            color: #f0f0f0 !important;
+        }
+
+        [data-theme="dark"] .has-text-grey-dark {
+            color: #c7c7c7 !important;
+        }
+
+        [data-theme="dark"] .has-text-grey {
+            color: #a3a3a3 !important;
+        }
+
+        [data-theme="dark"] .has-text-grey-light {
+            color: #7a7a7a !important;
+        }
+
+        [data-theme="dark"] .help {
+            color: #a3a3a3;
+        }
+
+        /* Primary (teal, hue 171) */
+        [data-theme="dark"] .has-background-primary-light { background-color: hsl(171, 100%, 14%) !important; }
+        [data-theme="dark"] .has-text-primary { color: hsl(171, 70%, 55%) !important; }
+
+        /* Success (green, hue 153) */
+        [data-theme="dark"] .has-background-success-light { background-color: hsl(153, 53%, 16%) !important; }
+        [data-theme="dark"] .has-text-success,
+        [data-theme="dark"] .has-text-failure.has-border-success,
+        [data-theme="dark"] .has-border-success { color: hsl(153, 55%, 62%) !important; }
+        [data-theme="dark"] .tag.is-success { background-color: hsl(153, 45%, 24%); color: hsl(153, 55%, 85%); }
+
+        /* Info (blue, hue 217) */
+        [data-theme="dark"] .has-background-info-light { background-color: hsl(217, 71%, 16%) !important; }
+        [data-theme="dark"] .has-text-info { color: hsl(217, 80%, 72%) !important; }
+        [data-theme="dark"] .notification.is-info { background-color: hsl(217, 60%, 22%); color: hsl(217, 80%, 92%); }
+        [data-theme="dark"] .tag.is-info { background-color: hsl(217, 50%, 28%); color: hsl(217, 80%, 88%); }
+
+        /* Warning (yellow, hue 48) */
+        [data-theme="dark"] .has-background-warning-light { background-color: hsl(44, 100%, 14%) !important; }
+        [data-theme="dark"] .has-text-warning { color: hsl(44, 100%, 65%) !important; }
+        [data-theme="dark"] .notification.is-warning { background-color: hsl(44, 70%, 24%); color: hsl(44, 100%, 90%); }
+        [data-theme="dark"] .tag.is-warning { background-color: hsl(44, 60%, 28%); color: hsl(44, 100%, 88%); }
+
+        /* Danger (red, hue 347) */
+        [data-theme="dark"] .has-background-danger-light { background-color: hsl(347, 90%, 16%) !important; }
+        [data-theme="dark"] .has-text-danger,
+        [data-theme="dark"] .has-text-failure,
+        [data-theme="dark"] .has-border-failure { color: hsl(347, 85%, 70%) !important; }
+        [data-theme="dark"] .notification.is-danger { background-color: hsl(347, 55%, 26%); color: hsl(347, 90%, 93%); }
+        [data-theme="dark"] .tag.is-danger { background-color: hsl(347, 50%, 30%); color: hsl(347, 90%, 90%); }
+
+        [data-theme="dark"] .tag.is-primary { background-color: hsl(171, 60%, 22%); color: hsl(171, 70%, 88%); }
+
+        [data-theme="dark"] .field-error {
+            background-color: hsl(347, 55%, 20%);
+            color: hsl(347, 90%, 88%);
+            border-left-color: hsl(347, 85%, 55%);
+        }
+
+        [data-theme="dark"] .info-icon::after {
+            background-color: #2a2a2a;
+            color: #e8e8e8;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
 
     </style>
 
@@ -145,14 +391,10 @@
     <!-- Navbar -->
     <nav class="navbar mx-4 my-4" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-            {% if request.path != '/' %}
-                <div class="navbar-item">
-                    <a href="javascript:history.back()" class="has-text-black">
-                        <i class="mdi mdi-chevron-left"></i> <strong>{% trans "Back" %}</strong>
-                    </a>
-                </div>
-            {% endif %}
-            <a href="{% url 'home' %}" class="has-text-black title m-1 p-1"><strong>Family Business</strong></a>
+            <a href="{% url 'home' %}" class="navbar-item has-text-black" style="display: flex; align-items: center; gap: 0.5rem;">
+                <img src="{% static 'logo/business.png' %}" alt="Family Business" style="height: 32px; width: auto; display: block;">
+                <strong class="title is-4 m-0">Family Business</strong>
+            </a>
             <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbar">
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
@@ -200,6 +442,26 @@
                                     </span>
                                     {% trans "manage_account" %}
                                 </a>
+                                <form action="{% url 'account:set_theme' %}" method="post" class="m-0" id="theme-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <input type="hidden" name="theme" id="theme-hidden-input"
+                                           value="{% if user.theme_preference == 'dark' %}light{% else %}dark{% endif %}">
+                                    <div class="navbar-item is-flex is-justify-content-space-between is-align-items-center">
+                                        <span>
+                                            <span class="icon mr-2">
+                                                <i class="mdi mdi-weather-night"></i>
+                                            </span>
+                                            {% trans "dark_mode" %}
+                                        </span>
+                                        <label class="switch mb-0">
+                                            <input type="checkbox" id="theme-switch"
+                                                   {% if user.theme_preference == 'dark' %}checked{% endif %}
+                                                   onchange="document.getElementById('theme-hidden-input').value = this.checked ? 'dark' : 'light'; document.getElementById('theme-form').submit();">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </form>
                                 <hr class="navbar-divider">
                                 <a href="{% url 'account:logout' %}?next={{ request.path }}" class="navbar-item">
                                     <span class="icon mr-2">
@@ -282,6 +544,36 @@
                 });
             }
 
+            // European date/datetime pickers for every field flagged with these classes,
+            // wherever they appear in the app. The real submitted value stays ISO
+            // (Y-m-d / Y-m-dTH:i) via altInput so Django's parsing doesn't need to change;
+            // only the displayed text is day/month/year.
+            if (window.flatpickr) {
+                document.querySelectorAll('.flatpickr-date').forEach((el) => {
+                    flatpickr(el, {
+                        locale: 'fr',
+                        altInput: true,
+                        altInputClass: el.className,
+                        altFormat: 'd/m/Y',
+                        dateFormat: 'Y-m-d',
+                        allowInput: true,
+                    });
+                });
+
+                document.querySelectorAll('.flatpickr-datetime').forEach((el) => {
+                    flatpickr(el, {
+                        locale: 'fr',
+                        enableTime: true,
+                        time_24hr: true,
+                        altInput: true,
+                        altInputClass: el.className,
+                        altFormat: 'd/m/Y H:i',
+                        dateFormat: 'Y-m-d\\TH:i',
+                        allowInput: true,
+                    });
+                });
+            }
+
             // Dyn language management
             const languageForm = document.getElementById('language-form');
             const nextInput = document.getElementById('next-input');
@@ -341,19 +633,6 @@
 
     <!-- Page content -->
     {% block content %}{% endblock %}
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="content has-text-centered">
-            <p>
-                {% trans "developed_by" %} <strong>Thomas Bernard</strong>, <strong>Marine Bodson</strong>, <strong>Maxime
-                Dupuis</strong> {% trans "and" %} <strong>Arnaud Moreau</strong>
-            </p>
-            <p class=" has-text-grey">
-                {% trans "Actual version" %} : 1.1.0
-            </p>
-        </div>
-    </footer>
 
 </div>
 

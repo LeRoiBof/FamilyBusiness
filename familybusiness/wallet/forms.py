@@ -1,6 +1,8 @@
+from decimal import Decimal
 from pydoc import describe
 
 from django import forms
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from .models import Wallet, Category, Transaction, FutureTransaction
 
@@ -61,9 +63,11 @@ class TransactionForm(forms.ModelForm):
                 'placeholder': '0.00',
                 'step': '0.01'
             }),
-            'date': forms.DateInput(attrs={
-                'type': 'date',
-                'class': 'input is-rounded'
+            'date': forms.DateInput(format='%Y-%m-%d', attrs={
+                'type': 'text',
+                'class': 'input is-rounded flatpickr-date',
+                'autocomplete': 'off',
+                'placeholder': 'jj/mm/aaaa'
             }),
             'description': forms.Textarea(attrs={
                 'class': 'textarea is-rounded',
@@ -94,7 +98,12 @@ class FutureTransactionForm(forms.ModelForm):
             'amount': forms.NumberInput(attrs={'class': 'input', 'step': '0.01'}),
             'description': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
             'is_income': forms.CheckboxInput(attrs={'class': 'switch is-rounded is-success'}),
-            'execution_date': forms.DateTimeInput(attrs={'class': 'input', 'type': 'datetime-local'}),
+            'execution_date': forms.DateTimeInput(format='%Y-%m-%dT%H:%M', attrs={
+                'class': 'input flatpickr-datetime',
+                'type': 'text',
+                'autocomplete': 'off',
+                'placeholder': 'jj/mm/aaaa hh:mm'
+            }),
             'frequency': forms.Select(attrs={'class': 'select is-fullwidth'}),
         }
         labels = {
@@ -111,6 +120,50 @@ class FutureTransactionForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['frequency'].choices = list(FutureTransaction.Frequency.choices)
 
+
+
+class TransferForm(forms.Form):
+    destination_wallet = forms.ModelChoiceField(
+        queryset=Wallet.objects.none(),
+        label=_('destination_wallet'),
+        widget=forms.Select(attrs={'class': 'select is-fullwidth'})
+    )
+    amount = forms.DecimalField(
+        max_digits=10, decimal_places=2, min_value=Decimal('0.01'),
+        label=_('amount'),
+        widget=forms.NumberInput(attrs={
+            'class': 'input',
+            'placeholder': '0.00',
+            'step': '0.01',
+            'min': '0.01'
+        })
+    )
+    date = forms.DateField(
+        label=_('date'),
+        initial=timezone.localdate,
+        widget=forms.DateInput(format='%Y-%m-%d', attrs={
+            'type': 'text',
+            'class': 'input flatpickr-date',
+            'autocomplete': 'off',
+            'placeholder': 'jj/mm/aaaa'
+        })
+    )
+    description = forms.CharField(
+        required=False,
+        label=_('description'),
+        widget=forms.Textarea(attrs={
+            'class': 'textarea',
+            'placeholder': _('description_optional_placeholder'),
+            'rows': 3
+        })
+    )
+
+    def __init__(self, *args, user=None, source_wallet=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        queryset = Wallet.objects.filter(users=user)
+        if source_wallet is not None:
+            queryset = queryset.exclude(pk=source_wallet.pk)
+        self.fields['destination_wallet'].queryset = queryset.distinct()
 
 
 class InvitationForm(forms.Form):

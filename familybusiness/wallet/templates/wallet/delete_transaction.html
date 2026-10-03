@@ -48,6 +48,9 @@
                                 <ul class="mt-3">
                                     <li>{% trans "action_is_irreversible" %}</li>
                                     <li>{% trans "wallet_balance_will_be_adjusted" %}</li>
+                                    {% if transaction.is_transfer %}
+                                    <li>{% trans "linked_transfer_will_be_deleted_too" %}</li>
+                                    {% endif %}
                                     {% if transaction.is_income %}
                                     <li>{% trans "balance_will_be_decreased_by" %} <strong class="has-text-danger">{{ transaction.amount|floatformat:2 }} €</strong></li>
                                     {% else %}

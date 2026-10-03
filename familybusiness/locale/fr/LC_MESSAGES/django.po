@@ -1565,3 +1565,62 @@ msgstr "Échéances dans les prochaines 24h"
 
 msgid "projected_balance"
 msgstr "Solde prévisionnel"
+msgid "icon_transfer"
+msgstr "Transfert"
+
+msgid "transfer"
+msgstr "Transfert"
+
+msgid "new_transfer"
+msgstr "Nouveau transfert"
+
+msgid "destination_wallet"
+msgstr "Wallet de destination"
+
+msgid "transfer_from_wallet"
+msgstr "Depuis le wallet"
+
+msgid "save_transfer"
+msgstr "Effectuer le transfert"
+
+msgid "transfer_to"
+msgstr "Transfert vers {wallet_name}"
+
+msgid "transfer_from"
+msgstr "Transfert depuis {wallet_name}"
+
+msgid "transfer_successful"
+msgstr "Transfert de {amount}€ vers {destination} effectué avec succès"
+
+msgid "transfer_executed"
+msgstr "Transfert effectué"
+
+msgid "unauthorized_transfer_attempt"
+msgstr "Tentative de transfert non autorisée"
+
+msgid "cannot_edit_transfer"
+msgstr "Un transfert ne peut pas être modifié, seulement supprimé"
+
+msgid "no_other_wallet_for_transfer"
+msgstr "Vous devez être membre d'au moins un autre wallet pour effectuer un transfert"
+
+msgid "linked_transfer_will_be_deleted_too"
+msgstr "Le transfert lié dans l'autre wallet sera également supprimé"
+
+msgid "back_to_wallets"
+msgstr "Retour aux wallets"
+
+msgid "theme_light"
+msgstr "Clair"
+
+msgid "theme_dark"
+msgstr "Sombre"
+
+msgid "theme_preference"
+msgstr "Préférence de thème"
+
+msgid "light_mode"
+msgstr "Mode clair"
+
+msgid "dark_mode"
+msgstr "Mode sombre"

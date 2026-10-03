@@ -81,6 +81,7 @@ class Category(models.Model):
         ('mdi-receipt-text-outline', _('icon_taxes')),
         ('mdi-airplane', _('icon_travel')),
         ('mdi-hanger', _('icon_clothing')),
+        ('mdi-bank-transfer', _('icon_transfer')),
     ]
 
     name = models.CharField(max_length=100, verbose_name=_("name"))
@@ -106,6 +107,11 @@ class Transaction(models.Model):
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='transactions', verbose_name=_("wallet"))
     description = models.TextField(blank=True, verbose_name=_("description"))
     is_income = models.BooleanField(default=False, verbose_name=_("is_income"))
+    is_transfer = models.BooleanField(default=False, verbose_name=_("is_transfer"))
+    linked_transaction = models.OneToOneField(
+        'self', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='+', verbose_name=_("linked_transaction")
+    )
 
     class Meta:
         verbose_name = _("transaction")

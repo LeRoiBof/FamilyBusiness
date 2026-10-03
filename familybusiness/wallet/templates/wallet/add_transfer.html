@@ -1,0 +1,105 @@
+{% extends "master.html" %}
+{% load i18n %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="columns">
+            <div class="column">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <span class="icon mr-2">
+                                <i class="mdi mdi-bank-transfer"></i>
+                            </span>
+                            {% trans "new_transfer" %}
+                        </div>
+                    </div>
+
+                    <div class="card-content">
+                        <p class="mb-4 has-text-grey">
+                            {% trans "transfer_from_wallet" %} <strong>{{ wallet.name }}</strong>
+                        </p>
+
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <!-- Destination wallet -->
+                            <div class="field">
+                                <label class="label">{{ form.destination_wallet.label }}</label>
+                                <div class="control has-icons-left">
+                                    <div class="select is-fullwidth">
+                                        {{ form.destination_wallet }}
+                                    </div>
+                                    <span class="icon is-small is-left">
+                                        <i class="mdi mdi-wallet"></i>
+                                    </span>
+                                </div>
+                                {% for error in form.destination_wallet.errors %}
+                                    <p class="help is-danger">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Amount -->
+                            <div class="field">
+                                <label class="label">{{ form.amount.label }}</label>
+                                <div class="control has-icons-left">
+                                    {{ form.amount }}
+                                    <span class="icon is-small is-left">
+                                        <i class="mdi mdi-currency-eur"></i>
+                                    </span>
+                                </div>
+                                {% for error in form.amount.errors %}
+                                    <p class="help is-danger">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Date -->
+                            <div class="field">
+                                <label class="label">{{ form.date.label }}</label>
+                                <div class="control has-icons-left">
+                                    {{ form.date }}
+                                    <span class="icon is-small is-left">
+                                        <i class="mdi mdi-calendar"></i>
+                                    </span>
+                                </div>
+                                {% for error in form.date.errors %}
+                                    <p class="help is-danger">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Description -->
+                            <div class="field">
+                                <label class="label">{{ form.description.label }}</label>
+                                <div class="control">
+                                    {{ form.description }}
+                                </div>
+                                {% for error in form.description.errors %}
+                                    <p class="help is-danger">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="field is-grouped is-grouped-right mt-5">
+                                <div class="control">
+                                    <a href="{% url 'wallet:wallet_detail' wallet.id %}" class="button is-light">
+                                        {% trans "cancel" %}
+                                    </a>
+                                </div>
+                                <div class="control">
+                                    <button type="submit" class="button is-info">
+                                        <span class="icon">
+                                            <i class="mdi mdi-bank-transfer"></i>
+                                        </span>
+                                        <span>{% trans "save_transfer" %}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

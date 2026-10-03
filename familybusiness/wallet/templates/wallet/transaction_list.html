@@ -9,6 +9,10 @@
     transition: background-color 0.2s ease;
 }
 
+[data-theme="dark"] .transaction-item:hover {
+    background-color: #262626;
+}
+
 .transaction-list {
     scrollbar-width: thin;
     scrollbar-color: #dbdbdb #f5f5f5;
@@ -357,8 +361,8 @@
                              data-title="{{ transaction.title|lower }}">
                             <div class="media">
                                 <div class="media-left">
-                                    <span class="icon is-large {% if transaction.is_income %}has-text-success{% else %}has-text-danger{% endif %}">
-                                        <i class="mdi mdi-36px {% if transaction.is_income %}mdi-plus-circle{% else %}mdi-minus-circle{% endif %}"></i>
+                                    <span class="icon is-large {% if transaction.is_transfer %}has-text-info{% elif transaction.is_income %}has-text-success{% else %}has-text-danger{% endif %}">
+                                        <i class="mdi mdi-36px {% if transaction.is_transfer %}mdi-bank-transfer{% elif transaction.is_income %}mdi-plus-circle{% else %}mdi-minus-circle{% endif %}"></i>
                                     </span>
                                 </div>
                                 <div class="media-content">
@@ -387,12 +391,14 @@
                                                         {% if transaction.is_income %}+{% else %}-{% endif %}{{ transaction.amount|floatformat:2 }} €
                                                     </p>
                                                     <div class="buttons is-right">
+                                                        {% if not transaction.is_transfer %}
                                                         <a href="{% url 'wallet:edit_transaction' wallet.id transaction.id %}"
                                                            class="button is-small is-info is-light" title="{% trans 'edit' %}">
                                                             <span class="icon is-small">
                                                                 <i class="mdi mdi-pencil"></i>
                                                             </span>
                                                         </a>
+                                                        {% endif %}
                                                         <a href="{% url 'wallet:delete_transaction' wallet.id transaction.id %}"
                                                            class="button is-small is-danger is-light" title="{% trans 'delete' %}">
                                                             <span class="icon is-small">

@@ -25,6 +25,10 @@ class AccountManager(BaseUserManager):
         return user
 
 class Account(AbstractUser):
+    class Theme(models.TextChoices):
+        LIGHT = "light", _("theme_light")
+        DARK = "dark", _("theme_dark")
+
     username = None
     email = models.EmailField(unique=True, verbose_name=_("email"))
     first_name = models.CharField(max_length=50, verbose_name=_("first_name"))
@@ -32,6 +36,9 @@ class Account(AbstractUser):
     role = models.CharField(max_length=50, default='user', verbose_name=_("role"))
     is_active = models.BooleanField(default=True, verbose_name=_("is_active"))
     is_staff = models.BooleanField(default=False, verbose_name=_("is_staff"))
+    theme_preference = models.CharField(
+        max_length=10, choices=Theme.choices, default=Theme.LIGHT, verbose_name=_("theme_preference")
+    )
     objects = AccountManager()
 
     USERNAME_FIELD = 'email'

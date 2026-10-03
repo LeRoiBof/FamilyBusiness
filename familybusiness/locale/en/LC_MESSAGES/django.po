@@ -2215,3 +2215,62 @@ msgstr "Upcoming in the next 24h"
 
 msgid "projected_balance"
 msgstr "Projected balance"
+msgid "icon_transfer"
+msgstr "Transfer"
+
+msgid "transfer"
+msgstr "Transfer"
+
+msgid "new_transfer"
+msgstr "New transfer"
+
+msgid "destination_wallet"
+msgstr "Destination wallet"
+
+msgid "transfer_from_wallet"
+msgstr "From wallet"
+
+msgid "save_transfer"
+msgstr "Make transfer"
+
+msgid "transfer_to"
+msgstr "Transfer to {wallet_name}"
+
+msgid "transfer_from"
+msgstr "Transfer from {wallet_name}"
+
+msgid "transfer_successful"
+msgstr "Transfer of {amount}€ to {destination} completed successfully"
+
+msgid "transfer_executed"
+msgstr "Transfer executed"
+
+msgid "unauthorized_transfer_attempt"
+msgstr "Unauthorized transfer attempt"
+
+msgid "cannot_edit_transfer"
+msgstr "A transfer cannot be edited, only deleted"
+
+msgid "no_other_wallet_for_transfer"
+msgstr "You must be a member of at least one other wallet to make a transfer"
+
+msgid "linked_transfer_will_be_deleted_too"
+msgstr "The linked transfer in the other wallet will also be deleted"
+
+msgid "back_to_wallets"
+msgstr "Back to wallets"
+
+msgid "theme_light"
+msgstr "Light"
+
+msgid "theme_dark"
+msgstr "Dark"
+
+msgid "theme_preference"
+msgstr "Theme preference"
+
+msgid "light_mode"
+msgstr "Light mode"
+
+msgid "dark_mode"
+msgstr "Dark mode"

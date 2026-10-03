@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import register_view, login_view, logout_view, request_password_reset, reset_password, profile_view
+from .views import register_view, login_view, logout_view, request_password_reset, reset_password, profile_view, set_theme
 
 app_name = 'account'
 
@@ -12,4 +12,5 @@ urlpatterns = [
     path('reset/<uuid:token>/', reset_password, name='reset_password'),
 
     path('profile/', profile_view, name='profile'),
+    path('set-theme/', set_theme, name='set_theme'),
 ]

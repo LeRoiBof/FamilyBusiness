@@ -1,4 +1,3 @@
-import copy
 import io
 import json
 from collections import defaultdict
@@ -7,6 +6,7 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction as db_transaction
 from django.db.models import Sum, Count, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -18,8 +18,10 @@ from django.utils.translation import gettext as _
 from xhtml2pdf import pisa
 
 from account.models import Account
-from .forms import WalletForm, TransactionForm, InvitationForm, FutureTransactionForm
+from .forms import WalletForm, TransactionForm, InvitationForm, FutureTransactionForm, TransferForm
 from .models import Wallet, Transaction, Category, WalletInvitation, FutureTransaction
+
+TRANSFER_CATEGORY_NAME = 'Transfert'
 from adminpanel.models import Event
 
 
@@ -104,30 +106,6 @@ def wallet_delete(request, wallet_id):
     return redirect('wallet:wallet_list')
 
 
-def _project_balance_changes(future_transactions, now):
-    thresholds = [30, 60, 90]
-    end_dates = {days: now + timedelta(days=days) for days in thresholds}
-    totals = {days: Decimal('0') for days in thresholds}
-
-    for trx in future_transactions:
-        clone = copy.copy(trx)
-        occurrence = clone.execution_date
-        iterations = 0
-        while occurrence and occurrence <= end_dates[90] and iterations < 1000:
-            if occurrence >= now:
-                signed_amount = clone.amount if clone.is_income else -clone.amount
-                for days in thresholds:
-                    if occurrence <= end_dates[days]:
-                        totals[days] += signed_amount
-            if clone.frequency == FutureTransaction.Frequency.ONCE:
-                break
-            clone.execution_date = occurrence
-            occurrence = clone.get_next_execution_date()
-            iterations += 1
-
-    return totals
-
-
 def _percent_change(current, previous):
     if not previous:
         return None
@@ -177,12 +155,7 @@ def wallet_detail(request, wallet_id):
     income_change_percent = _percent_change(monthly_income, last_month_income)
     expenses_change_percent = _percent_change(monthly_expenses, last_month_expenses)
 
-    # Prévisionnel de solde à J+30/60/90
     future_transactions = FutureTransaction.objects.filter(wallet=wallet, active=True)
-    projected_changes = _project_balance_changes(future_transactions, now)
-    projected_balance_30 = wallet.balance + projected_changes[30]
-    projected_balance_60 = wallet.balance + projected_changes[60]
-    projected_balance_90 = wallet.balance + projected_changes[90]
 
     # Échéances dans les prochaines 24h
     upcoming_transactions = future_transactions.filter(
@@ -250,9 +223,6 @@ def wallet_detail(request, wallet_id):
         'income_change_percent': income_change_percent,
         'expenses_change_percent': expenses_change_percent,
 
-        'projected_balance_30': projected_balance_30,
-        'projected_balance_60': projected_balance_60,
-        'projected_balance_90': projected_balance_90,
         'upcoming_transactions': upcoming_transactions,
 
         # plot data (JSON format for JavaScript)
@@ -466,6 +436,95 @@ def add_future_transaction(request, wallet_id):
     return render(request, 'wallet/add_future_transaction.html', {'form': form, 'wallet': wallet})
 
 @login_required
+def add_transfer(request, wallet_id):
+    """
+    View to transfer money between two wallets the user is a member/owner of
+    """
+    wallet = get_object_or_404(Wallet, id=wallet_id)
+
+    # Check that the user is a member of the source wallet
+    if request.user not in wallet.users.all():
+        messages.error(request, _("no_access_to_wallet"))
+        Event.objects.create(
+            date=timezone.now(),
+            content=_("unauthorized_transfer_attempt") + f": {wallet.name}",
+            user=request.user,
+            type='ERROR'
+        )
+        return redirect('wallet:wallet_list')
+
+    if not Wallet.objects.filter(users=request.user).exclude(pk=wallet.pk).exists():
+        messages.error(request, _("no_other_wallet_for_transfer"))
+        return redirect('wallet:wallet_detail', wallet_id=wallet.id)
+
+    if request.method == 'POST':
+        form = TransferForm(request.POST, user=request.user, source_wallet=wallet)
+        if form.is_valid():
+            destination_wallet = form.cleaned_data['destination_wallet']
+            amount = form.cleaned_data['amount']
+            date = form.cleaned_data['date']
+            description = form.cleaned_data['description']
+
+            # Created on first use if it doesn't already exist
+            transfer_category, _created = Category.objects.get_or_create(
+                name=TRANSFER_CATEGORY_NAME,
+                defaults={'color': 'info', 'icon': 'mdi-bank-transfer'}
+            )
+
+            with db_transaction.atomic():
+                outgoing = Transaction.objects.create(
+                    title=_("transfer_to").format(wallet_name=destination_wallet.name),
+                    category=transfer_category,
+                    user=request.user,
+                    amount=amount,
+                    date=date,
+                    wallet=wallet,
+                    description=description,
+                    is_income=False,
+                    is_transfer=True,
+                )
+                incoming = Transaction.objects.create(
+                    title=_("transfer_from").format(wallet_name=wallet.name),
+                    category=transfer_category,
+                    user=request.user,
+                    amount=amount,
+                    date=date,
+                    wallet=destination_wallet,
+                    description=description,
+                    is_income=True,
+                    is_transfer=True,
+                )
+                outgoing.linked_transaction = incoming
+                outgoing.save(update_fields=['linked_transaction'])
+                incoming.linked_transaction = outgoing
+                incoming.save(update_fields=['linked_transaction'])
+
+                wallet.balance -= amount
+                wallet.save()
+                destination_wallet.balance += amount
+                destination_wallet.save()
+
+            messages.success(request, _("transfer_successful").format(
+                amount=amount, destination=destination_wallet.name
+            ))
+            Event.objects.create(
+                date=timezone.now(),
+                content=_("transfer_executed") + f": {wallet.name} → {destination_wallet.name} - {amount}€",
+                user=request.user,
+                type='TRANSACTION_CREATE'
+            )
+            return redirect('wallet:wallet_detail', wallet_id=wallet.id)
+    else:
+        form = TransferForm(user=request.user, source_wallet=wallet)
+
+    context = {
+        'form': form,
+        'wallet': wallet,
+    }
+
+    return render(request, 'wallet/add_transfer.html', context)
+
+@login_required
 def edit_transaction(request, wallet_id, transaction_id):
     """
     View to edit a wallet's transaction
@@ -483,6 +542,11 @@ def edit_transaction(request, wallet_id, transaction_id):
             type='ERROR'
         )
         return redirect('wallet:wallet_list')
+
+    # Transfers are edited as a pair and can't be modified through the regular transaction form
+    if transaction.is_transfer:
+        messages.error(request, _("cannot_edit_transfer"))
+        return redirect('wallet:wallet_detail', wallet_id=wallet.id)
 
     old_amount = transaction.amount
     old_is_income = transaction.is_income
@@ -549,16 +613,29 @@ def delete_transaction(request, wallet_id, transaction_id):
         return redirect('wallet:wallet_list')
 
     if request.method == 'POST':
-        # Update wallet's balance
-        if transaction.is_income:
-            wallet.balance -= transaction.amount
-            messages.success(request, _("income_deleted").format(amount=transaction.amount))
-        else:
-            wallet.balance += transaction.amount
-            messages.success(request, _("expense_deleted").format(amount=transaction.amount))
+        linked_transaction = transaction.linked_transaction
 
-        wallet.save()
-        transaction.delete()
+        with db_transaction.atomic():
+            # Update wallet's balance
+            if transaction.is_income:
+                wallet.balance -= transaction.amount
+                messages.success(request, _("income_deleted").format(amount=transaction.amount))
+            else:
+                wallet.balance += transaction.amount
+                messages.success(request, _("expense_deleted").format(amount=transaction.amount))
+
+            wallet.save()
+            transaction.delete()
+
+            # Reverse the other leg of the transfer too, so it never ends up one-sided
+            if linked_transaction is not None:
+                other_wallet = linked_transaction.wallet
+                if linked_transaction.is_income:
+                    other_wallet.balance -= linked_transaction.amount
+                else:
+                    other_wallet.balance += linked_transaction.amount
+                other_wallet.save()
+                linked_transaction.delete()
 
         Event.objects.create(
             date=timezone.now(),

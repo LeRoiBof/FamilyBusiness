@@ -5,6 +5,7 @@ from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from .forms import RegistrationForm, LoginForm, ResetPasswordForm, CustomPasswordChangeForm, ProfileUpdateForm
 from django.contrib.auth.decorators import login_required
@@ -103,6 +104,22 @@ def reset_password(request, token):
         form = ResetPasswordForm()
 
     return render(request, 'account/reset_password.html', {'form': form})
+
+@login_required
+def set_theme(request):
+    """
+    View to toggle the user's dark/light mode preference, stored on their account
+    """
+    if request.method == 'POST':
+        theme = request.POST.get('theme')
+        if theme in (Account.Theme.LIGHT, Account.Theme.DARK):
+            request.user.theme_preference = theme
+            request.user.save(update_fields=['theme_preference'])
+
+    next_url = request.POST.get('next')
+    if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        return redirect(next_url)
+    return redirect('home:home')
 
 @login_required
 def profile_view(request):

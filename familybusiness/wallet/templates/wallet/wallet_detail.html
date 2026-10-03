@@ -5,6 +5,12 @@
 {% block content %}
     <section class="section">
         <div class="container">
+            <a href="{% url 'wallet:wallet_list' %}" class="mb-3 is-flex is-align-items-center has-text-grey">
+                <span class="icon">
+                    <i class="mdi mdi-chevron-left"></i>
+                </span>
+                <span>{% trans "back_to_wallets" %}</span>
+            </a>
             <div class="columns">
                 <div class="column is-one-quarter">
                     <div class="card">
@@ -144,6 +150,15 @@
                                                             <i class="fa-regular fa-calendar"></i>
                                                         </span>
                                                             <span>{% trans "future_transaction" %}</span>
+                                                        </a>
+                                                    </div>
+                                                    <div class="dropdown-item">
+                                                        <a href="{% url 'wallet:add_transfer' wallet.id %}"
+                                                           class="button is-light is-fullwidth">
+                                                        <span class="icon">
+                                                            <i class="mdi mdi-bank-transfer"></i>
+                                                        </span>
+                                                            <span>{% trans "transfer" %}</span>
                                                         </a>
                                                     </div>
                                                 </div>
@@ -319,34 +334,6 @@
                 </div>
             </div>
 
-            <!-- Prévisionnel -->
-            <div class="card mb-5">
-                <div class="card-header">
-                    <div class="card-header-title">
-                        <span class="icon mr-2">
-                            <i class="mdi mdi-crystal-ball"></i>
-                        </span>
-                        {% trans "projected_balance" %}
-                    </div>
-                </div>
-                <div class="card-content">
-                    <div class="columns is-multiline">
-                        <div class="column is-one-third">
-                            <p class="heading">J+30</p>
-                            <p class="title is-5">{{ projected_balance_30|floatformat:2 }} €</p>
-                        </div>
-                        <div class="column is-one-third">
-                            <p class="heading">J+60</p>
-                            <p class="title is-5">{{ projected_balance_60|floatformat:2 }} €</p>
-                        </div>
-                        <div class="column is-one-third">
-                            <p class="heading">J+90</p>
-                            <p class="title is-5">{{ projected_balance_90|floatformat:2 }} €</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Plots -->
             <div class="columns">
                 <div class="column is-half">
@@ -516,8 +503,11 @@
 
         {% if recent_transactions %}
         // Configuration globale
+        const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+        const chartGridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+
         Chart.defaults.font.family = "'Segoe UI', 'Roboto', sans-serif";
-        Chart.defaults.color = '#4a4a4a';
+        Chart.defaults.color = isDarkMode ? '#e8e8e8' : '#4a4a4a';
 
         const evolutionCtx = document.getElementById('evolutionChart').getContext('2d');
         const evolutionChart = new Chart(evolutionCtx, {
@@ -582,7 +572,7 @@
                     y: {
                         beginAtZero: true,
                         grid: {
-                            color: 'rgba(0, 0, 0, 0.1)'
+                            color: chartGridColor
                         },
                         ticks: {
                             callback: function (value) {
